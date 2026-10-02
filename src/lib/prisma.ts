@@ -1,29 +1,32 @@
 import { PrismaClient } from "@prisma/client";
 import fs from "fs";
-import path from "path";
+import { SEED_DB_BASE64 } from "./initial-db";
 
 function getDatabaseUrl(): string {
+  const currentUrl = process.env.DATABASE_URL;
+  if (currentUrl && (currentUrl.startsWith("postgresql://") || currentUrl.startsWith("postgres://"))) {
+    return currentUrl;
+  }
+
   // Check if running on Vercel or serverless environment
-  if (process.env.VERCEL) {
+  const isServerless = Boolean(
+    process.env.VERCEL ||
+    process.env.AWS_LAMBDA_FUNCTION_NAME ||
+    process.env.VERCEL_ENV ||
+    process.env.NOW_REGION
+  );
+
+  if (isServerless) {
     const tmpDb = "/tmp/dev.db";
     try {
-      if (!fs.existsSync(tmpDb)) {
-        const candidates = [
-          path.join(process.cwd(), "prisma", "dev.db"),
-          path.join("/var/task", "prisma", "dev.db"),
-          path.resolve("./prisma/dev.db"),
-        ];
-
-        for (const candidate of candidates) {
-          if (fs.existsSync(candidate)) {
-            fs.copyFileSync(candidate, tmpDb);
-            break;
-          }
-        }
+      if (!fs.existsSync(tmpDb) || fs.statSync(tmpDb).size === 0) {
+        fs.writeFileSync(tmpDb, Buffer.from(SEED_DB_BASE64, "base64"));
       }
     } catch (err) {
       console.error("Vercel SQLite init error:", err);
     }
+    // Explicitly set process.env.DATABASE_URL so Prisma's Rust Query Engine respects the writable /tmp path
+    process.env.DATABASE_URL = "file:/tmp/dev.db";
     return "file:/tmp/dev.db";
   }
 
@@ -53,4 +56,3 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 export default prisma;
-
