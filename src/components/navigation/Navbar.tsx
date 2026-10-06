@@ -17,6 +17,10 @@ import {
   Menu,
   X,
   ChevronRight,
+  Bot,
+  Video,
+  Fingerprint,
+  Sparkles,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -101,9 +105,21 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
       icon: LayoutDashboard,
     },
     {
+      href: "/student/ai-sensei",
+      label: "AI Sensei Partner",
+      description: "Interactive Japanese chat & @explain vocab",
+      icon: Bot,
+    },
+    {
+      href: "/student/chapters",
+      label: "Video Chapters & Notes",
+      description: "Lecture notes & gated completion quizzes",
+      icon: Video,
+    },
+    {
       href: "/student/attendance",
-      label: "Attendance",
-      description: "Hour-by-hour logs and subject percentages",
+      label: "Attendance & Biometrics",
+      description: "Hour-by-hour logs & WebAuthn enrollment",
       icon: Clock,
       badge: attendanceRate !== null ? `${attendanceRate}%` : undefined,
       badgeColor: attendanceRate !== null && attendanceRate >= 75 ? "emerald" : "amber",
@@ -116,11 +132,10 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
     },
     {
       href: "/student/assignments",
-      label: "Assignments",
-      description: "Course practicums & interactive tasks",
+      label: "Daily AI Homework",
+      description: "Personalized anti-collusion practicums",
       icon: FileCheck2,
     },
-
     {
       href: "/student/exams",
       label: "Exams",
@@ -138,17 +153,23 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
     },
     {
       href: "/admin/attendance",
-      label: "Attendance Ledger",
-      description: "Live cohort attendance & offline marks",
-      icon: Clock,
+      label: "Live Kiosk & Attendance",
+      description: "Open/close class & biometric reader",
+      icon: Fingerprint,
       badge: attendanceRate !== null ? `${attendanceRate}%` : undefined,
       badgeColor: attendanceRate !== null && attendanceRate >= 75 ? "emerald" : "amber",
     },
     {
       href: "/admin/students",
-      label: "Student Directory",
-      description: "Batch management & Excel export",
+      label: "Student Directory & Dossiers",
+      description: "360° student record, devices & Excel export",
       icon: Users,
+    },
+    {
+      href: "/admin/chapters",
+      label: "Chapter Publisher",
+      description: "Video lecture manager & quiz attachments",
+      icon: Video,
     },
     {
       href: "/admin/timetable",
@@ -158,8 +179,8 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
     },
     {
       href: "/admin/exams",
-      label: "Exam Manager",
-      description: "Evaluation module & proctored tests",
+      label: "Exam & AI Generator",
+      description: "Evaluation module & AI test builder",
       icon: ShieldAlert,
     },
     {
@@ -168,7 +189,6 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
       description: "Publish assignments & evaluate scoring",
       icon: BookOpen,
     },
-
   ];
 
   const links = isAdmin ? adminLinks : studentLinks;
@@ -177,14 +197,14 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
     <>
       {/* Clean Top Header Bar */}
       <header className="sticky top-0 z-40 w-full border-b border-white/[0.08] bg-[#081220]/90 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
           {/* Left: Sole Navigation Control & Main Brand Title */}
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
             {/* Sole Menu Toggle Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-              className="btn-spring flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900/90 border border-white/10 hover:border-[#f06449]/50 hover:bg-slate-800 text-slate-100 transition-all cursor-pointer shadow-sm group"
+              className="btn-spring flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 rounded-xl bg-slate-900/90 border border-white/10 hover:border-[#f06449]/50 hover:bg-slate-800 text-slate-100 transition-all cursor-pointer shadow-sm group shrink-0"
             >
               {isMenuOpen ? (
                 <X className="w-4 h-4 text-[#ff7c62] group-hover:rotate-90 transition-transform duration-200" />
@@ -199,25 +219,25 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
             {/* Main Brand Title: RIT JAPANESE COURSE */}
             <Link
               href={isAdmin ? "/admin/dashboard" : "/student/dashboard"}
-              className="flex items-center gap-2.5 group"
+              className="flex items-center gap-2 sm:gap-2.5 group min-w-0"
             >
-              <div className="relative w-9 h-9 rounded-full overflow-hidden border border-[#f06449]/40 shadow-md shadow-[#081220]/60 group-hover:scale-105 transition-transform shrink-0 bg-[#081220]">
+              <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border border-[#f06449]/40 shadow-md shadow-[#081220]/60 group-hover:scale-105 transition-transform shrink-0 bg-[#081220]">
                 <img
                   src="/logo.png"
                   alt="RIT Japanese Portal Logo"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-extrabold text-sm sm:text-base tracking-tight text-white">
+                  <span className="font-extrabold text-xs sm:text-base tracking-tight text-white truncate">
                     RIT <span className="text-[#ff7c62]">JAPANESE COURSE</span>
                   </span>
-                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#296ec2]/20 text-[#93c5fd] font-mono border border-[#296ec2]/35">
-                    日本語コース
+                  <span className="hidden sm:inline-flex text-[9px] px-1.5 py-0.5 rounded bg-[#296ec2]/20 text-[#93c5fd] font-medium border border-[#296ec2]/35 shrink-0">
+                    JLPT Academy
                   </span>
                 </div>
-                <p className="text-[10px] sm:text-[11px] text-[#ff7c62] font-bold tracking-wider uppercase">
+                <p className="text-[9px] sm:text-[11px] text-[#ff7c62] font-bold tracking-wider uppercase truncate">
                   BELIEVE IN THE POSSIBILITIES
                 </p>
               </div>
@@ -268,7 +288,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
 
       {/* Slide-over Drawer (Clean, Smooth & Scrollable with Spring Physics) */}
       <aside
-        className={`fixed top-0 left-0 bottom-0 z-50 w-80 sm:w-96 bg-[#081220]/95 backdrop-blur-2xl border-r border-[#296ec2]/20 shadow-2xl flex flex-col justify-between transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
+        className={`fixed top-0 left-0 bottom-0 z-50 w-[85vw] max-w-sm sm:w-96 bg-[#081220]/95 backdrop-blur-2xl border-r border-[#296ec2]/20 shadow-2xl flex flex-col justify-between transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -385,7 +405,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
         </div>
 
         {/* Drawer Bottom Footer (Fixed at bottom of drawer) */}
-        <div className="p-4 border-t border-white/10 bg-[#060d17] shrink-0 space-y-2.5">
+        <div className="p-4 pb-safe border-t border-white/10 bg-[#060d17] shrink-0 space-y-2.5">
           <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -396,7 +416,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-[#ff7c62] hover:text-[#ffa694] transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-[#ff7c62] hover:text-[#ffa694] transition-all cursor-pointer min-h-[44px]"
           >
             <LogOut className="w-4 h-4" />
             Sign Out of Portal

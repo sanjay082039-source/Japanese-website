@@ -1,8 +1,17 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: "#081220",
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
-  title: "RIT Japanese Course | 現代日本語アカデミー • Modern Japanese Digital Academy",
+  title: "RIT Japanese Course • Modern Japanese Digital Academy",
   description:
     "RIT Japanese Course combining modern digital pedagogy, authentic brush typography, hour-by-hour timetables, interactive 3D flashcards, and certification across JLPT N5 to N1.",
   icons: {
@@ -27,7 +36,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-[#081220] text-slate-100 font-sans antialiased selection:bg-[#f06449] selection:text-white">
+      <body className="min-h-screen bg-[#081220] text-slate-100 font-sans antialiased selection:bg-[#f06449] selection:text-white overflow-x-hidden">
         {children}
       </body>
     </html>

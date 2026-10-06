@@ -35,3 +35,6 @@ yarn-error.log*
 # local SQLite temporary files
 prisma/*.db-journal
 prisma/*.db.bak
+
+# scratch scripts
+/scratch/

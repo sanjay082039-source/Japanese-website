@@ -14,12 +14,12 @@ interface HourlyTimetableProps {
 }
 
 const DAYS = [
-  { id: 1, name: "Monday", jp: "月曜日" },
-  { id: 2, name: "Tuesday", jp: "火曜日" },
-  { id: 3, name: "Wednesday", jp: "水曜日" },
-  { id: 4, name: "Thursday", jp: "木曜日" },
-  { id: 5, name: "Friday", jp: "金曜日" },
-  { id: 6, name: "Saturday", jp: "土曜日" },
+  { id: 1, name: "Monday" },
+  { id: 2, name: "Tuesday" },
+  { id: 3, name: "Wednesday" },
+  { id: 4, name: "Thursday" },
+  { id: 5, name: "Friday" },
+  { id: 6, name: "Saturday" },
 ];
 
 export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
@@ -120,14 +120,20 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
     }
   };
 
+  // Displayed days based on mobile selection
+  const displayedDays = useMemo(() => {
+    if (selectedDay === "ALL") return DAYS;
+    return DAYS.filter((d) => d.id === selectedDay);
+  }, [selectedDay]);
+
   return (
-    <div className="w-full bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl backdrop-blur-xl">
+    <div className="w-full bg-slate-900/90 border border-slate-800 rounded-3xl p-3 sm:p-6 shadow-2xl backdrop-blur-xl">
       {/* Header & Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/15 text-blue-300 border border-blue-500/30">
-              時間割・Syllabus
+              Class Timetable
             </span>
             <span className="text-xs text-slate-400">AM / PM Synchronized Timetable</span>
           </div>
@@ -143,13 +149,13 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
         </div>
 
         {/* JLPT Level Filter Controls */}
-        <div className="flex items-center flex-wrap gap-2">
-          <div className="flex items-center bg-slate-950/80 border border-slate-800 rounded-xl p-1">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
+          <div className="flex items-center bg-slate-950/80 border border-slate-800 rounded-xl p-1 overflow-x-auto max-w-full">
             {(["ALL", "N1", "N2", "N3", "N4", "N5"] as const).map((lvl) => (
               <button
                 key={lvl}
                 onClick={() => setSelectedLevel(lvl)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                   selectedLevel === lvl
                     ? "bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-bold shadow-md shadow-orange-950/40"
                     : "text-slate-400 hover:text-white hover:bg-slate-800/60"
@@ -160,42 +166,47 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
             ))}
           </div>
 
-          {/* Mobile Day Selector */}
-          <div className="flex md:hidden items-center bg-slate-950/80 border border-slate-800 rounded-xl px-2 py-1">
-            <Filter className="w-3.5 h-3.5 text-slate-400 mr-1" />
-            <select
-              value={selectedDay}
-              onChange={(e) =>
-                setSelectedDay(
-                  e.target.value === "ALL" ? "ALL" : parseInt(e.target.value, 10)
-                )
-              }
-              aria-label="Filter timetable by day of week"
-              className="bg-transparent text-xs text-slate-200 outline-none"
+          {/* Mobile Quick Day Selector */}
+          <div className="flex md:hidden items-center gap-1 overflow-x-auto w-full pb-1">
+            <button
+              onClick={() => setSelectedDay("ALL")}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                selectedDay === "ALL"
+                  ? "bg-orange-500 text-slate-950 font-bold"
+                  : "bg-slate-950 text-slate-400 border border-slate-800"
+              }`}
             >
-              <option value="ALL">All Days (Mon-Sat)</option>
-              {DAYS.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name} ({d.jp})
-                </option>
-              ))}
-            </select>
+              All Days
+            </button>
+            {DAYS.map((d) => (
+              <button
+                key={d.id}
+                onClick={() => setSelectedDay(d.id)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                  selectedDay === d.id
+                    ? "bg-orange-500 text-slate-950 font-bold"
+                    : "bg-slate-950 text-slate-400 border border-slate-800"
+                }`}
+              >
+                {d.name.slice(0, 3)}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Timetable Desktop Grid with AM & PM Formatting */}
       <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-800/80 shadow-inner">
-        <table className="w-full text-left border-collapse min-w-[820px]">
+        <table className={`w-full text-left border-collapse ${selectedDay === "ALL" ? "min-w-[820px]" : "min-w-[320px]"}`}>
           <thead>
             <tr className="bg-slate-950 text-slate-300 border-b border-slate-800 text-xs font-semibold uppercase tracking-wider">
-              <th className="py-4 px-4 w-44 border-r border-slate-800 text-center">
+              <th className="py-4 px-3 sm:px-4 w-36 sm:w-44 border-r border-slate-800 text-center">
                 <div className="flex items-center justify-center gap-1.5 text-orange-400">
                   <Clock className="w-3.5 h-3.5" />
-                  <span>Time (AM / PM)</span>
+                  <span>Time (AM/PM)</span>
                 </div>
               </th>
-              {DAYS.map((day) => (
+              {displayedDays.map((day) => (
                 <th
                   key={day.id}
                   className={`py-4 px-3 border-r border-slate-800 last:border-r-0 ${
@@ -204,12 +215,7 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
                       : ""
                   }`}
                 >
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold">{day.name}</span>
-                    <span className="text-[10px] text-slate-500 font-normal">
-                      {day.jp}
-                    </span>
-                  </div>
+                  <span className="text-sm font-semibold">{day.name}</span>
                 </th>
               ))}
             </tr>
@@ -226,17 +232,17 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
                   }`}
                 >
                   {/* Time Column with Strict AM and PM Format */}
-                  <td className="py-3.5 px-3 border-r border-slate-800 text-center text-xs font-mono font-bold text-slate-200 bg-slate-950/60 whitespace-nowrap">
+                  <td className="py-3.5 px-2 sm:px-3 border-r border-slate-800 text-center text-xs font-mono font-bold text-slate-200 bg-slate-950/60 whitespace-nowrap">
                     <span className="text-white block">{row.labelAmPm}</span>
                     {isLunchBreak && (
                       <span className="text-[10px] text-amber-400 font-sans font-medium block mt-0.5">
-                        Lunch / Break (休)
+                        Lunch Break
                       </span>
                     )}
                   </td>
 
                   {/* Days Columns */}
-                  {DAYS.map((day) => {
+                  {displayedDays.map((day) => {
                     const slot = findSlot(day.id, row.start24);
                     const isNow = isCurrentTimeSlot(row.start24, day.id);
 

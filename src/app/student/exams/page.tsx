@@ -38,7 +38,7 @@ export default async function StudentExamsPage() {
         <div className="mb-8">
           <div className="flex items-center gap-2">
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-semibold border border-rose-500/30">
-              試験ポータル・Examination Hall
+              Examination Portal
             </span>
           </div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight mt-1">

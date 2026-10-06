@@ -70,6 +70,20 @@ export default function AdminAssignmentsPage() {
     return d.toISOString().slice(0, 10);
   });
 
+  // AI Assignment Generator Modal State
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiCourseLevel, setAiCourseLevel] = useState<CourseLevel>("N5");
+  const [aiFocusArea, setAiFocusArea] = useState<string>("MIXED");
+  const [aiQuestionCount, setAiQuestionCount] = useState<number>(10);
+  const [aiMarksPerQuestion, setAiMarksPerQuestion] = useState<number>(5);
+  const [aiDueDate, setAiDueDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().slice(0, 10);
+  });
+  const [aiTitle, setAiTitle] = useState("");
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+
   // Dynamic Google Form Questions
   const [questions, setQuestions] = useState<FormQuestion[]>([
     {
@@ -175,7 +189,7 @@ export default function AdminAssignmentsPage() {
       return;
     }
     const newOptions = q.options.filter((_, i) => i !== optIndex);
-    let newCorrect = q.correctOption;
+    let newCorrect = q.correctOption ?? 0;
     if (newCorrect >= newOptions.length) {
       newCorrect = newOptions.length - 1;
     }
@@ -341,7 +355,7 @@ export default function AdminAssignmentsPage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 font-semibold border border-orange-500/30">
-                課題配信・Assignment Hub
+                Assignment Hub
               </span>
               <span className="text-xs text-slate-400">Interactive Quiz & Practicum Management</span>
             </div>
@@ -353,7 +367,16 @@ export default function AdminAssignmentsPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => {
+                setAiTitle("");
+                setIsAiModalOpen(true);
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-blue-950/50 transition-all cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 text-amber-300" /> AI Generate Assignment
+            </button>
             <button
               onClick={() => {
                 setTitle("");
@@ -379,9 +402,9 @@ export default function AdminAssignmentsPage() {
                 ]);
                 setIsModalOpen(true);
               }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-lg shadow-orange-950/40 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-lg shadow-orange-950/40 transition-all cursor-pointer"
             >
-              <Plus className="w-4 h-4" /> Publish Assignment
+              <Plus className="w-4 h-4" /> Create Manual Assignment
             </button>
           </div>
         </div>
@@ -477,7 +500,7 @@ export default function AdminAssignmentsPage() {
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {formData.questions.map((q, idx) => (
+                        {formData.questions.map((q: any, idx: number) => (
                           <div
                             key={q.id || idx}
                             className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs space-y-1.5"
@@ -491,7 +514,7 @@ export default function AdminAssignmentsPage() {
                               </span>
                             </div>
                             <div className="text-[11px] text-slate-400 pl-2 border-l border-slate-800 space-y-0.5">
-                              {q.options.map((opt, optIdx) => (
+                              {q.options.map((opt: any, optIdx: number) => (
                                 <div
                                   key={optIdx}
                                   className={
@@ -985,6 +1008,237 @@ export default function AdminAssignmentsPage() {
                   </div>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* AI Assignment Generator Modal */}
+        {isAiModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+            <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-8">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-amber-300" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">AI Assignment Generator</h3>
+                    <p className="text-xs text-slate-400">
+                      Generate authentic JLPT practice sets with admin-configured question limits.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsAiModalOpen(false)}
+                  className="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">
+                    Target JLPT Proficiency Level
+                  </label>
+                  <div className="grid grid-cols-5 gap-2">
+                    {(["N5", "N4", "N3", "N2", "N1"] as const).map((lvl) => (
+                      <button
+                        key={lvl}
+                        type="button"
+                        onClick={() => setAiCourseLevel(lvl)}
+                        className={`py-2 rounded-xl text-xs font-bold font-mono border transition-all ${
+                          aiCourseLevel === lvl
+                            ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-950/50"
+                            : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        {lvl}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">
+                    Focus Area / Curriculum Domain
+                  </label>
+                  <select
+                    value={aiFocusArea}
+                    onChange={(e) => setAiFocusArea(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-blue-500"
+                  >
+                    <option value="MIXED">Comprehensive Mixed (文字・語彙・文法・読解)</option>
+                    <option value="KANJI_VOCAB">Kanji & Vocabulary (文字・語彙)</option>
+                    <option value="GRAMMAR">Grammar & Syntax (文法)</option>
+                    <option value="READING_COMPREHENSION">Reading Comprehension (読解)</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">
+                      Question Limit (Set by Admin)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={1}
+                        max={50}
+                        value={aiQuestionCount}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          setAiQuestionCount(isNaN(val) ? 10 : Math.max(1, Math.min(50, val)));
+                        }}
+                        className="w-20 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono font-bold text-center outline-none focus:border-blue-500"
+                      />
+                      <div className="flex flex-wrap gap-1">
+                        {[5, 10, 15, 20, 25, 30].map((cnt) => (
+                          <button
+                            key={cnt}
+                            type="button"
+                            onClick={() => setAiQuestionCount(cnt)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-mono font-semibold transition-all ${
+                              aiQuestionCount === cnt
+                                ? "bg-blue-600 text-white"
+                                : "bg-slate-800 text-slate-400 hover:text-white"
+                            }`}
+                          >
+                            {cnt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">
+                      Marks Per Question
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={1}
+                        max={20}
+                        value={aiMarksPerQuestion}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          setAiMarksPerQuestion(isNaN(val) ? 5 : Math.max(1, Math.min(20, val)));
+                        }}
+                        className="w-20 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono font-bold text-center outline-none focus:border-blue-500"
+                      />
+                      <span className="text-xs text-slate-400 font-mono">Marks / Item</span>
+                      <div className="flex gap-1 ml-auto">
+                        {[2, 5, 10].map((m) => (
+                          <button
+                            key={m}
+                            type="button"
+                            onClick={() => setAiMarksPerQuestion(m)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-mono font-semibold transition-all ${
+                              aiMarksPerQuestion === m
+                                ? "bg-orange-600 text-white"
+                                : "bg-slate-800 text-slate-400 hover:text-white"
+                            }`}
+                          >
+                            {m}pt
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">
+                      Due Date & Deadline
+                    </label>
+                    <input
+                      type="date"
+                      value={aiDueDate}
+                      onChange={(e) => setAiDueDate(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">
+                      Custom Title (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={aiTitle}
+                      onChange={(e) => setAiTitle(e.target.value)}
+                      placeholder={`Auto: JLPT ${aiCourseLevel} ${aiFocusArea} Assignment`}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white outline-none focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Summary Box */}
+                <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <span className="text-slate-400 text-[11px] block">Planned Assessment Structure:</span>
+                    <span className="font-bold text-white">
+                      {aiQuestionCount} Multiple Choice Questions • {aiMarksPerQuestion} Marks each
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-400 block font-mono">Total Score</span>
+                    <span className="text-sm font-black font-mono text-orange-400">
+                      {aiQuestionCount * aiMarksPerQuestion} Marks
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-800 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsAiModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={isGeneratingAi}
+                  onClick={async () => {
+                    setIsGeneratingAi(true);
+                    try {
+                      const res = await fetch("/api/admin/assignments/ai-generate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          courseLevel: aiCourseLevel,
+                          focusArea: aiFocusArea,
+                          questionCount: aiQuestionCount,
+                          marksPerQuestion: aiMarksPerQuestion,
+                          dueDate: aiDueDate,
+                          title: aiTitle.trim() || undefined,
+                        }),
+                      });
+
+                      const data = await res.json();
+                      if (res.ok) {
+                        alert(data.message || "Assignment generated successfully!");
+                        setIsAiModalOpen(false);
+                        fetchProfileAndAssignments();
+                      } else {
+                        alert(data.error || "Failed to generate assignment.");
+                      }
+                    } catch (e: any) {
+                      alert(e.message || "Network error generating assignment.");
+                    } finally {
+                      setIsGeneratingAi(false);
+                    }
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-950/50 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  {isGeneratingAi ? "Synthesizing Assignment Items..." : "Generate & Publish Assignment"}
+                </button>
+              </div>
             </div>
           </div>
         )}

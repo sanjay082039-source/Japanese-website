@@ -3,13 +3,18 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import Navbar from "@/components/navigation/Navbar";
-import { Clock, Calendar, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { Clock, Calendar, CheckCircle2, XCircle, AlertCircle, Fingerprint } from "lucide-react";
+import { BiometricEnrollmentCard } from "@/components/biometrics/BiometricEnrollmentCard";
 
 export const dynamic = "force-dynamic";
 
 export default async function StudentAttendancePage() {
   const session = await getSession();
   if (!session) redirect("/login");
+
+  const biometricCred = await prisma.biometricCredential.findFirst({
+    where: { userId: session.id },
+  });
 
   const attendances = await prisma.attendance.findMany({
     where: { studentId: session.id },
@@ -39,16 +44,19 @@ export default async function StudentAttendancePage() {
         <div className="mb-6">
           <div className="flex items-center gap-2">
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-semibold border border-rose-500/30">
-              出席簿・Attendance Registry
+              Attendance Registry
             </span>
           </div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight mt-1">
-            Individual Attendance Ledger
+            Individual Attendance Ledger & Biometrics
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Subject-wise logs and hour-by-hour status records for JLPT {session.courseLevel}.
+            Subject-wise logs, hour-by-hour status records, and physical hardware biometric enrollment for JLPT {session.courseLevel}.
           </p>
         </div>
+
+        {/* WebAuthn FIDO2 Biometric Enrollment Card */}
+        <BiometricEnrollmentCard initialEnrolled={!!biometricCred} />
 
         {/* Metrics Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

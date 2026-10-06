@@ -20,6 +20,8 @@ import {
   Edit3,
   User,
   Eye,
+  Sparkles,
+  Wand2,
 } from "lucide-react";
 
 interface ExamQuestionItem {
@@ -106,8 +108,15 @@ export default function AdminExamsManagerPage() {
   // Proctoring Toggles
   const [clipboardBlock, setClipboardBlock] = useState(true);
   const [devtoolsBlock, setDevtoolsBlock] = useState(true);
-  const [fullScreenRequired, setFullScreenRequired] = useState(true);
   const [tabSwitchLimit, setTabSwitchLimit] = useState(3);
+  const [fullScreenRequired, setFullScreenRequired] = useState(true);
+
+  // AI Exam Generator Modal
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiFocusArea, setAiFocusArea] = useState("KANJI_VOCAB");
+  const [aiQuestionCount, setAiQuestionCount] = useState(5);
+  const [aiDuration, setAiDuration] = useState(30);
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
 
   // Question Items
   const [questions, setQuestions] = useState<
@@ -303,9 +312,9 @@ export default function AdminExamsManagerPage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-semibold border border-rose-500/30">
-                試験管理・Exam Control & Evaluation
+                Exam Control & Evaluation
               </span>
-              <span className="text-xs text-slate-400">Host Assessment & Grading Console</span>
+              <span className="text-xs text-slate-400">Assessment & Grading Console</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
               Examination & Host-Side Evaluation Manager
@@ -315,16 +324,26 @@ export default function AdminExamsManagerPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => {
-              setTitle("");
-              setMessage(null);
-              setIsModalOpen(true);
-            }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-lg shadow-rose-950/40"
-          >
-            <Plus className="w-4 h-4" /> Create Proctored Exam
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsAiModalOpen(true)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#296ec2] to-[#1b4987] hover:from-[#3b82f6] hover:to-[#2563eb] text-white font-bold text-xs shadow-lg shadow-[#081220]/60 transition-all cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 text-[#93c5fd]" />
+              AI Assessment Generator
+            </button>
+
+            <button
+              onClick={() => {
+                setTitle("");
+                setMessage(null);
+                setIsModalOpen(true);
+              }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-lg shadow-rose-950/40 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" /> Create Manual Exam
+            </button>
+          </div>
         </div>
 
         {/* ============================================================== */}
@@ -964,6 +983,209 @@ export default function AdminExamsManagerPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* MODAL 2: AI EXAM GENERATOR (GEMINI STRUCTURED PROMPT)          */}
+        {/* ============================================================== */}
+        {isAiModalOpen && (
+          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-blue-500/20 text-[#93c5fd]">
+                    <Sparkles className="w-5 h-5 text-[#93c5fd]" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base text-white">
+                      AI JLPT Assessment Generator
+                    </h3>
+                    <p className="text-[11px] text-slate-400">
+                      Powered by Gemini 1.5 Pro / Flash with strict schema validation.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsAiModalOpen(false)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">
+                    Target JLPT Proficiency Level
+                  </label>
+                  <div className="grid grid-cols-5 gap-2">
+                    {(["N5", "N4", "N3", "N2", "N1"] as const).map((lvl) => (
+                      <button
+                        key={lvl}
+                        type="button"
+                        onClick={() => setCourseLevel(lvl)}
+                        className={`py-2 rounded-xl text-xs font-bold font-mono border transition-all ${
+                          courseLevel === lvl
+                            ? "bg-[#f06449] border-[#f06449] text-white shadow-md shadow-[#f06449]/30"
+                            : "bg-slate-950 border-white/10 text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        {lvl}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">
+                    Syllabus Focus Area
+                  </label>
+                  <select
+                    value={aiFocusArea}
+                    onChange={(e) => setAiFocusArea(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                  >
+                    <option value="KANJI_VOCAB">Kanji & Vocabulary (文字・語彙)</option>
+                    <option value="GRAMMAR">Grammar & Syntax (文法)</option>
+                    <option value="READING_COMPREHENSION">Reading Comprehension (読解)</option>
+                    <option value="MIXED">Comprehensive Mixed Assessment (総合試験)</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">
+                      Assessment Question Limit (Set by Admin)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={1}
+                        max={50}
+                        value={aiQuestionCount}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          setAiQuestionCount(isNaN(val) ? 5 : Math.max(1, Math.min(50, val)));
+                        }}
+                        className="w-24 bg-slate-950 border border-white/20 rounded-xl px-3 py-2 text-xs text-white font-mono font-bold text-center outline-none focus:border-[#f06449]"
+                      />
+                      <div className="flex flex-wrap gap-1">
+                        {[5, 10, 15, 20, 25, 30].map((count) => (
+                          <button
+                            key={count}
+                            type="button"
+                            onClick={() => setAiQuestionCount(count)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-mono font-semibold transition-all ${
+                              aiQuestionCount === count
+                                ? "bg-[#f06449] text-white"
+                                : "bg-slate-800 text-slate-400 hover:text-white"
+                            }`}
+                          >
+                            {count}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-slate-400 mt-1 block">
+                      Total: {aiQuestionCount} questions ({aiQuestionCount * 2} total marks)
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">
+                      Time Allowed
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={5}
+                        max={180}
+                        value={aiDuration}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          setAiDuration(isNaN(val) ? 30 : Math.max(5, Math.min(180, val)));
+                        }}
+                        className="w-24 bg-slate-950 border border-white/20 rounded-xl px-3 py-2 text-xs text-white font-mono font-bold text-center outline-none focus:border-[#f06449]"
+                      />
+                      <span className="text-xs text-slate-400 font-mono">Minutes</span>
+                      <div className="flex gap-1 ml-auto">
+                        {[15, 30, 45, 60, 90].map((mins) => (
+                          <button
+                            key={mins}
+                            type="button"
+                            onClick={() => setAiDuration(mins)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-mono font-semibold transition-all ${
+                              aiDuration === mins
+                                ? "bg-blue-600 text-white"
+                                : "bg-slate-800 text-slate-400 hover:text-white"
+                            }`}
+                          >
+                            {mins}m
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-slate-950 border border-white/5 text-[11px] text-slate-400 space-y-1">
+                  <div className="font-semibold text-slate-300 flex items-center gap-1.5">
+                    <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
+                    Proctoring Protocols Automatically Attached:
+                  </div>
+                  <p>
+                    Full-screen lock, DevTools interception, clipboard blocking, and tab-switch telemetry tracking with 3-strike auto-disqualification.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-white/10 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsAiModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isGeneratingAi}
+                  onClick={async () => {
+                    setIsGeneratingAi(true);
+                    try {
+                      const res = await fetch("/api/admin/exams/ai-generate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          courseLevel,
+                          focusArea: aiFocusArea,
+                          questionCount: aiQuestionCount,
+                          durationMinutes: aiDuration,
+                        }),
+                      });
+
+                      if (res.ok) {
+                        setIsAiModalOpen(false);
+                        window.location.reload();
+                      } else {
+                        const err = await res.json();
+                        alert(err.error || "Failed to generate exam.");
+                      }
+                    } catch (e: any) {
+                      alert(e.message || "Network error");
+                    } finally {
+                      setIsGeneratingAi(false);
+                    }
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#296ec2] to-[#1b4987] hover:from-[#3b82f6] hover:to-[#2563eb] disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-[#081220]/60 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  {isGeneratingAi ? "Synthesizing Exam Items..." : "Generate & Publish Assessment"}
+                </button>
+              </div>
             </div>
           </div>
         )}

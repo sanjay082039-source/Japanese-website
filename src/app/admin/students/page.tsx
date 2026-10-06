@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Navbar from "@/components/navigation/Navbar";
+import StudentDossierModal from "@/components/admin/StudentDossierModal";
 import { UserSession, StudentShortlistRecord, CourseLevel } from "@/lib/types";
 import {
   Users,
@@ -15,6 +16,8 @@ import {
   Layers,
   Edit3,
   Calendar,
+  ShieldCheck,
+  FileText,
 } from "lucide-react";
 
 interface StudentRecordWithRole extends StudentShortlistRecord {
@@ -34,6 +37,7 @@ export default function AdminStudentsDirectoryPage() {
   const [user, setUser] = useState<UserSession | null>(null);
   const [students, setStudents] = useState<StudentRecordWithRole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDossierStudentId, setSelectedDossierStudentId] = useState<string | null>(null);
 
   // Filter States
   const [courseLevel, setCourseLevel] = useState<string>("ALL");
@@ -204,7 +208,7 @@ export default function AdminStudentsDirectoryPage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-semibold border border-blue-500/30">
-                名簿・クラス管理・Student Batches & Levels
+                Student Directory & Batches
               </span>
               <span className="text-xs text-slate-400">Batch Assignment & JLPT Tiers (N1–N5)</span>
             </div>
@@ -375,7 +379,7 @@ export default function AdminStudentsDirectoryPage() {
                   <th className="py-3 px-4 text-center">P / A / L</th>
                   <th className="py-3 px-4 text-center">Avg Exam %</th>
                   <th className="py-3 px-4 text-center">Standing</th>
-                  <th className="py-3 px-4 text-center">Manage Batch & Level</th>
+                  <th className="py-3 px-4 text-center">Actions & Dossier</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800 text-slate-300">
@@ -392,10 +396,18 @@ export default function AdminStudentsDirectoryPage() {
                         {st.id.slice(-6).toUpperCase()}
                       </td>
                       <td className="py-3 px-4 font-bold text-white">
-                        <div>
-                          <span>{st.name}</span>
+                        <button
+                          onClick={() => setSelectedDossierStudentId(st.id)}
+                          className="text-left group cursor-pointer focus:outline-none"
+                        >
+                          <span className="group-hover:text-orange-400 transition-colors flex items-center gap-1.5">
+                            {st.name}
+                            <span className="text-[10px] text-blue-400 opacity-0 group-hover:opacity-100 font-normal transition-opacity">
+                              (View 360°)
+                            </span>
+                          </span>
                           <span className="block text-[11px] text-slate-400 font-normal">{st.email}</span>
-                        </div>
+                        </button>
                       </td>
                       <td className="py-3 px-4">
                         <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-950 text-blue-300 border border-blue-800 font-mono">
@@ -442,18 +454,30 @@ export default function AdminStudentsDirectoryPage() {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <button
-                          onClick={() => {
-                            setSelectedStudentForEdit(st);
-                            setTargetBatch(st.section || "Batch A");
-                            setTargetCourseLevel(st.courseLevel);
-                            setUpdateMessage(null);
-                          }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-orange-400 text-[11px] font-semibold transition-all border border-slate-700"
-                        >
-                          <Edit3 className="w-3.5 h-3.5 text-orange-400" />
-                          <span>Edit Batch</span>
-                        </button>
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => setSelectedDossierStudentId(st.id)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-950/80 hover:bg-blue-900 text-blue-300 hover:text-white text-[11px] font-semibold transition-all border border-blue-800 shadow-sm"
+                            title="Open 360° Student Academic & Security Dossier"
+                          >
+                            <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                            <span>360° Dossier</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setSelectedStudentForEdit(st);
+                              setTargetBatch(st.section || "Batch A");
+                              setTargetCourseLevel(st.courseLevel);
+                              setUpdateMessage(null);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-orange-400 text-[11px] font-semibold transition-all border border-slate-700"
+                            title="Reassign batch or course tier"
+                          >
+                            <Edit3 className="w-3.5 h-3.5 text-orange-400" />
+                            <span>Batch</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -610,6 +634,17 @@ export default function AdminStudentsDirectoryPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* 360° STUDENT ACADEMIC & SECURITY DOSSIER MODAL                */}
+        {/* ============================================================== */}
+        {selectedDossierStudentId && (
+          <StudentDossierModal
+            studentId={selectedDossierStudentId}
+            onClose={() => setSelectedDossierStudentId(null)}
+            onUpdate={fetchProfileAndData}
+          />
         )}
       </main>
     </div>

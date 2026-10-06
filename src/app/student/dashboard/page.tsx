@@ -38,7 +38,7 @@ export default async function StudentDashboardPage() {
   // Group attendance by subject
   const subjectMap: Record<string, { present: number; total: number }> = {};
   attendances.forEach((a) => {
-    const subj = a.subject || "General Nihongo";
+    const subj = a.subject || "Japanese Language";
     if (!subjectMap[subj]) {
       subjectMap[subj] = { present: 0, total: 0 };
     }
@@ -100,10 +100,10 @@ export default async function StudentDashboardPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-8 border-b border-slate-800">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              おかえりなさい, {session.name}
+              Welcome back, {session.name}
             </h1>
             <p className="text-sm text-slate-400 mt-1">
-              JLPT {session.courseLevel} (Section {session.section}) • Real-time academic standing, attendance logs, and schedules.
+              JLPT {session.courseLevel} (Section {session.section}) • Academic standing, attendance logs, and schedules.
             </p>
           </div>
 
@@ -312,7 +312,7 @@ export default async function StudentDashboardPage() {
               <div className="mt-4 space-y-2">
                 {todaySlots.length === 0 ? (
                   <div className="text-center py-6 text-slate-500 text-xs">
-                    No lecture sessions scheduled for today. Recommended: Self-study kanji & bunpou review.
+                    No lecture sessions scheduled for today. Recommended: Self-study vocabulary and grammar review.
                   </div>
                 ) : (
                   todaySlots.map((slot) => (
@@ -327,7 +327,7 @@ export default async function StudentDashboardPage() {
                         <div>
                           <p className="text-sm font-bold text-slate-200">{slot.subject}</p>
                           <p className="text-xs text-slate-400">
-                            Sensei: {slot.staff?.name || "Faculty Sensei"} | {slot.room || "Room 101"}
+                            Instructor: {slot.staff?.name || "Faculty Member"} | {slot.room || "Room 101"}
                           </p>
                         </div>
                       </div>

@@ -22,6 +22,7 @@ import {
   X,
   Maximize2,
 } from "lucide-react";
+import { DailyHomeworkWidget } from "@/components/homework/DailyHomeworkWidget";
 
 interface AssignmentItem {
   id: string;
@@ -65,6 +66,7 @@ export default function StudentAssignmentsPage() {
   const [securityAlert, setSecurityAlert] = useState<string | null>(null);
   const [showNavLockModal, setShowNavLockModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [infractionCount, setInfractionCount] = useState(0);
 
   // Standard legacy assignment state
   const [legacyModalAssign, setLegacyModalAssign] = useState<AssignmentItem | null>(null);
@@ -188,6 +190,26 @@ export default function StudentAssignmentsPage() {
       }
     };
 
+    // 6. Proctoring: Intercept Tab Switches & Window Blurs
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setInfractionCount((prev) => {
+          const updated = prev + 1;
+          triggerSecurityWarning(`⚠️ Tab Switch Detected: Leaving the assignment is prohibited (${updated}/3 strikes).`);
+          if (updated >= 3) {
+            setTimeout(() => {
+              handleSubmitForm(true);
+            }, 1200);
+          }
+          return updated;
+        });
+      }
+    };
+
+    const handleWindowBlur = () => {
+      triggerSecurityWarning("⚠️ Focus Lost: Please keep application focus inside your assignment.");
+    };
+
     // Attach listeners
     window.addEventListener("copy", handleCopy);
     window.addEventListener("cut", handleCut);
@@ -197,6 +219,8 @@ export default function StudentAssignmentsPage() {
     window.addEventListener("beforeunload", handleBeforeUnload);
     window.addEventListener("popstate", handlePopState);
     document.addEventListener("click", handleGlobalClick, true);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleWindowBlur);
 
     return () => {
       window.removeEventListener("copy", handleCopy);
@@ -207,6 +231,8 @@ export default function StudentAssignmentsPage() {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("popstate", handlePopState);
       document.removeEventListener("click", handleGlobalClick, true);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleWindowBlur);
     };
   }, [isStarted, isSubmitted, triggerSecurityWarning]);
 
@@ -296,13 +322,14 @@ export default function StudentAssignmentsPage() {
   };
 
   // Submit Google Form Answers
-  const handleSubmitForm = async () => {
+  const handleSubmitForm = async (isAutoOrEvent?: boolean | React.MouseEvent) => {
     if (!activeAssignment || submitting) return;
 
+    const isAuto = typeof isAutoOrEvent === "boolean" ? isAutoOrEvent : false;
     const questions = activeAssignment.formData?.questions || [];
     const answeredCount = Object.keys(selectedAnswers).length;
 
-    if (answeredCount < questions.length) {
+    if (!isAuto && answeredCount < questions.length) {
       const confirmIncomplete = window.confirm(
         `You have answered ${answeredCount} of ${questions.length} questions. Unanswered questions will receive 0 marks. Submit now?`
       );
@@ -395,7 +422,13 @@ export default function StudentAssignmentsPage() {
     const progressPct = questions.length > 0 ? (answeredCount / questions.length) * 100 : 0;
 
     return (
-      <div className="min-h-screen bg-[#070D18] text-slate-100 select-none pb-24">
+      <div
+        className="min-h-screen bg-[#070D18] text-slate-100 select-none pb-24"
+        onCopy={(e) => e.preventDefault()}
+        onCut={(e) => e.preventDefault()}
+        onPaste={(e) => e.preventDefault()}
+        onContextMenu={(e) => e.preventDefault()}
+      >
         {/* Top Sticky Proctoring & Navigation Lock Banner */}
         <header className="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-3 shadow-xl">
           <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -431,6 +464,16 @@ export default function StudentAssignmentsPage() {
             {/* Status or Progress */}
             {isStarted && !isSubmitted && (
               <div className="flex items-center gap-4">
+                <div
+                  className={`px-2.5 py-1 rounded-xl text-xs font-mono font-bold border ${
+                    infractionCount > 0
+                      ? "bg-rose-950 text-rose-300 border-rose-700 animate-pulse"
+                      : "bg-slate-900 text-slate-400 border-slate-800"
+                  }`}
+                >
+                  Infractions: {infractionCount}/3
+                </div>
+
                 {!isFullscreen && (
                   <button
                     onClick={async () => {
@@ -635,7 +678,7 @@ export default function StudentAssignmentsPage() {
           {isStarted && !isSubmitted && (
             <div className="space-y-6">
               {/* Question Cards */}
-              {questions.map((q, idx) => {
+              {questions.map((q: any, idx: number) => {
                 const isAnswered = selectedAnswers[q.id] !== undefined;
 
                 return (
@@ -674,7 +717,7 @@ export default function StudentAssignmentsPage() {
 
                     {/* Options (Radio selection) */}
                     <div className="space-y-2.5 pt-2">
-                      {q.options.map((opt, optIdx) => {
+                      {q.options.map((opt: any, optIdx: number) => {
                         const isSelected = selectedAnswers[q.id] === optIdx;
 
                         return (
@@ -795,7 +838,7 @@ export default function StudentAssignmentsPage() {
         <div className="mb-8">
           <div className="flex items-center gap-2">
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 font-semibold border border-orange-500/30">
-              課題・Course Assignments
+              Course Assignments
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
@@ -806,6 +849,8 @@ export default function StudentAssignmentsPage() {
           </p>
         </div>
 
+        {/* Dynamic Anti-Collusion Daily AI Homework Widget */}
+        <DailyHomeworkWidget />
 
         {/* Assignments Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

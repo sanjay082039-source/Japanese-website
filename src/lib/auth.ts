@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 import { UserSession, Role } from "./types";
+import prisma from "./prisma";
 
 const JWT_SECRET_STRING = process.env.JWT_SECRET || "rit-japanese-portal-secure-production-secret-2026";
 const SECRET_KEY = new TextEncoder().encode(JWT_SECRET_STRING);
@@ -34,12 +35,29 @@ export async function verifySessionToken(token: string): Promise<UserSession | n
   }
 }
 
+/**
+ * Validates session cookie AND confirms database device session is still valid (not revoked by admin)
+ */
 export async function getSession(): Promise<UserSession | null> {
   try {
     const cookieStore = cookies();
     const token = cookieStore.get(COOKIE_NAME)?.value;
     if (!token) return null;
-    return await verifySessionToken(token);
+    const session = await verifySessionToken(token);
+    if (!session) return null;
+
+    // Check device session validity if student
+    if (session.role === "STUDENT" && session.deviceSessionId) {
+      const activeSession = await prisma.deviceSession.findUnique({
+        where: { id: session.deviceSessionId },
+      });
+      if (!activeSession) {
+        // Revoked by admin or expired
+        return null;
+      }
+    }
+
+    return session;
   } catch (error) {
     return null;
   }
@@ -49,7 +67,17 @@ export async function getSessionFromRequest(request: NextRequest): Promise<UserS
   try {
     const token = request.cookies.get(COOKIE_NAME)?.value;
     if (!token) return null;
-    return await verifySessionToken(token);
+    const session = await verifySessionToken(token);
+    if (!session) return null;
+
+    if (session.role === "STUDENT" && session.deviceSessionId) {
+      const activeSession = await prisma.deviceSession.findUnique({
+        where: { id: session.deviceSessionId },
+      });
+      if (!activeSession) return null;
+    }
+
+    return session;
   } catch (error) {
     return null;
   }

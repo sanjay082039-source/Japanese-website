@@ -30,30 +30,94 @@ model User {
   taughtSlots           TimetableSlot[]        @relation("StaffTimetableSlots")
   examAttempts          ExamAttempt[]
   assignmentSubmissions AssignmentSubmission[]
+  deviceSessions        DeviceSession[]
+  biometricCredentials  BiometricCredential[]
+  openedSessions        LiveClassSession[]     @relation("OpenedClassSessions")
+  chapterProgresses     ChapterProgress[]
+  assignedHomeworks     Assignment[]           @relation("StudentAssignments")
 
   @@index([role])
   @@index([courseLevel])
   @@index([email])
 }
 
-// Attendance tracking hour by hour
-model Attendance {
-  id        String   @id @default(cuid())
-  studentId String
-  date      DateTime
-  hourSlot  String   // e.g. "09:00 - 10:00", "10:00 - 11:00", etc.
-  status    String   // "PRESENT", "ABSENT", "ON_LEAVE"
-  subject   String?
-  remarks   String?
-  isOffline Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// Hardware & Device Locked Sessions (Max 1 MOBILE & 1 DESKTOP per Student)
+model DeviceSession {
+  id           String   @id @default(cuid())
+  userId       String
+  deviceType   String   // "MOBILE", "DESKTOP"
+  userAgent    String
+  ipAddress    String?
+  sessionToken String   @unique
+  lastActive   DateTime @default(now())
+  createdAt    DateTime @default(now())
 
-  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, deviceType])
+}
+
+// WebAuthn Biometric Hardware Authenticators (FIDO2 / Touch ID / Windows Hello)
+model BiometricCredential {
+  id           String   @id @default(cuid())
+  userId       String
+  credentialId String   @unique
+  publicKey    String   // Base64-encoded public key
+  counter      Int      @default(0)
+  deviceType   String?  // "MOBILE" | "DESKTOP"
+  transports   String?  // JSON array e.g. ["internal", "hybrid"]
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Live Class Gating (Strict Admin Gating: Open Class / Close Class)
+model LiveClassSession {
+  id          String   @id @default(cuid())
+  courseLevel String   // "N1", "N2", "N3", "N4", "N5"
+  section     String   @default("A")
+  hourSlot    String   // e.g. "09:00 AM - 10:00 AM"
+  subject     String
+  isOpen      Boolean  @default(true)
+  openedById  String
+  openedAt    DateTime @default(now())
+  closedAt    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  openedBy    User     @relation("OpenedClassSessions", fields: [openedById], references: [id], onDelete: Cascade)
+  attendances Attendance[]
+
+  @@index([courseLevel, section, isOpen])
+  @@index([isOpen])
+}
+
+// Attendance tracking hour by hour & biometric verification
+model Attendance {
+  id                   String            @id @default(cuid())
+  studentId            String
+  sessionId            String?           // Tied to LiveClassSession if live
+  date                 DateTime
+  hourSlot             String            // e.g. "09:00 - 10:00", "09:00 AM - 10:00 AM"
+  status               String            // "PRESENT", "ABSENT", "ON_LEAVE"
+  subject              String?
+  remarks              String?
+  isOffline            Boolean           @default(false)
+  verifiedByBiometric  Boolean           @default(false)
+  biometricVerifiedAt  DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  student              User              @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  liveSession          LiveClassSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
 
   @@index([studentId])
   @@index([studentId, date])
   @@index([date, hourSlot])
+  @@index([sessionId])
   @@index([isOffline])
 }
 
@@ -76,6 +140,48 @@ model TimetableSlot {
   @@index([staffId])
 }
 
+// Curriculum Chapters with Video Progress Gating & Attached Quizzes
+model Chapter {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  courseLevel     String   // "N1", "N2", "N3", "N4", "N5"
+  chapterNumber   Int      @default(1)
+  videoUrl        String   // YouTube/Vimeo/Direct MP4
+  durationSeconds Int      @default(600)
+  notesContent    String   // Markdown notes & study resources
+  resourcesJson   String?  // Array of attachments / download links
+  quizQuestionsJson String? // JSON Array of [{ id, questionText, options: [], correctOption: 0, explanation: "" }]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  progresses      ChapterProgress[]
+
+  @@index([courseLevel, chapterNumber])
+}
+
+// Student Chapter Progression & Watch Completion Gate
+model ChapterProgress {
+  id              String   @id @default(cuid())
+  studentId       String
+  chapterId       String
+  watchPercentage Float    @default(0) // 0 to 100
+  videoCompleted  Boolean  @default(false) // Unlocks quiz strictly at 100%
+  completedAt     DateTime?
+  quizSubmitted   Boolean  @default(false)
+  quizScore       Float?
+  quizAnswersJson String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  student         User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  chapter         Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, chapterId])
+  @@index([studentId])
+  @@index([chapterId])
+}
+
 // Examination Management
 model Exam {
   id              String   @id @default(cuid())
@@ -88,6 +194,7 @@ model Exam {
   totalMarks      Int
   passingMarks    Int      @default(50)
   isPublished     Boolean  @default(false)
+  isAiGenerated   Boolean  @default(false)
   proctoringRules String?  // JSON string: { clipboardBlock: true, devtoolsBlock: true, tabSwitchLimit: 3, fullScreenRequired: true }
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -109,6 +216,7 @@ model ExamQuestion {
   correctOption String   // "0", "1", "2", "3" or correct text
   marks         Int      @default(1)
   orderIndex    Int      @default(0)
+  explanation   String?  // AI or sensei rationale
 
   exam          Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
 
@@ -154,21 +262,26 @@ model CheatViolationLog {
   @@index([violationType])
 }
 
-// Assignments
+// Assignments & Daily AI Unique Homework
 model Assignment {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  courseLevel String   // "N1", "N2", "N3", "N4", "N5"
-  dueDate     DateTime
-  maxMarks    Int      @default(100)
-  isPublished Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  title               String
+  description         String
+  courseLevel         String   // "N1", "N2", "N3", "N4", "N5"
+  dueDate             DateTime
+  maxMarks            Int      @default(100)
+  isPublished         Boolean  @default(true)
+  isUniqueAiGenerated Boolean  @default(false)
+  studentId           String?  // If assigned uniquely to 1 student for anti-collusion
+  questionsJson       String?  // JSON Array of dynamic questions
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  submissions AssignmentSubmission[]
+  assignedStudent     User?    @relation("StudentAssignments", fields: [studentId], references: [id], onDelete: Cascade)
+  submissions         AssignmentSubmission[]
 
   @@index([courseLevel, dueDate])
+  @@index([studentId])
 }
 
 // Student Assignment Submissions
@@ -176,7 +289,7 @@ model AssignmentSubmission {
   id           String     @id @default(cuid())
   assignmentId String
   studentId    String
-  content      String     // Rich-text or textual response
+  content      String     // Rich-text, textual response, or JSON answer object
   fileUrl      String?    // Uploaded document URL or relative file path
   submittedAt  DateTime   @default(now())
   grade        Float?

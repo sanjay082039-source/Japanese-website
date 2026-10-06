@@ -385,24 +385,30 @@ export default function ExamRoomPage() {
   const totalQuestions = sessionData?.exam.questions.length || 0;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col select-none proctor-protected">
+    <div
+      className="min-h-screen bg-slate-950 text-slate-100 flex flex-col select-none proctor-protected"
+      onCopy={(e) => e.preventDefault()}
+      onCut={(e) => e.preventDefault()}
+      onPaste={(e) => e.preventDefault()}
+      onContextMenu={(e) => e.preventDefault()}
+    >
       {/* MANDATORY FULLSCREEN ENFORCEMENT OVERLAY */}
       {!isFullscreen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 sm:p-6 select-none">
-          <div className="w-full max-w-lg bg-slate-900 border border-rose-600/80 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-center">
-            <div className="relative w-16 h-16 rounded-2xl bg-rose-950/80 border border-rose-500 text-rose-400 flex items-center justify-center mx-auto shadow-lg shadow-rose-950/50">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-3 sm:p-6 select-none overflow-y-auto">
+          <div className="w-full max-w-lg bg-slate-900 border border-rose-600/80 rounded-3xl p-5 sm:p-8 shadow-2xl space-y-4 sm:space-y-6 text-center max-h-[92vh] overflow-y-auto">
+            <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-rose-950/80 border border-rose-500 text-rose-400 flex items-center justify-center mx-auto shadow-lg shadow-rose-950/50">
               {hasEnteredOnce ? (
-                <AlertTriangle className="w-8 h-8 animate-pulse text-amber-400" />
+                <AlertTriangle className="w-7 h-7 sm:w-8 sm:h-8 animate-pulse text-amber-400" />
               ) : (
-                <Lock className="w-8 h-8 text-rose-400" />
+                <Lock className="w-7 h-7 sm:w-8 sm:h-8 text-rose-400" />
               )}
             </div>
 
             <div>
-              <span className="text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider bg-rose-950 text-rose-300 border border-rose-800">
+              <span className="text-[10px] sm:text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider bg-rose-950 text-rose-300 border border-rose-800">
                 {hasEnteredOnce ? "⚠️ Fullscreen Mode Interrupted" : "Proctored Exam Verification"}
               </span>
-              <h2 className="text-xl sm:text-2xl font-black text-white mt-3">
+              <h2 className="text-lg sm:text-2xl font-black text-white mt-2.5 sm:mt-3">
                 {hasEnteredOnce ? "Fullscreen Mode Required" : "Enter Secure Exam Room"}
               </h2>
               <p className="text-xs text-slate-300 mt-2 leading-relaxed">
@@ -419,12 +425,12 @@ export default function ExamRoomPage() {
             </div>
 
             {/* Protocol highlights */}
-            <div className="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 text-left text-xs text-slate-300 space-y-2">
-              <div className="flex items-center gap-2 text-rose-400 font-bold text-[11px] uppercase tracking-wider">
+            <div className="p-3.5 sm:p-4 bg-slate-950/80 rounded-2xl border border-slate-800 text-left text-xs text-slate-300 space-y-2">
+              <div className="flex items-center gap-2 text-rose-400 font-bold text-[10px] sm:text-[11px] uppercase tracking-wider">
                 <ShieldAlert className="w-4 h-4 shrink-0" />
                 <span>Strict Examination Protocols:</span>
               </div>
-              <ul className="text-[11px] text-slate-400 space-y-1.5 list-disc list-inside">
+              <ul className="text-[10px] sm:text-[11px] text-slate-400 space-y-1.5 list-disc list-inside">
                 <li><strong className="text-slate-200">Fullscreen Locked:</strong> Exiting fullscreen logs an academic infraction strike.</li>
                 <li><strong className="text-slate-200">Navigation Blocked:</strong> Back/Forward, Tab closing, and Reload are locked until submission.</li>
                 <li><strong className="text-slate-200">Evaluation:</strong> Responses are securely evaluated and submitted upon completion.</li>
@@ -436,9 +442,9 @@ export default function ExamRoomPage() {
                 await requestFullScreen();
                 setHasEnteredOnce(true);
               }}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white font-black text-xs sm:text-sm tracking-wide shadow-xl shadow-rose-950/60 flex items-center justify-center gap-2 cursor-pointer transition-all transform hover:scale-[1.01]"
+              className="w-full py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white font-black text-xs sm:text-sm tracking-wide shadow-xl shadow-rose-950/60 flex items-center justify-center gap-2 cursor-pointer transition-all transform hover:scale-[1.01]"
             >
-              <Maximize2 className="w-5 h-5" />
+              <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5" />
               {hasEnteredOnce ? "Restore Fullscreen Mode & Resume" : "Enter Fullscreen Mode & Begin Exam"}
             </button>
           </div>
@@ -470,39 +476,39 @@ export default function ExamRoomPage() {
       )}
 
       {/* Top Security & Countdown Navigation Bar */}
-      <header className="sticky top-0 z-50 bg-slate-900/95 border-b border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="relative w-8 h-8 rounded-full overflow-hidden border border-slate-700 shrink-0 bg-slate-900">
+      <header className="sticky top-0 z-50 bg-slate-900/95 border-b border-slate-800 px-3 sm:px-6 py-2.5 sm:py-3 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 sm:gap-4 backdrop-blur-md">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-slate-700 shrink-0 bg-slate-900">
             <img
               src="/logo.png"
               alt="RIT Japanese Portal Logo"
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 proctor-active-pulse"></span>
-            <span className="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1">
-              <ShieldAlert className="w-4 h-4" />
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="w-2 h-2 rounded-full bg-rose-500 proctor-active-pulse shrink-0"></span>
+            <span className="text-[11px] sm:text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1 whitespace-nowrap">
+              <ShieldAlert className="w-3.5 h-3.5" />
               Proctor Engine Active
             </span>
           </div>
 
           <span className="hidden md:inline text-xs text-slate-500">|</span>
-          <span className="hidden md:inline text-xs font-semibold text-slate-300">
+          <span className="hidden md:inline text-xs font-semibold text-slate-300 truncate max-w-[200px]">
             {sessionData?.exam.title} ({sessionData?.exam.courseLevel})
           </span>
         </div>
 
         {/* Countdown Timer with Hard Server Sync */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <div
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border font-mono font-bold text-sm ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl border font-mono font-bold text-xs sm:text-sm ${
               remainingTime <= 300
                 ? "bg-rose-950/70 border-rose-500 text-rose-300 animate-pulse"
                 : "bg-slate-950 border-slate-800 text-white"
             }`}
           >
-            <Clock className="w-4 h-4 text-rose-500" />
+            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-500" />
             <span>{formatRemaining(remainingTime)}</span>
           </div>
 
@@ -510,22 +516,22 @@ export default function ExamRoomPage() {
           {!isFullscreen && (
             <button
               onClick={requestFullScreen}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition-colors animate-bounce"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] sm:text-xs font-bold hover:bg-amber-500/30 transition-colors animate-bounce"
             >
               <Maximize2 className="w-3.5 h-3.5" />
-              Lock Fullscreen
+              <span className="hidden xs:inline">Lock </span>Fullscreen
             </button>
           )}
 
           {/* Infraction Counter Badge */}
           <div
-            className={`px-3 py-1 rounded-xl text-xs font-bold border ${
+            className={`px-2.5 sm:px-3 py-1 rounded-xl text-[11px] sm:text-xs font-bold border font-mono ${
               violationCount > 0
                 ? "bg-rose-950 text-rose-300 border-rose-700"
                 : "bg-slate-950 text-slate-400 border-slate-800"
             }`}
           >
-            Infractions: {violationCount}/3
+            <span className="hidden xs:inline">Strikes: </span>{violationCount}/3
           </div>
         </div>
       </header>
@@ -611,7 +617,7 @@ export default function ExamRoomPage() {
                     rows={6}
                     value={answers[currentQuestion.id] || ""}
                     onChange={(e) => handleSelectAnswer(currentQuestion.id, e.target.value)}
-                    placeholder="Enter your response in Japanese (日本語で回答してください)..."
+                    placeholder="Type your response here..."
                     className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-sm text-slate-200 focus:outline-none focus:border-rose-500 font-mono"
                   ></textarea>
                 </div>

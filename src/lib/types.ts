@@ -1,6 +1,7 @@
 export type Role = "ADMIN" | "STUDENT";
 export type CourseLevel = "N1" | "N2" | "N3" | "N4" | "N5";
 export type AttendanceStatus = "PRESENT" | "ABSENT" | "ON_LEAVE";
+export type DeviceType = "MOBILE" | "DESKTOP";
 
 export interface UserSession {
   id: string;
@@ -11,6 +12,7 @@ export interface UserSession {
   section: string;
   phone?: string | null;
   avatarUrl?: string | null;
+  deviceSessionId?: string | null;
 }
 
 export interface ProctoringRules {
@@ -39,6 +41,7 @@ export interface ExamWithQuestions {
   totalMarks: number;
   passingMarks: number;
   isPublished: boolean;
+  isAiGenerated?: boolean;
   proctoringRules?: ProctoringRules | null;
   questions: {
     id: string;
@@ -47,6 +50,7 @@ export interface ExamWithQuestions {
     options: string[];
     marks: number;
     orderIndex: number;
+    explanation?: string | null;
   }[];
 }
 
@@ -86,13 +90,28 @@ export interface FormQuestion {
   questionText: string;
   questionType: "MCQ" | "SHORT_ANSWER";
   options: string[];
-  correctOption: number;
+  correctOption?: number;
   marks: number;
+  explanation?: string;
 }
 
 export interface FormAssignmentData {
-  formType: "GOOGLE_FORM";
+  formType: string;
   instructions?: string;
+  totalMarks?: number;
   questions: FormQuestion[];
 }
 
+export interface ChapterResource {
+  name: string;
+  url: string;
+  size?: string;
+}
+
+export interface ChapterQuizQuestion {
+  id: string;
+  questionText: string;
+  options: string[];
+  correctOption: number;
+  explanation?: string;
+}

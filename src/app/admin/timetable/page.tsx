@@ -190,7 +190,7 @@ export default function AdminTimetablePage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-semibold border border-blue-500/30">
-                時間割編成・Master Scheduler
+                Master Scheduler
               </span>
               <span className="text-xs text-slate-400">AM / PM Hourly Schedule Editor</span>
             </div>
@@ -273,12 +273,12 @@ export default function AdminTimetablePage() {
                       onChange={(e) => setEditDay(parseInt(e.target.value, 10))}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-orange-500"
                     >
-                      <option value={1}>Monday (月曜日)</option>
-                      <option value={2}>Tuesday (火曜日)</option>
-                      <option value={3}>Wednesday (水曜日)</option>
-                      <option value={4}>Thursday (木曜日)</option>
-                      <option value={5}>Friday (金曜日)</option>
-                      <option value={6}>Saturday (土曜日)</option>
+                      <option value={1}>Monday</option>
+                      <option value={2}>Tuesday</option>
+                      <option value={3}>Wednesday</option>
+                      <option value={4}>Thursday</option>
+                      <option value={5}>Friday</option>
+                      <option value={6}>Saturday</option>
                     </select>
                   </div>
 
@@ -354,7 +354,7 @@ export default function AdminTimetablePage() {
                     required
                     value={editSubject}
                     onChange={(e) => setEditSubject(e.target.value)}
-                    placeholder="e.g. Kanji Mastery, Bunpou Dokkai, Choukai Drills"
+                    placeholder="e.g. Kanji Practice, Grammar & Reading, Listening Drills"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-orange-500"
                   />
                 </div>
@@ -449,12 +449,12 @@ export default function AdminTimetablePage() {
                       onChange={(e) => setFormDay(parseInt(e.target.value, 10))}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-orange-500"
                     >
-                      <option value={1}>Monday (月曜日)</option>
-                      <option value={2}>Tuesday (火曜日)</option>
-                      <option value={3}>Wednesday (水曜日)</option>
-                      <option value={4}>Thursday (木曜日)</option>
-                      <option value={5}>Friday (金曜日)</option>
-                      <option value={6}>Saturday (土曜日)</option>
+                      <option value={1}>Monday</option>
+                      <option value={2}>Tuesday</option>
+                      <option value={3}>Wednesday</option>
+                      <option value={4}>Thursday</option>
+                      <option value={5}>Friday</option>
+                      <option value={6}>Saturday</option>
                     </select>
                   </div>
 
@@ -523,7 +523,7 @@ export default function AdminTimetablePage() {
                     required
                     value={formSubject}
                     onChange={(e) => setFormSubject(e.target.value)}
-                    placeholder="e.g. Kanji Mastery, Bunpou Dokkai, Choukai Drills"
+                    placeholder="e.g. Kanji Practice, Grammar & Reading, Listening Drills"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-orange-500"
                   />
                 </div>

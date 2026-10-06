@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { verifyPassword, createSessionToken } from "@/lib/auth";
 import { Role, CourseLevel } from "@/lib/types";
+import { detectDeviceType, extractClientIp } from "@/lib/device";
+import { randomUUID } from "crypto";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +14,7 @@ export async function POST(request: NextRequest) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: "Email and password are required" },
+        { error: "Email and password are required." },
         { status: 400 }
       );
     }
@@ -23,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: "Invalid email or password" },
+        { error: "Invalid email or password." },
         { status: 401 }
       );
     }
@@ -31,9 +33,52 @@ export async function POST(request: NextRequest) {
     const isValid = await verifyPassword(password, user.passwordHash);
     if (!isValid) {
       return NextResponse.json(
-        { error: "Invalid email or password" },
+        { error: "Invalid email or password." },
         { status: 401 }
       );
+    }
+
+    // Client Telemetry & Device Classification
+    const userAgent = request.headers.get("user-agent") || "Unknown Device";
+    const ipAddress = extractClientIp(request);
+    const deviceType = detectDeviceType(userAgent);
+
+    let createdDeviceSessionId: string | null = null;
+
+    // Strict Device Concurrency Enforcement for STUDENTS
+    if (user.role === "STUDENT") {
+      // Find existing active sessions for this deviceType
+      const existingDeviceSessions = await prisma.deviceSession.findMany({
+        where: {
+          userId: user.id,
+          deviceType: deviceType,
+        },
+      });
+
+      // Max 1 MOBILE and 1 DESKTOP concurrently
+      if (existingDeviceSessions.length >= 1) {
+        return NextResponse.json(
+          {
+            error: `Device limit reached. You already have an active ${deviceType} session registered. Contact an administrator to de-authorize an existing device.`,
+            deviceType: deviceType,
+            conflict: true,
+          },
+          { status: 403 }
+        );
+      }
+
+      // Register new DeviceSession
+      const deviceSession = await prisma.deviceSession.create({
+        data: {
+          userId: user.id,
+          deviceType: deviceType,
+          userAgent: userAgent.slice(0, 500),
+          ipAddress: ipAddress,
+          sessionToken: randomUUID(),
+          lastActive: new Date(),
+        },
+      });
+      createdDeviceSessionId = deviceSession.id;
     }
 
     const sessionPayload = {
@@ -45,6 +90,7 @@ export async function POST(request: NextRequest) {
       section: user.section,
       phone: user.phone,
       avatarUrl: user.avatarUrl,
+      deviceSessionId: createdDeviceSessionId,
     };
 
     const token = await createSessionToken(sessionPayload);

@@ -43,7 +43,7 @@ export default async function StudentTimetablePage() {
         <div className="mb-6">
           <div className="flex items-center gap-2">
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-semibold border border-blue-500/30">
-              時間割・Syllabus
+              Class Timetable
             </span>
             <span className="text-xs text-orange-400 font-mono font-bold">{batchDisplay}</span>
           </div>

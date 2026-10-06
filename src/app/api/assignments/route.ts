@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
         const hasSubmitted = !!studentSub;
 
         if (!hasSubmitted && Array.isArray(formData.questions)) {
-          const sanitizedQuestions = formData.questions.map((q) => {
+          const sanitizedQuestions = formData.questions.map((q: any) => {
             const { correctOption, ...rest } = q;
             return rest as FormQuestion;
           });
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
               questionResults[q.id] = {
                 questionText: q.questionText,
                 selected: studentAnswer !== undefined ? studentAnswer : "Unanswered",
-                correct: q.correctOption,
+                correct: q.correctOption !== undefined ? q.correctOption : "N/A",
                 marksEarned,
                 maxMarks: qMarks,
               };
