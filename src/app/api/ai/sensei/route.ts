@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     const studentLevel = session.courseLevel || "N5";
 
-    // Build System Persona Prompt strictly adhering to Sensei AI specifications
+    // Build System Persona Prompt strictly adhering to Sensei AI specifications with MANDATORY mistake checking
     const systemInstruction = `You are "Sensei AI", a modern, friendly, and patient Japanese Language Sensei designed for college students. You operate as both an interactive conversation partner and an active vocabulary coach.
 
 Your primary goals:
@@ -31,17 +31,28 @@ Your primary goals:
 2. Build and reinforce practical vocabulary (JLPT N5 to N3 focus unless directed otherwise. Current student level: JLPT ${studentLevel}).
 3. Teach vocabulary meanings in context whenever unfamiliar words appear.
 4. Provide targeted phonetics, pitch-accent guidance, and pronunciation tips optimized for TTS/Voice output.
+5. ACTIVELY AUDIT AND CORRECT MISTAKES made by the student.
 
-# Interaction Mode & Tone
-- Vibe: Encouraging, modern, collegiate, and immersive. Think of a supportive language exchange partner meets an intuitive tutor.
-- Language Balance:
-  - Keep conversational immersion primarily in Japanese.
-  - Provide English translations, explanations, and furigana/romaji support to eliminate friction.
-  - Automatically adapt complexity based on the student's observed skill level (JLPT ${studentLevel}).
+# MANDATORY REAL-TIME MISTAKE AUDITING & CORRECTION
+Listen carefully to the student's input (whether typed or spoken via voice recognition). Check for:
+- Particle misplacement (e.g. using を with 好き/上手/下手 instead of が, or using で instead of に/へ for movement, or に instead of で for actions).
+- Conjugation and tense mistakes (e.g., incorrect te-form, incorrect negative, mixing plain and polite).
+- Awkward phrasing or direct English-to-Japanese literal translation tropes.
 
-# Core Response Structure
-Format EVERY response using the following 3 distinct blocks:
+CORRECTION RULE:
+- IF ANY MISTAKE OR UNNATURAL PHRASING IS DETECTED:
+  You MUST prepend your response with this distinct correction block BEFORE the conversation blocks:
 
+  💡 文法・表現の訂正 (Correction & Tip):
+  - **元の文 (Your Sentence):** "[quoted student text with the error highlighted]"
+  - **自然な表現 (Corrected):** "[clean, natural Japanese phrasing with furigana/romaji]"
+  - **解説 (Explanation):** [Concise, encouraging explanation in English of why this change is needed and the underlying grammar rule.]
+
+- IF THE STUDENT'S SENTENCE IS COMPLETELY ACCURATE & NATURAL:
+  Prepend with a brief positive recognition:
+  ✨ **自然な日本語です！ (Very natural Japanese phrasing!)**
+
+# Core Response Structure (Always Include All 3 Blocks)
 ### 1. 💬 Conversation (Voice Output Focus)
 - Respond naturally to what the student said in Japanese.
 - Include Hiragana/Katakana + Kanji, followed by Romaji, and the English translation.
@@ -58,10 +69,6 @@ Give actionable accent and pronunciation guidance for one highlighted word or ph
 - **Pitch Accent / Rhythm:** Indicate high/low tone shifts or mora count (e.g., *nihongo* is *Heiban/flat* [low-high-high-high], *taberu* drops on *be* [Nakadaka]).
 - **Mouth / Tongue Position:** Practical phonetic tips (e.g., Japanese "r" is a light tap against the alveolar ridge, not a rolled English "r"; clean short vowels without diphthong glides).
 
-# Real-Time Corrections
-- If the student makes a grammatical or phrasing mistake, do not shame them. Gently restate the corrected version naturally under a quick \`💡 Quick Tip:\` line BEFORE the blocks, explain why concisely, then continue the dialogue.
-- If the student explicitly asks "What does [word] mean?", "@explain [word]", or "How do I pronounce [word]?", switch immediately to full breakdown mode with sample sentences and pitch-accent markers while retaining the 3-block structure.
-
 # Formatting Guidelines
 - Use bolding for new vocabulary words.
 - Keep audio-facing sentences under 25 words per turn.`;
@@ -69,11 +76,33 @@ Give actionable accent and pronunciation guidance for one highlighted word or ph
     const gemini = getGeminiClient();
 
     if (!gemini) {
-      // Deterministic collegiate response fallback implementing the 3-block architecture
+      // Deterministic collegiate response fallback implementing mistake checking and 3-block architecture
       let replyContent = "";
+      const text = message.trim();
+
+      // Heuristic mistake detection for fallback
+      let correctionBlock = "";
+      if (/を\s*好き/i.test(text)) {
+        correctionBlock = `💡 文法・表現の訂正 (Correction & Tip):
+- **元の文 (Your Sentence):** "${text}" (Using を with 好き)
+- **自然な表現 (Corrected):** 「〜**が好き**です」 (*...ga suki desu*)
+- **解説 (Explanation):** In Japanese, 好き (*suki*) is a na-adjective expressing preference, so the target object takes the subject particle **が (ga)** rather than the direct-object particle を (o).\n\n`;
+      } else if (/(学校|東京|日本|駅)\s*で\s*(行く|行きます|いく|いきます)/i.test(text)) {
+        correctionBlock = `💡 文法・表現の訂正 (Correction & Tip):
+- **元の文 (Your Sentence):** "${text}" (Using で for destination)
+- **自然な表現 (Corrected):** 「〜**に行く**」 (*...ni iku*) または 「〜**へ行く**」 (*...e iku*)
+- **解説 (Explanation):** Movement verbs like 行く (*iku* - go) require the destination particle **に (ni)** or **へ (e)**. Particle で (de) is reserved for the means/transport or location where an action takes place.\n\n`;
+      } else if (/食べますでした|行きますでした/i.test(text)) {
+        correctionBlock = `💡 文法・表現の訂正 (Correction & Tip):
+- **元の文 (Your Sentence):** "${text}" (Incorrect past polite form)
+- **自然な表現 (Corrected):** 「**食べました**」 (*tabemashita*) / 「**行きました**」 (*ikimashita*)
+- **解説 (Explanation):** To express past polite affirmative, change the verb ending from *-masu* directly to **-mashita**, not *-masu deshita*.\n\n`;
+      } else if (/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(text)) {
+        correctionBlock = `✨ **自然な日本語です！ (Very natural Japanese phrasing!)**\n\n`;
+      }
 
       if (isExplainCommand && explainTarget) {
-        replyContent = `### 1. 💬 Conversation (Voice Output Focus)
+        replyContent = `${correctionBlock}### 1. 💬 Conversation (Voice Output Focus)
 **${explainTarget}**ですね！とても重要で日常的によく使われる表現です。
 *${explainTarget} desu ne! Totemo juuyou de nichijouteki ni yoku tsukawareru hyougen desu.*
 (Ah, "${explainTarget}"! That is an important and very commonly used expression in daily life.)
@@ -87,8 +116,7 @@ Give actionable accent and pronunciation guidance for one highlighted word or ph
 - **Pitch Accent / Rhythm:** Pronounced with standard Tokyo pitch contour. Ensure each mora receives equal time without rushing.
 - **Mouth / Tongue Position:** Keep vowels clean and un-glided. Release final consonants clearly without swallowing sounds.`;
       } else {
-        const studentQuery = message.trim();
-        replyContent = `### 1. 💬 Conversation (Voice Output Focus)
+        replyContent = `${correctionBlock}### 1. 💬 Conversation (Voice Output Focus)
 こんにちは、${session.name}さん！今日も一緒に楽しく**日本語**を勉強しましょう。
 *Konnichiwa, ${session.name}-san! Kyou mo issho ni tanoshiku nihongo o benkyou shimashou.*
 (Hello, ${session.name}! Let's enjoy studying Japanese together again today.)
