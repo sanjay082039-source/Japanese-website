@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+import { UserSession } from "@/lib/types";
 import {
   MessageSquare,
   X,
@@ -39,10 +41,15 @@ const QUICK_CHIPS = [
 ];
 
 export default function ChatbotWidget() {
+  const pathname = usePathname();
+  const [user, setUser] = useState<UserSession | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+
 
   // Bilingual Display Toggles
   const [showFurigana, setShowFurigana] = useState(true);
@@ -116,6 +123,31 @@ export default function ChatbotWidget() {
       }
     }
   }, []);
+
+  // Check user authentication session on mount and route changes
+  useEffect(() => {
+    let isMounted = true;
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) setUser(data.user);
+        } else {
+          if (isMounted) setUser(null);
+        }
+      } catch {
+        if (isMounted) setUser(null);
+      } finally {
+        if (isMounted) setAuthChecked(true);
+      }
+    }
+    checkAuth();
+    return () => {
+      isMounted = false;
+    };
+  }, [pathname]);
+
 
   // Save to Session Storage
   useEffect(() => {
@@ -382,6 +414,11 @@ Click any quick-action chip below or ask your own question in English or Japanes
     return text;
   };
 
+  // Only render the chatbot widget when the student or staff is logged in and not on /login
+  if (!user || pathname === "/login") {
+    return null;
+  }
+
   return (
     <>
       {/* Floating Bottom-Right Launcher Button */}
@@ -438,7 +475,9 @@ Click any quick-action chip below or ask your own question in English or Japanes
                     Online
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400">RIT Japanese Course Tutor (N5–N4)</p>
+                <p className="text-[10px] text-slate-400">
+                  {user.name} • {user.courseLevel ? `JLPT ${user.courseLevel} Track` : "RIT Japanese Tutor"}
+                </p>
               </div>
             </div>
 
