@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
         include: {
           deviceSessions: true,
           biometricCredentials: true,
-          attendances: { orderBy: { date: "desc" } },
+          attendances: { include: { session: true }, orderBy: { timestamp: "desc" } },
           examAttempts: { include: { exam: true }, orderBy: { startedAt: "desc" } },
           assignmentSubmissions: { include: { assignment: true }, orderBy: { submittedAt: "desc" } },
           chapterProgresses: { include: { chapter: true } },
@@ -53,19 +53,21 @@ export async function GET(request: NextRequest) {
       // Sheet 2: Attendance Ledger
       const attSheet = workbook.addWorksheet("Attendance Logs");
       attSheet.columns = [
-        { header: "Date", key: "date", width: 15 },
-        { header: "Hour Slot", key: "hourSlot", width: 22 },
-        { header: "Subject", key: "subject", width: 25 },
-        { header: "Status", key: "status", width: 15 },
-        { header: "Biometric Verified", key: "bio", width: 20 },
+        { header: "Timestamp", key: "timestamp", width: 22 },
+        { header: "Course Code", key: "courseCode", width: 16 },
+        { header: "Course Name", key: "courseName", width: 28 },
+        { header: "Distance (m)", key: "distance", width: 15 },
+        { header: "Device Signature", key: "device", width: 22 },
+        { header: "Status", key: "status", width: 25 },
       ];
       student.attendances.forEach((a) => {
         attSheet.addRow({
-          date: new Date(a.date).toLocaleDateString(),
-          hourSlot: a.hourSlot,
-          subject: a.subject || "Japanese Language",
-          status: a.status,
-          bio: a.verifiedByBiometric ? "VERIFIED (Touch ID/Hello)" : "Manual / Standard",
+          timestamp: new Date(a.timestamp).toLocaleString(),
+          courseCode: a.session?.courseCode || "JLPT",
+          courseName: a.session?.courseName || "Japanese Lecture",
+          distance: `${(a.distanceMeters || 0).toFixed(1)}m`,
+          device: (a.deviceHash || "").slice(0, 12),
+          status: "VERIFIED (GPS + Hardware Lock)",
         });
       });
 
@@ -113,6 +115,8 @@ export async function GET(request: NextRequest) {
       orderBy: [{ courseLevel: "asc" }, { name: "asc" }],
     });
 
+    const totalSessions = await prisma.courseSession.count();
+
     const sheet = workbook.addWorksheet("Cohort Directory");
     sheet.columns = [
       { header: "Student Name", key: "name", width: 25 },
@@ -126,8 +130,8 @@ export async function GET(request: NextRequest) {
     ];
 
     students.forEach((s) => {
-      const totalAtt = s.attendances.length;
-      const present = s.attendances.filter((a) => a.status === "PRESENT").length;
+      const totalAtt = totalSessions;
+      const present = s.attendances.length;
       const rate = totalAtt > 0 ? ((present / totalAtt) * 100).toFixed(1) + "%" : "100%";
       const infractions = s.examAttempts.reduce((acc, a) => acc + a.cheatCount, 0);
 

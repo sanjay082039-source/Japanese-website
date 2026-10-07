@@ -38,14 +38,16 @@ export default async function AdminDashboardPage() {
     include: { exam: true, student: true },
   });
 
-  // 2. Platform Overall Progress Averages (Regular System Attendance Only - Offline Attendance is excluded from Overview)
-  const allAttendances = await prisma.attendance.findMany({
-    where: { isOffline: false },
-  });
-  const totalAttendanceHours = allAttendances.length;
-  const totalPresentHours = allAttendances.filter((a) => a.status === "PRESENT").length;
+  // 2. Platform Overall Progress Averages
+  const totalSessions = await prisma.courseSession.count();
+  const totalStudentsCount = Math.max(1, totalStudents);
+  const totalPossibleAttendances = totalSessions * totalStudentsCount;
+  const allAttendances = await prisma.attendance.findMany();
+  const totalPresentHours = allAttendances.length;
   const overallAttendanceRate =
-    totalAttendanceHours > 0 ? Number(((totalPresentHours / totalAttendanceHours) * 100).toFixed(1)) : 100;
+    totalPossibleAttendances > 0
+      ? Math.min(100, Number(((totalPresentHours / totalPossibleAttendances) * 100).toFixed(1)))
+      : 100;
 
   // Average Exam Score %
   const gradedAttempts = allAttempts.filter((a) => a.score !== null);
@@ -80,9 +82,7 @@ export default async function AdminDashboardPage() {
       const studentsInLevel = await prisma.user.findMany({
         where: { role: "STUDENT", courseLevel: level },
         include: {
-          attendances: {
-            where: { isOffline: false }, // Exclude offline attendance from overview tier matrix
-          },
+          attendances: true,
           examAttempts: { include: { exam: true } },
           assignmentSubmissions: true,
         },
@@ -90,14 +90,13 @@ export default async function AdminDashboardPage() {
 
       const count = studentsInLevel.length;
 
-      // Tier attendance average (online only for overview)
+      // Tier attendance average
       let tierPresent = 0;
-      let tierTotalHours = 0;
       studentsInLevel.forEach((s) => {
-        tierTotalHours += s.attendances.length;
-        tierPresent += s.attendances.filter((a) => a.status === "PRESENT").length;
+        tierPresent += s.attendances.length;
       });
-      const avgAttendance = tierTotalHours > 0 ? Number(((tierPresent / tierTotalHours) * 100).toFixed(1)) : 100;
+      const tierPossible = Math.max(1, totalSessions * count);
+      const avgAttendance = count > 0 ? Math.min(100, Number(((tierPresent / tierPossible) * 100).toFixed(1))) : 100;
 
       // Tier exam average
       let examScoreSum = 0;
@@ -122,11 +121,9 @@ export default async function AdminDashboardPage() {
       });
       const assignmentRate = expectedSubs > 0 ? Number(((actualSubs / expectedSubs) * 100).toFixed(1)) : 0;
 
-      // Eligible student count (attendance >= 75% and avg exam >= 50%)
+      // Eligible student count (attendance >= 75%)
       const eligibleStudents = studentsInLevel.filter((s) => {
-        const studentTotal = s.attendances.length;
-        const studentPres = s.attendances.filter((a) => a.status === "PRESENT").length;
-        const studentRate = studentTotal > 0 ? (studentPres / studentTotal) * 100 : 100;
+        const studentRate = totalSessions > 0 ? (s.attendances.length / totalSessions) * 100 : 100;
         return studentRate >= 75;
       }).length;
 
@@ -149,28 +146,24 @@ export default async function AdminDashboardPage() {
     })
   );
 
-  // 4. Enrolled Students with Live Online Attendance (Overview Page Excludes Offline Attendance)
+  // 4. Enrolled Students with Live Online Attendance
   const enrolledStudents = await prisma.user.findMany({
     where: { role: "STUDENT" },
     take: 12,
     orderBy: { createdAt: "desc" },
     include: {
-      attendances: {
-        where: { isOffline: false }, // Exclude offline attendance from overview page
-      },
+      attendances: true,
     },
   });
 
-  // 5. Recent Exam Attempts with Student Attendance (Overview Page Excludes Offline Attendance)
+  // 5. Recent Exam Attempts with Student Attendance
   const recentAttempts = await prisma.examAttempt.findMany({
     take: 8,
     orderBy: { createdAt: "desc" },
     include: {
       student: {
         include: {
-          attendances: {
-            where: { isOffline: false }, // Exclude offline attendance from overview page
-          },
+          attendances: true,
         },
       },
       exam: true,
@@ -316,7 +309,7 @@ export default async function AdminDashboardPage() {
                 ></div>
               </div>
               <p className="text-[11px] text-slate-500">
-                Based on {totalAttendanceHours} total classroom session logs
+                Based on {allAttendances.length} verified attendance check-ins
               </p>
             </div>
 
@@ -526,8 +519,8 @@ export default async function AdminDashboardPage() {
                   </tr>
                 ) : (
                   recentAttempts.map((att) => {
-                    const totalAtt = att.student.attendances?.length || 0;
-                    const presAtt = att.student.attendances?.filter((a) => a.status === "PRESENT").length || 0;
+                    const totalAtt = totalSessions;
+                    const presAtt = att.student.attendances?.length || 0;
                     const attRate = totalAtt > 0 ? Math.round((presAtt / totalAtt) * 100) : 100;
 
                     return (
@@ -632,8 +625,8 @@ export default async function AdminDashboardPage() {
               </thead>
               <tbody className="divide-y divide-slate-800 text-slate-300">
                 {enrolledStudents.map((s) => {
-                  const totalHours = s.attendances.length;
-                  const presentHours = s.attendances.filter((a) => a.status === "PRESENT").length;
+                  const totalHours = totalSessions;
+                  const presentHours = s.attendances.length;
                   const rate = totalHours > 0 ? Number(((presentHours / totalHours) * 100).toFixed(1)) : 100;
                   const isEligible = rate >= 75;
 

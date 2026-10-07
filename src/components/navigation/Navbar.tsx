@@ -21,6 +21,7 @@ import {
   Video,
   Fingerprint,
   Sparkles,
+  QrCode,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -117,9 +118,15 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
       icon: Video,
     },
     {
+      href: "/student/scan",
+      label: "QR Attendance Scanner",
+      description: "Scan classroom dynamic QR with GPS lock",
+      icon: QrCode,
+    },
+    {
       href: "/student/attendance",
-      label: "Attendance & Biometrics",
-      description: "Hour-by-hour logs & WebAuthn enrollment",
+      label: "Attendance Ledger",
+      description: "Verified session logs & geofence audit",
       icon: Clock,
       badge: attendanceRate !== null ? `${attendanceRate}%` : undefined,
       badgeColor: attendanceRate !== null && attendanceRate >= 75 ? "emerald" : "amber",
@@ -153,9 +160,9 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
     },
     {
       href: "/admin/attendance",
-      label: "Live Kiosk & Attendance",
-      description: "Open/close class & biometric reader",
-      icon: Fingerprint,
+      label: "QR Sessions & Attendance",
+      description: "Projector dynamic QR, live kiosk & override",
+      icon: QrCode,
       badge: attendanceRate !== null ? `${attendanceRate}%` : undefined,
       badgeColor: attendanceRate !== null && attendanceRate >= 75 ? "emerald" : "amber",
     },

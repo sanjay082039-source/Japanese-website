@@ -22,28 +22,37 @@ export default async function StudentDashboardPage() {
     redirect("/login");
   }
 
-  // 1. Fetch Student Attendance Data (Regular system attendance - offline marks excluded from overview)
+  // 1. Fetch Student Attendance Data
+  const allSessions = await prisma.courseSession.findMany({
+    orderBy: { startTime: "desc" },
+  });
   const attendances = await prisma.attendance.findMany({
-    where: { studentId: session.id, isOffline: false },
-    orderBy: { date: "desc" },
+    where: { studentId: session.id },
+    include: { session: true },
+    orderBy: { timestamp: "desc" },
   });
 
-  const totalClasses = attendances.length;
-  const presentCount = attendances.filter((a) => a.status === "PRESENT").length;
-  const absentCount = attendances.filter((a) => a.status === "ABSENT").length;
-  const leaveCount = attendances.filter((a) => a.status === "ON_LEAVE").length;
+  const totalClasses = allSessions.length;
+  const presentCount = attendances.length;
+  const absentCount = Math.max(0, totalClasses - presentCount);
+  const leaveCount = 0;
 
   const attendanceRate = totalClasses > 0 ? Number(((presentCount / totalClasses) * 100).toFixed(1)) : 100;
 
-  // Group attendance by subject
+  // Group attendance by subject/course
   const subjectMap: Record<string, { present: number; total: number }> = {};
-  attendances.forEach((a) => {
-    const subj = a.subject || "Japanese Language";
+  allSessions.forEach((s) => {
+    const subj = s.courseName || s.courseCode || "Japanese Language";
     if (!subjectMap[subj]) {
       subjectMap[subj] = { present: 0, total: 0 };
     }
     subjectMap[subj].total += 1;
-    if (a.status === "PRESENT") subjectMap[subj].present += 1;
+  });
+  attendances.forEach((a) => {
+    const subj = a.session?.courseName || a.session?.courseCode || "Japanese Language";
+    if (subjectMap[subj]) {
+      subjectMap[subj].present += 1;
+    }
   });
 
   // 2. Fetch Active & Upcoming Exams for Student's Level

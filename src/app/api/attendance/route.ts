@@ -12,195 +12,124 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const studentIdParam = searchParams.get("studentId");
     const mode = searchParams.get("mode");
 
     // =========================================================================
-    // MODE 1: DAILY ATTENDANCE SHEET FOR CLASS / BATCH
+    // ADMIN COHORT & SESSION MANAGEMENT
     // =========================================================================
-    if (session.role === "ADMIN" && mode === "dailySheet") {
-      const dateStr = searchParams.get("date") || new Date().toISOString().split("T")[0];
-      const courseLevel = searchParams.get("courseLevel") || "N3";
-      const section = searchParams.get("section");
-      const hourSlot = searchParams.get("hourSlot") || "09:00 AM - 10:00 AM";
+    if (session.role === "ADMIN") {
+      // 1. Sessions List Mode
+      if (mode === "sessions" || !mode) {
+        const sessions = await prisma.courseSession.findMany({
+          orderBy: { startTime: "desc" },
+          include: {
+            _count: { select: { attendances: true } },
+            faculty: { select: { id: true, name: true, email: true } },
+          },
+          take: 50,
+        });
 
-      const studentWhere: any = { role: "STUDENT", courseLevel };
-      if (section && section !== "ALL") {
-        studentWhere.section = section;
+        const totalStudents = await prisma.user.count({ where: { role: "STUDENT" } });
+        const totalCheckins = await prisma.attendance.count();
+        const totalSessions = sessions.length;
+
+        const overallRate =
+          totalSessions > 0 && totalStudents > 0
+            ? Number(((totalCheckins / (totalSessions * totalStudents)) * 100).toFixed(1))
+            : 85.0;
+
+        return NextResponse.json({
+          overallRate,
+          totalSessions,
+          totalCheckins,
+          totalStudents,
+          sessions,
+        });
       }
 
-      const students = await prisma.user.findMany({
-        where: studentWhere,
-        orderBy: [{ section: "asc" }, { name: "asc" }],
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          courseLevel: true,
-          section: true,
-        },
-      });
-
-      // Find existing records for this day & hour slot
-      const startOfDay = new Date(`${dateStr}T00:00:00.000Z`);
-      const endOfDay = new Date(`${dateStr}T23:59:59.999Z`);
-
-      const existingRecords = await prisma.attendance.findMany({
-        where: {
-          hourSlot,
-          date: { gte: startOfDay, lte: endOfDay },
-          studentId: { in: students.map((s) => s.id) },
-        },
-      });
-
-      return NextResponse.json({
-        students,
-        existingRecords,
-        date: dateStr,
-        hourSlot,
-        courseLevel,
-        section: section || "ALL",
-      });
-    }
-
-    // =========================================================================
-    // MODE 2: FULL STUDENT ATTENDANCE LEDGER
-    // =========================================================================
-    if (session.role === "ADMIN" && mode === "ledger") {
-      const students = await prisma.user.findMany({
-        where: { role: "STUDENT" },
-        orderBy: [{ courseLevel: "asc" }, { name: "asc" }],
-        include: {
-          attendances: {
-            orderBy: { date: "desc" },
+      // 2. Daily Sheet / Students Roster for Manual Override Modal
+      if (mode === "dailySheet" || mode === "roster") {
+        const students = await prisma.user.findMany({
+          where: { role: "STUDENT" },
+          orderBy: { name: "asc" },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            courseLevel: true,
+            section: true,
           },
-        },
-      });
+        });
 
-      const formatted = students.map((s) => {
-        const total = s.attendances.length;
-        const present = s.attendances.filter((a) => a.status === "PRESENT").length;
-        const absent = s.attendances.filter((a) => a.status === "ABSENT").length;
-        const onLeave = s.attendances.filter((a) => a.status === "ON_LEAVE").length;
-        const overallRate = total > 0 ? Number(((present / total) * 100).toFixed(1)) : 100;
+        return NextResponse.json({ students });
+      }
 
-        return {
-          id: s.id,
-          name: s.name,
-          email: s.email,
-          courseLevel: s.courseLevel,
-          section: s.section,
-          totalHours: total,
-          presentHours: present,
-          absentHours: absent,
-          leaveHours: onLeave,
-          overallRate,
-          recentLogs: s.attendances.slice(0, 5),
-        };
-      });
+      // 3. Detailed Anti-Fraud Audit Logs
+      if (mode === "logs") {
+        const logs = await prisma.attendance.findMany({
+          orderBy: { timestamp: "desc" },
+          take: 100,
+          include: {
+            session: {
+              select: {
+                id: true,
+                courseCode: true,
+                courseName: true,
+                radiusMeters: true,
+              },
+            },
+          },
+        });
 
-      return NextResponse.json({ students: formatted });
+        return NextResponse.json({ logs });
+      }
     }
 
     // =========================================================================
-    // MODE 3: DETAILED ATTENDANCE LOGS HISTORY
+    // STUDENT VIEW: INDIVIDUAL ATTENDANCE LEDGER & AUDIT LOGS
     // =========================================================================
-    if (session.role === "ADMIN" && mode === "logs") {
-      const logs = await prisma.attendance.findMany({
-        orderBy: { date: "desc" },
-        take: 200,
+    const studentId = session.id;
+
+    const [studentAttendances, totalSessions] = await Promise.all([
+      prisma.attendance.findMany({
+        where: { studentId },
+        orderBy: { timestamp: "desc" },
         include: {
-          student: {
+          session: {
             select: {
               id: true,
-              name: true,
-              email: true,
-              courseLevel: true,
-              section: true,
+              courseCode: true,
+              courseName: true,
+              date: true,
+              startTime: true,
+              endTime: true,
+              radiusMeters: true,
             },
           },
         },
-      });
-      return NextResponse.json({ logs });
-    }
+      }),
+      prisma.courseSession.count(),
+    ]);
 
-    // =========================================================================
-    // ADMIN OVERVIEW STATS (FOR OVERVIEW PAGE)
-    // =========================================================================
-    if (session.role === "ADMIN" && !studentIdParam) {
-      const allAttendances = await prisma.attendance.findMany();
-      const totalHours = allAttendances.length;
-      const presentCount = allAttendances.filter((a) => a.status === "PRESENT").length;
-      const absentCount = allAttendances.filter((a) => a.status === "ABSENT").length;
-      const leaveCount = allAttendances.filter((a) => a.status === "ON_LEAVE").length;
-      const overallRate = totalHours > 0 ? Number(((presentCount / totalHours) * 100).toFixed(1)) : 100;
-
-      return NextResponse.json({
-        overallRate,
-        totalHours,
-        presentCount,
-        absentCount,
-        leaveCount,
-        isCohortOverview: true,
-      });
-    }
-
-    // =========================================================================
-    // STUDENT VIEW: INDIVIDUAL ATTENDANCE RECORDS
-    // =========================================================================
-    const targetStudentId =
-      session.role === "STUDENT" ? session.id : studentIdParam || session.id;
-
-    const attendances = await prisma.attendance.findMany({
-      where: { studentId: targetStudentId },
-      orderBy: { date: "desc" },
-    });
-
-    const totalHours = attendances.length;
-    const presentCount = attendances.filter((a) => a.status === "PRESENT").length;
-    const absentCount = attendances.filter((a) => a.status === "ABSENT").length;
-    const leaveCount = attendances.filter((a) => a.status === "ON_LEAVE").length;
-
-    const overallRate = totalHours > 0 ? Number(((presentCount / totalHours) * 100).toFixed(1)) : 0;
-
-    // Subject-wise breakdown
-    const subjectMap: Record<string, { present: number; absent: number; leave: number; total: number }> = {};
-    attendances.forEach((att) => {
-      const subj = att.subject || "General JLPT Class";
-      if (!subjectMap[subj]) {
-        subjectMap[subj] = { present: 0, absent: 0, leave: 0, total: 0 };
-      }
-      subjectMap[subj].total += 1;
-      if (att.status === "PRESENT") subjectMap[subj].present += 1;
-      else if (att.status === "ABSENT") subjectMap[subj].absent += 1;
-      else if (att.status === "ON_LEAVE") subjectMap[subj].leave += 1;
-    });
-
-    const subjectBreakdown = Object.entries(subjectMap).map(([subject, stats]) => ({
-      subject,
-      totalHours: stats.total,
-      present: stats.present,
-      absent: stats.absent,
-      onLeave: stats.leave,
-      rate: Number(((stats.present / stats.total) * 100).toFixed(1)),
-    }));
+    const presentCount = studentAttendances.length;
+    const overallRate =
+      totalSessions > 0
+        ? Number(((presentCount / totalSessions) * 100).toFixed(1))
+        : 100;
 
     return NextResponse.json({
       overallRate,
-      totalHours,
+      totalSessions,
       presentCount,
-      absentCount,
-      leaveCount,
-      subjectBreakdown,
-      logs: attendances,
+      logs: studentAttendances,
     });
-  } catch (error: unknown) {
-    console.error("Attendance fetch error:", error);
-    const message = error instanceof Error ? error.message : "Internal Server Error";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (error: any) {
+    console.error("Attendance API fetch error:", error);
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }
 
+// POST: Faculty Create New Course Session with Geofencing
 export async function POST(request: NextRequest) {
   try {
     const session = await getSessionFromRequest(request);
@@ -209,83 +138,48 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { date, hourSlot, subject, records, studentId, status, remarks } = body;
+    const {
+      courseCode,
+      courseName,
+      targetLatitude,
+      targetLongitude,
+      radiusMeters = 50.0,
+      startTime,
+      endTime,
+    } = body;
 
-    const dateStr = date ? (typeof date === "string" ? date.split("T")[0] : new Date(date).toISOString().split("T")[0]) : new Date().toISOString().split("T")[0];
-    const targetDate = new Date(`${dateStr}T12:00:00.000Z`);
-    const startOfDay = new Date(`${dateStr}T00:00:00.000Z`);
-    const endOfDay = new Date(`${dateStr}T23:59:59.999Z`);
-
-    // Case 1: Bulk Daily Register Submission
-    if (records && Array.isArray(records) && records.length > 0) {
-      if (!hourSlot) {
-        return NextResponse.json({ error: "Hour slot is required" }, { status: 400 });
-      }
-
-      const classSubject = subject || "General Nihongo Session";
-
-      // Process in transaction or parallel upserts
-      const studentIds = records.map((r: any) => r.studentId);
-
-      // Clean existing records for this session slot on this date
-      await prisma.attendance.deleteMany({
-        where: {
-          hourSlot,
-          date: { gte: startOfDay, lte: endOfDay },
-          studentId: { in: studentIds },
-        },
-      });
-
-      // Insert new verified daily records
-      const toCreate = records.map((rec: any) => ({
-        studentId: rec.studentId,
-        date: targetDate,
-        hourSlot,
-        status: rec.status || "PRESENT",
-        subject: classSubject,
-        remarks: rec.remarks || null,
-      }));
-
-      await prisma.attendance.createMany({
-        data: toCreate,
-      });
-
-      return NextResponse.json({
-        success: true,
-        count: toCreate.length,
-        message: `Successfully saved daily attendance for ${toCreate.length} candidate(s).`,
-      });
+    if (!courseCode || targetLatitude == null || targetLongitude == null) {
+      return NextResponse.json(
+        { error: "Missing required parameters (courseCode, targetLatitude, targetLongitude)" },
+        { status: 400 }
+      );
     }
 
-    // Case 2: Single Student Submission
-    if (!studentId || !hourSlot || !status) {
-      return NextResponse.json({ error: "Missing required attendance parameters (studentId, hourSlot, status)" }, { status: 400 });
-    }
+    const now = new Date();
+    const sStart = startTime ? new Date(startTime) : now;
+    const sEnd = endTime ? new Date(endTime) : new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours default
 
-    // Check & replace if existing on same day & slot
-    await prisma.attendance.deleteMany({
-      where: {
-        studentId,
-        hourSlot,
-        date: { gte: startOfDay, lte: endOfDay },
-      },
-    });
-
-    const record = await prisma.attendance.create({
+    const newSession = await prisma.courseSession.create({
       data: {
-        studentId,
-        date: targetDate,
-        hourSlot,
-        status,
-        subject: subject || "General Nihongo Session",
-        remarks: remarks || null,
+        courseCode,
+        courseName: courseName || "Japanese Course Lecture",
+        facultyId: session.id,
+        date: now,
+        startTime: sStart,
+        endTime: sEnd,
+        targetLatitude: Number(targetLatitude),
+        targetLongitude: Number(targetLongitude),
+        radiusMeters: Number(radiusMeters) || 50.0,
       },
     });
 
-    return NextResponse.json({ success: true, count: 1, record });
-  } catch (error: unknown) {
-    console.error("Attendance post error:", error);
-    const message = error instanceof Error ? error.message : "Internal Server Error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({
+      success: true,
+      message: "Course session created successfully.",
+      session: newSession,
+    }, { status: 201 });
+  } catch (error: any) {
+    console.error("Session creation error:", error);
+    return NextResponse.json({ error: error.message || "Failed to create session" }, { status: 500 });
   }
 }

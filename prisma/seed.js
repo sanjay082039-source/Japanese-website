@@ -197,40 +197,108 @@ async function main() {
   }
   console.log("Created master timetable slots for RIT Japanese Portal");
 
-  // 4. Generate Attendance History
-  const pastDays = 14;
-  const hourSlots = ["09:00 - 10:00", "10:00 - 11:00", "11:00 - 12:00", "13:00 - 14:00"];
+  // 4. Generate Course Sessions & Anti-Cheat Attendance Records
+  const campusLat = 35.6895; // Campus classroom latitude
+  const campusLon = 139.6917; // Campus classroom longitude
 
-  for (const student of createdStudents) {
-    for (let d = pastDays; d >= 1; d--) {
-      const date = new Date();
-      date.setDate(date.getDate() - d);
-      if (date.getDay() === 0) continue;
+  // Create today's live active sessions (available for immediate presentation)
+  const today = new Date();
+  const liveStartTime = new Date(today.getTime() - 1 * 60 * 60 * 1000); // started 1 hour ago
+  const liveEndTime = new Date(today.getTime() + 4 * 60 * 60 * 1000); // ends in 4 hours
 
-      for (const slot of hourSlots) {
-        const rand = Math.random();
-        let status = "PRESENT";
-        if (rand > student.targetAttendance) {
-          status = rand > student.targetAttendance + 0.05 ? "ABSENT" : "ON_LEAVE";
-        }
+  const liveSessionN5 = await prisma.courseSession.create({
+    data: {
+      courseCode: "JPN-101",
+      courseName: "Elementary Japanese I (JLPT N5)",
+      facultyId: adminYamamoto.id,
+      date: today,
+      startTime: liveStartTime,
+      endTime: liveEndTime,
+      targetLatitude: campusLat,
+      targetLongitude: campusLon,
+      radiusMeters: 50.0,
+      secretKey: "n5-live-anti-cheat-secret-2026",
+    },
+  });
 
-        const subjList = subjectsByLevel[student.courseLevel];
-        const subject = subjList[Math.floor(Math.random() * subjList.length)];
+  const liveSessionN4 = await prisma.courseSession.create({
+    data: {
+      courseCode: "JPN-201",
+      courseName: "Intermediate Japanese I (JLPT N4)",
+      facultyId: adminYamamoto.id,
+      date: today,
+      startTime: liveStartTime,
+      endTime: liveEndTime,
+      targetLatitude: campusLat,
+      targetLongitude: campusLon,
+      radiusMeters: 50.0,
+      secretKey: "n4-live-anti-cheat-secret-2026",
+    },
+  });
 
+  const liveSessionN3 = await prisma.courseSession.create({
+    data: {
+      courseCode: "JPN-301",
+      courseName: "Advanced Japanese (JLPT N3-N1)",
+      facultyId: adminTanaka.id,
+      date: today,
+      startTime: liveStartTime,
+      endTime: liveEndTime,
+      targetLatitude: campusLat,
+      targetLongitude: campusLon,
+      radiusMeters: 50.0,
+      secretKey: "n3-live-anti-cheat-secret-2026",
+    },
+  });
+
+  // Seed past completed sessions for historical analytics
+  const pastSessions = [liveSessionN5, liveSessionN4, liveSessionN3];
+  for (let d = 5; d >= 1; d--) {
+    const sDate = new Date();
+    sDate.setDate(sDate.getDate() - d);
+    const sStart = new Date(sDate.getTime() - 2 * 60 * 60 * 1000);
+    const sEnd = new Date(sDate.getTime() - 1 * 60 * 60 * 1000);
+
+    const pastSession = await prisma.courseSession.create({
+      data: {
+        courseCode: "JPN-101",
+        courseName: "Elementary Japanese I (JLPT N5)",
+        facultyId: adminYamamoto.id,
+        date: sDate,
+        startTime: sStart,
+        endTime: sEnd,
+        targetLatitude: campusLat,
+        targetLongitude: campusLon,
+        radiusMeters: 50.0,
+        secretKey: `past-session-${d}-secret`,
+      },
+    });
+    pastSessions.push(pastSession);
+  }
+
+  // Record verified attendance check-ins for students across sessions
+  for (const session of pastSessions) {
+    for (const student of createdStudents) {
+      if (Math.random() <= student.targetAttendance) {
+        const offsetLat = (Math.random() - 0.5) * 0.0002; // within ~15m
+        const offsetLon = (Math.random() - 0.5) * 0.0002;
         await prisma.attendance.create({
           data: {
+            sessionId: session.id,
             studentId: student.id,
-            date,
-            hourSlot: slot,
-            status,
-            subject,
-            remarks: status === "ON_LEAVE" ? "Medical Certificate Approved" : undefined,
+            studentName: student.name,
+            timestamp: new Date(session.startTime.getTime() + 5 * 60 * 1000),
+            deviceHash: `device-hw-${student.id.slice(-6)}-${session.id.slice(-4)}`,
+            ipAddress: "192.168.1.105",
+            clientLatitude: session.targetLatitude + offsetLat,
+            clientLongitude: session.targetLongitude + offsetLon,
+            distanceMeters: Math.floor(Math.random() * 25) + 3,
           },
         });
       }
     }
   }
-  console.log("Created attendance records");
+  console.log("Created course sessions and anti-cheat attendance records");
 
   // 5. Create Examinations
   const now = new Date();

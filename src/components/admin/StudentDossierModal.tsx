@@ -156,11 +156,11 @@ export default function StudentDossierModal({
       currentY += 4;
 
       const attendanceRows = (data.attendances || []).slice(0, 15).map((att: any) => [
-        new Date(att.date).toLocaleDateString(),
-        att.hourSlot,
-        att.subject || "Japanese Language",
-        att.status,
-        att.verifiedByBiometric ? "Biometric (FIDO2)" : "Standard",
+        new Date(att.timestamp || att.date || Date.now()).toLocaleDateString(),
+        att.session?.courseCode || "JLPT",
+        att.session?.courseName || "Japanese Language",
+        "Present (Verified)",
+        att.distanceMeters !== undefined ? `${Number(att.distanceMeters).toFixed(1)}m (GPS Lock)` : "Verified",
       ]);
 
       autoTable(doc, {
@@ -493,26 +493,18 @@ export default function StudentDossierModal({
                     {(attendances || []).slice(0, 4).map((att: any) => (
                       <div key={att.id} className="p-2.5 bg-slate-950/70 rounded-xl border border-slate-800/70 flex items-center justify-between">
                         <div>
-                          <span className="font-semibold text-white block">{att.subject || "Japanese Class"}</span>
+                          <span className="font-semibold text-white block">{att.session?.courseName || att.session?.courseCode || "Japanese Class"}</span>
                           <span className="text-[10px] text-slate-400 font-mono">
-                            {new Date(att.date).toLocaleDateString()} • {att.hourSlot}
+                            {new Date(att.timestamp || att.date || Date.now()).toLocaleDateString()} • {new Date(att.timestamp || att.date || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
                         <div className="text-right">
-                          <span
-                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                              att.status === "PRESENT"
-                                ? "bg-emerald-950 text-emerald-300"
-                                : att.status === "ON_LEAVE"
-                                ? "bg-amber-950 text-amber-300"
-                                : "bg-rose-950 text-rose-300"
-                            }`}
-                          >
-                            {att.status}
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">
+                            VERIFIED
                           </span>
-                          {att.verifiedByBiometric && (
-                            <span className="block text-[9px] text-blue-400 mt-0.5">Biometric</span>
-                          )}
+                          <span className="block text-[9px] text-blue-400 font-mono mt-0.5">
+                            {att.distanceMeters !== undefined ? `${Number(att.distanceMeters).toFixed(1)}m` : "GPS Locked"}
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -782,7 +774,7 @@ export default function StudentDossierModal({
                   Total Class Logs: <strong className="text-white">{attendances?.length || 0}</strong>
                 </span>
                 <span className="text-emerald-400 font-bold">
-                  Biometric Verified: {attendances?.filter((a: any) => a.verifiedByBiometric).length || 0}
+                  Verified Check-Ins: {attendances?.length || 0}
                 </span>
               </div>
 
@@ -791,11 +783,11 @@ export default function StudentDossierModal({
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
                       <tr className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
-                        <th className="py-2.5 px-4">Date</th>
-                        <th className="py-2.5 px-4">Hour Slot</th>
-                        <th className="py-2.5 px-4">Subject</th>
+                        <th className="py-2.5 px-4">Date & Time</th>
+                        <th className="py-2.5 px-4">Course Code</th>
+                        <th className="py-2.5 px-4">Course Name</th>
                         <th className="py-2.5 px-4 text-center">Status</th>
-                        <th className="py-2.5 px-4 text-center">Biometric Authenticator</th>
+                        <th className="py-2.5 px-4 text-center">Anti-Cheat Verification</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800 text-slate-300">
@@ -809,32 +801,22 @@ export default function StudentDossierModal({
                         (attendances || []).map((att: any) => (
                           <tr key={att.id} className="hover:bg-slate-800/40">
                             <td className="py-2.5 px-4 font-mono font-medium text-slate-300">
-                              {new Date(att.date).toLocaleDateString()}
+                              {new Date(att.timestamp || att.date || Date.now()).toLocaleDateString()}{" "}
+                              <span className="text-[10px] text-slate-500">
+                                {new Date(att.timestamp || att.date || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
                             </td>
-                            <td className="py-2.5 px-4 font-mono text-slate-400">{att.hourSlot}</td>
-                            <td className="py-2.5 px-4 font-medium text-white">{att.subject || "Japanese Language"}</td>
+                            <td className="py-2.5 px-4 font-mono font-bold text-blue-400">{att.session?.courseCode || "JLPT"}</td>
+                            <td className="py-2.5 px-4 font-medium text-white">{att.session?.courseName || "Japanese Lecture"}</td>
                             <td className="py-2.5 px-4 text-center">
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                  att.status === "PRESENT"
-                                    ? "bg-emerald-950 text-emerald-300 border border-emerald-800"
-                                    : att.status === "ON_LEAVE"
-                                    ? "bg-amber-950 text-amber-300 border border-amber-800"
-                                    : "bg-rose-950 text-rose-300 border border-rose-800"
-                                }`}
-                              >
-                                {att.status}
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">
+                                PRESENT
                               </span>
                             </td>
                             <td className="py-2.5 px-4 text-center">
-                              {att.verifiedByBiometric ? (
-                                <span className="inline-flex items-center gap-1 text-[10px] text-blue-300 font-mono font-bold bg-blue-950/80 px-2 py-0.5 rounded-lg border border-blue-800">
-                                  <Fingerprint className="w-3 h-3 text-blue-400" />
-                                  Touch ID / Hello
-                                </span>
-                              ) : (
-                                <span className="text-[10px] text-slate-500 font-mono">Manual / Ledger</span>
-                              )}
+                              <span className="inline-flex items-center gap-1 text-[10px] text-emerald-300 font-mono font-bold bg-emerald-950/80 px-2 py-0.5 rounded-lg border border-emerald-800">
+                                {att.distanceMeters !== undefined ? `${Number(att.distanceMeters).toFixed(1)}m (GPS & Device)` : "GPS & Device Lock"}
+                              </span>
                             </td>
                           </tr>
                         ))

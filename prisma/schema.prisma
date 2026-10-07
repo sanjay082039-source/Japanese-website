@@ -32,7 +32,7 @@ model User {
   assignmentSubmissions AssignmentSubmission[]
   deviceSessions        DeviceSession[]
   biometricCredentials  BiometricCredential[]
-  openedSessions        LiveClassSession[]     @relation("OpenedClassSessions")
+  conductedSessions     CourseSession[]        @relation("FacultySessions")
   chapterProgresses     ChapterProgress[]
   assignedHomeworks     Assignment[]           @relation("StudentAssignments")
 
@@ -74,51 +74,55 @@ model BiometricCredential {
   @@index([userId])
 }
 
-// Live Class Gating (Strict Admin Gating: Open Class / Close Class)
-model LiveClassSession {
-  id          String   @id @default(cuid())
-  courseLevel String   // "N1", "N2", "N3", "N4", "N5"
-  section     String   @default("A")
-  hourSlot    String   // e.g. "09:00 AM - 10:00 AM"
-  subject     String
-  isOpen      Boolean  @default(true)
-  openedById  String
-  openedAt    DateTime @default(now())
-  closedAt    DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// Course Session for Dynamic Anti-Cheat Attendance
+model CourseSession {
+  id              String       @id @default(cuid())
+  courseCode      String
+  courseName      String?
+  facultyId       String
+  date            DateTime     @default(now())
+  startTime       DateTime
+  endTime         DateTime
+  
+  // Geofence center
+  targetLatitude  Float
+  targetLongitude Float
+  radiusMeters    Float        @default(50.0)
 
-  openedBy    User     @relation("OpenedClassSessions", fields: [openedById], references: [id], onDelete: Cascade)
-  attendances Attendance[]
+  // Rotating salt used to sign dynamic tokens
+  secretKey       String       @default(uuid())
+  
+  attendances     Attendance[]
+  faculty         User?        @relation("FacultySessions", fields: [facultyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
-  @@index([courseLevel, section, isOpen])
-  @@index([isOpen])
+  @@index([facultyId])
+  @@index([courseCode])
 }
 
-// Attendance tracking hour by hour & biometric verification
+// Attendance with anti-fraud audit fields
 model Attendance {
-  id                   String            @id @default(cuid())
-  studentId            String
-  sessionId            String?           // Tied to LiveClassSession if live
-  date                 DateTime
-  hourSlot             String            // e.g. "09:00 - 10:00", "09:00 AM - 10:00 AM"
-  status               String            // "PRESENT", "ABSENT", "ON_LEAVE"
-  subject              String?
-  remarks              String?
-  isOffline            Boolean           @default(false)
-  verifiedByBiometric  Boolean           @default(false)
-  biometricVerifiedAt  DateTime?
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
+  id              String        @id @default(cuid())
+  sessionId       String
+  studentId       String
+  studentName     String?
+  timestamp       DateTime      @default(now())
+  
+  // Anti-fraud audit fields
+  deviceHash      String
+  ipAddress       String
+  clientLatitude  Float
+  clientLongitude Float
+  distanceMeters  Float
 
-  student              User              @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  liveSession          LiveClassSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  session         CourseSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student         User?         @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
-  @@index([studentId])
-  @@index([studentId, date])
-  @@index([date, hourSlot])
+  @@unique([sessionId, studentId])
+  @@unique([sessionId, deviceHash])
   @@index([sessionId])
-  @@index([isOffline])
+  @@index([studentId])
 }
 
 // Hourly Timetable Slot

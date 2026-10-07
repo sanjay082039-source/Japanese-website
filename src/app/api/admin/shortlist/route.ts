@@ -38,15 +38,16 @@ export async function GET(request: NextRequest) {
     });
 
     const totalAssignments = await prisma.assignment.count();
+    const totalSessions = await prisma.courseSession.count();
 
     const formatted = students
       .map((student) => {
-        const totalClasses = student.attendances.length;
-        const presentCount = student.attendances.filter((a) => a.status === "PRESENT").length;
-        const absentCount = student.attendances.filter((a) => a.status === "ABSENT").length;
-        const leaveCount = student.attendances.filter((a) => a.status === "ON_LEAVE").length;
+        const totalClasses = totalSessions;
+        const presentCount = student.attendances.length;
+        const absentCount = Math.max(0, totalClasses - presentCount);
+        const leaveCount = 0;
 
-        const attendanceRate = totalClasses > 0 ? (presentCount / totalClasses) * 100 : 0;
+        const attendanceRate = totalClasses > 0 ? (presentCount / totalClasses) * 100 : 100;
 
         const gradedExams = student.examAttempts.filter((a) => a.score !== null);
         const totalExamScore = gradedExams.reduce((sum, curr) => sum + (curr.score || 0), 0);

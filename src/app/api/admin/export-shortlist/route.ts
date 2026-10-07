@@ -55,22 +55,17 @@ export async function GET(request: NextRequest) {
     const totalAssignmentsCount = await prisma.assignment.count({
       where: courseLevel && courseLevel !== "ALL" ? { courseLevel } : {},
     });
+    const totalSessions = await prisma.courseSession.count();
 
     const shortlistedStudents = students
       .map((student) => {
-        const totalClasses = student.attendances.length;
-        const presentCount = student.attendances.filter(
-          (a) => a.status === "PRESENT"
-        ).length;
-        const absentCount = student.attendances.filter(
-          (a) => a.status === "ABSENT"
-        ).length;
-        const leaveCount = student.attendances.filter(
-          (a) => a.status === "ON_LEAVE"
-        ).length;
+        const totalClasses = totalSessions;
+        const presentCount = student.attendances.length;
+        const absentCount = Math.max(0, totalClasses - presentCount);
+        const leaveCount = 0;
 
         const attendanceRate =
-          totalClasses > 0 ? (presentCount / totalClasses) * 100 : 0;
+          totalClasses > 0 ? (presentCount / totalClasses) * 100 : 100;
 
         const gradedExams = student.examAttempts.filter(
           (attempt) => attempt.score !== null

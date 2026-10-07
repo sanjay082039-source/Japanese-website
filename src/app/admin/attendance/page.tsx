@@ -1,516 +1,479 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/navigation/Navbar";
 import { UserSession } from "@/lib/types";
 import {
-  Clock,
-  Calendar,
+  QrCode,
   Users,
+  MapPin,
+  Clock,
+  Plus,
+  Play,
+  ShieldCheck,
   CheckCircle2,
   AlertCircle,
-  Search,
-  Filter,
-  FileSpreadsheet,
-  Edit3,
+  ExternalLink,
+  Compass,
   X,
-  Fingerprint,
-  UserCheck,
-  ShieldCheck,
-  RotateCcw,
-  Sparkles,
+  FileSpreadsheet,
 } from "lucide-react";
-import { LiveAttendanceKiosk } from "@/components/attendance/LiveAttendanceKiosk";
 
-interface StudentLedgerItem {
+interface SessionItem {
   id: string;
-  name: string;
-  email: string;
-  courseLevel: string;
-  section: string;
+  courseCode: string;
+  courseName: string | null;
+  date: string;
+  startTime: string;
+  endTime: string;
+  targetLatitude: number;
+  targetLongitude: number;
+  radiusMeters: number;
+  _count: { attendances: number };
 }
 
 export default function AdminAttendancePage() {
+  const router = useRouter();
   const [user, setUser] = useState<UserSession | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"kiosk" | "history">("kiosk");
 
-  // Roster of all students
-  const [students, setStudents] = useState<StudentLedgerItem[]>([]);
+  const [sessions, setSessions] = useState<SessionItem[]>([]);
+  const [overallRate, setOverallRate] = useState<number>(85.0);
+  const [totalCheckins, setTotalCheckins] = useState<number>(0);
+  const [logs, setLogs] = useState<any[]>([]);
 
-  // Day-by-Day History Tab State
-  const [historyDate, setHistoryDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
-  const [historyLevel, setHistoryLevel] = useState<string>("ALL");
-  const [historySection, setHistorySection] = useState<string>("ALL");
-  const [historyRecords, setHistoryRecords] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [loadingHistory, setLoadingHistory] = useState(false);
-
-  // Manual Safety Edit Modal in History View
-  const [editingRecord, setEditingRecord] = useState<any | null>(null);
-  const [editStatus, setEditStatus] = useState<"PRESENT" | "ABSENT" | "ON_LEAVE">("PRESENT");
-  const [editRemarks, setEditRemarks] = useState("");
-  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  // Create Session Modal
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [courseCode, setCourseCode] = useState("JPN-101");
+  const [courseName, setCourseName] = useState("Elementary Japanese I (JLPT N5)");
+  const [lat, setLat] = useState("35.6895");
+  const [lon, setLon] = useState("139.6917");
+  const [radius, setRadius] = useState("50");
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    fetchSessionAndInitialData();
-  }, []);
-
-  const fetchSessionAndInitialData = async () => {
-    try {
-      const authRes = await fetch("/api/auth/me");
-      const authData = await authRes.json();
-      if (!authData.user || authData.user.role !== "ADMIN") {
-        window.location.href = "/login";
-        return;
-      }
-      setUser(authData.user);
-
-      // Load all students
-      const studRes = await fetch("/api/attendance?mode=ledger");
-      const studData = await studRes.json();
-      if (studData.students) {
-        setStudents(studData.students);
-      }
-
-      await fetchDayRecords(historyDate, historyLevel, historySection);
-    } catch (err) {
-      console.error("Failed to load initial attendance data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchDayRecords = useCallback(
-    async (date: string, level: string, section: string) => {
-      setLoadingHistory(true);
+    async function loadData() {
       try {
-        const params = new URLSearchParams({
-          date,
-          courseLevel: level,
-          section,
-        });
-        const res = await fetch(`/api/attendance/live-session?${params.toString()}`);
-        const data = await res.json();
-        setHistoryRecords(data.dayRecords || []);
+        const authRes = await fetch("/api/auth/me");
+        const authData = await authRes.json();
+        if (!authData.user || authData.user.role !== "ADMIN") {
+          router.push("/login");
+          return;
+        }
+        setUser(authData.user);
+
+        // Fetch sessions
+        const sessRes = await fetch("/api/attendance?mode=sessions");
+        if (sessRes.ok) {
+          const sData = await sessRes.json();
+          setSessions(sData.sessions || []);
+          if (sData.overallRate != null) setOverallRate(sData.overallRate);
+          if (sData.totalCheckins != null) setTotalCheckins(sData.totalCheckins);
+        }
+
+        // Fetch logs
+        const logsRes = await fetch("/api/attendance?mode=logs");
+        if (logsRes.ok) {
+          const lData = await logsRes.json();
+          setLogs(lData.logs || []);
+        }
       } catch (err) {
-        console.error("Error fetching day records:", err);
+        console.error("Failed to load attendance dashboard:", err);
       } finally {
-        setLoadingHistory(false);
+        setLoading(false);
       }
-    },
-    []
-  );
+    }
+    loadData();
+  }, [router]);
 
-  const handleDateChange = (newDate: string) => {
-    setHistoryDate(newDate);
-    fetchDayRecords(newDate, historyLevel, historySection);
+  // Use current GPS location
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLat(pos.coords.latitude.toFixed(6));
+        setLon(pos.coords.longitude.toFixed(6));
+      },
+      (err) => {
+        alert(`Could not get location: ${err.message}`);
+      },
+      { enableHighAccuracy: true }
+    );
   };
 
-  const handleFilterChange = (level: string, section: string) => {
-    setHistoryLevel(level);
-    setHistorySection(section);
-    fetchDayRecords(historyDate, level, section);
-  };
-
-  const handleSaveSafetyEdit = async () => {
-    if (!editingRecord) return;
-    setIsSavingEdit(true);
+  const handleCreateSession = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
 
     try {
-      const res = await fetch("/api/attendance/live-session", {
+      const res = await fetch("/api/attendance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "MANUAL_OVERRIDE_ATTENDANCE",
-          studentId: editingRecord.studentId,
-          sessionId: editingRecord.sessionId,
-          status: editStatus,
-          remarks: editRemarks.trim() || `Manual safety adjustment (${editStatus})`,
+          courseCode,
+          courseName,
+          targetLatitude: parseFloat(lat),
+          targetLongitude: parseFloat(lon),
+          radiusMeters: parseFloat(radius),
         }),
       });
 
-      if (res.ok) {
-        setEditingRecord(null);
-        await fetchDayRecords(historyDate, historyLevel, historySection);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create session.");
       }
-    } catch (err) {
-      console.error(err);
+
+      setIsCreateOpen(false);
+      // Immediately open projector view for the new session
+      router.push(`/admin/sessions/${data.session.id}/present`);
+    } catch (err: any) {
+      alert(err.message || "Failed to create session.");
     } finally {
-      setIsSavingEdit(false);
+      setCreating(false);
     }
   };
 
-  const handleExportExcel = () => {
-    window.location.href = `/api/admin/dossier/export`;
-  };
-
-  const filteredHistory = historyRecords.filter((rec) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    const matchName = rec.student?.name?.toLowerCase().includes(q);
-    const matchEmail = rec.student?.email?.toLowerCase().includes(q);
-    return matchName || matchEmail;
-  });
-
-  const presentCount = historyRecords.filter((r) => r.status === "PRESENT").length;
-  const biometricVerifiedCount = historyRecords.filter((r) => r.verifiedByBiometric).length;
-  const absentCount = historyRecords.filter((r) => r.status === "ABSENT").length;
-
-  if (loading || !user) {
-    return (
-      <div className="min-h-screen bg-[#070D18] flex items-center justify-center text-slate-400">
-        Loading attendance system...
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#070D18] pb-16 text-slate-100">
-      <Navbar user={user} />
+    <div className="min-h-screen bg-[#081220] text-slate-100 flex flex-col selection:bg-[#f06449] selection:text-white">
+      {user && <Navbar user={user} />}
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
-        {/* Header Banner */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-8">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-bold border border-blue-500/30">
-                Biometric & Ledger Console
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#f06449]/20 text-[#ff7c62] font-semibold border border-[#f06449]/30 flex items-center gap-1.5">
+                <QrCode className="w-3.5 h-3.5" />
+                Anti-Cheat QR Pipeline
               </span>
-              <span className="text-xs text-slate-400">FIDO2 Hardware Fingerprint & Safety Override</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
-              Live Fingerprint Roll Call & Day-by-Day Ledger
+              Dynamic QR Attendance Management
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Open the fingerprint scanner for students to verify one by one. Close to lock the day&apos;s ledger, with manual override for safety.
+            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+              Launch auto-rotating HMAC projector screens. Student mobile check-ins are secured with 5-second time decay, classroom GPS geofencing, and physical device locks.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <button
-              onClick={handleExportExcel}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/40 transition-all cursor-pointer"
+              onClick={() => setIsCreateOpen(true)}
+              className="px-4 py-2.5 rounded-2xl bg-[#f06449] hover:bg-[#d9533a] text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-[#f06449]/20 transition-all cursor-pointer"
             >
-              <FileSpreadsheet className="w-4 h-4" />
-              <span>Export Ledger (.xlsx)</span>
+              <Plus className="w-4 h-4" />
+              <span>Create New Session</span>
             </button>
           </div>
         </div>
 
-        {/* Tab Switcher: Live Kiosk vs Day-by-Day Ledger */}
-        <div className="flex items-center gap-2 border-b border-slate-800 text-xs">
-          <button
-            onClick={() => setActiveTab("kiosk")}
-            className={`py-3 px-4 font-bold border-b-2 flex items-center gap-2 transition-all cursor-pointer ${
-              activeTab === "kiosk"
-                ? "border-orange-500 text-orange-400"
-                : "border-transparent text-slate-400 hover:text-white"
-            }`}
-          >
-            <Fingerprint className="w-4 h-4" />
-            <span>Live Fingerprint Kiosk</span>
-          </button>
+        {/* Overview Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-slate-900/80 border border-white/10 rounded-3xl p-5 backdrop-blur-xl">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Total Course Sessions
+            </span>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-3xl font-black text-white">{sessions.length}</span>
+              <span className="text-xs text-slate-400">sessions</span>
+            </div>
+          </div>
 
-          <button
-            onClick={() => setActiveTab("history")}
-            className={`py-3 px-4 font-bold border-b-2 flex items-center gap-2 transition-all cursor-pointer ${
-              activeTab === "history"
-                ? "border-orange-500 text-orange-400"
-                : "border-transparent text-slate-400 hover:text-white"
-            }`}
-          >
-            <Calendar className="w-4 h-4" />
-            <span>Day-by-Day Attendance History & Safety Editor</span>
-          </button>
+          <div className="bg-slate-900/80 border border-white/10 rounded-3xl p-5 backdrop-blur-xl">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Total Verified Check-Ins
+            </span>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-3xl font-black text-emerald-400">{totalCheckins}</span>
+              <span className="text-xs text-emerald-500 font-medium">GPS &amp; HW verified</span>
+            </div>
+          </div>
+
+          <div className="bg-slate-900/80 border border-white/10 rounded-3xl p-5 backdrop-blur-xl">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Cohort Attendance Rate
+            </span>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-3xl font-black text-white">{overallRate}%</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">
+                Healthy
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* ============================================================== */}
-        {/* TAB 1: LIVE FINGERPRINT KIOSK                                  */}
-        {/* ============================================================== */}
-        {activeTab === "kiosk" && (
-          <LiveAttendanceKiosk
-            students={students}
-            onAttendanceVerified={() => {
-              fetchDayRecords(historyDate, historyLevel, historySection);
-            }}
-          />
-        )}
+        {/* Active & Scheduled Sessions Grid */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <Clock className="w-4 h-4 text-[#f06449]" />
+              Class Sessions &amp; Projector Controls
+            </h2>
+            <span className="text-xs text-slate-400 font-mono">
+              Click any session to launch hands-free screen
+            </span>
+          </div>
 
-        {/* ============================================================== */}
-        {/* TAB 2: DAY-BY-DAY ATTENDANCE HISTORY & MANUAL SAFETY OVERRIDE  */}
-        {/* ============================================================== */}
-        {activeTab === "history" && (
-          <div className="space-y-6">
-            {/* Filter Bar */}
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-800">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-orange-400" />
-                  <h3 className="text-sm font-bold text-white">Daily Ledger Query</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sessions.map((sess) => {
+              const now = new Date();
+              const isLive = now >= new Date(sess.startTime) && now <= new Date(sess.endTime);
+
+              return (
+                <div
+                  key={sess.id}
+                  className="bg-slate-900/90 border border-white/10 hover:border-[#f06449]/40 rounded-3xl p-5 flex flex-col justify-between shadow-xl transition-all"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-lg bg-[#296ec2]/20 text-[#93c5fd] border border-[#93c5fd]/30">
+                        {sess.courseCode}
+                      </span>
+                      {isLive ? (
+                        <span className="inline-flex items-center gap-1.5 text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                          LIVE NOW
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 font-medium">Scheduled</span>
+                      )}
+                    </div>
+
+                    <h3 className="font-extrabold text-white text-base leading-snug">
+                      {sess.courseName || "Japanese Course Lecture"}
+                    </h3>
+
+                    <div className="mt-3 space-y-1.5 text-xs text-slate-400 font-sans">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-slate-500" />
+                        <span>
+                          {new Date(sess.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} -{" "}
+                          {new Date(sess.endTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                        <span>Geofence: &le; {sess.radiusMeters}m radius</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-white">
+                      <Users className="w-4 h-4 text-[#f06449]" />
+                      <span>{sess._count.attendances} present</span>
+                    </div>
+
+                    <button
+                      onClick={() => router.push(`/admin/sessions/${sess.id}/present`)}
+                      className="px-3.5 py-2 rounded-xl bg-[#f06449] hover:bg-[#d9533a] text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-[#f06449]/20 transition-all cursor-pointer"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>Launch Projector</span>
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-slate-400">Present Today:</span>
-                  <span className="font-mono font-bold text-emerald-400">{presentCount}</span>
-                  <span className="text-slate-600">•</span>
-                  <span className="text-slate-400">Fingerprint Verified:</span>
-                  <span className="font-mono font-bold text-blue-400">{biometricVerifiedCount}</span>
-                  <span className="text-slate-600">•</span>
-                  <span className="text-slate-400">Absent:</span>
-                  <span className="font-mono font-bold text-rose-400">{absentCount}</span>
-                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Real-Time Anti-Fraud Audit Ledger */}
+        <div className="bg-slate-900/80 border border-white/10 rounded-3xl p-5 sm:p-6 backdrop-blur-xl">
+          <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+            <div>
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                Anti-Fraud Attendance Audit Log
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Atomic logs recording client GPS distance and unique hardware fingerprint for every check-in.
+              </p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-slate-300">
+              <thead className="bg-slate-950/60 text-slate-400 uppercase text-[10px] tracking-wider font-semibold border-b border-white/10">
+                <tr>
+                  <th className="py-3 px-4">Student</th>
+                  <th className="py-3 px-4">Course Session</th>
+                  <th className="py-3 px-4">Timestamp</th>
+                  <th className="py-3 px-4">GPS Distance</th>
+                  <th className="py-3 px-4">Device Lock</th>
+                  <th className="py-3 px-4">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {logs.length > 0 ? (
+                  logs.map((log) => (
+                    <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="py-3 px-4 font-bold text-white">
+                        {log.studentName || log.studentId}
+                      </td>
+                      <td className="py-3 px-4 font-mono text-[#93c5fd]">
+                        {log.session?.courseCode || "JPN-101"}
+                      </td>
+                      <td className="py-3 px-4 text-slate-400 font-mono">
+                        {new Date(log.timestamp).toLocaleString([], {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                        })}
+                      </td>
+                      <td className="py-3 px-4 font-semibold text-emerald-400">
+                        {log.distanceMeters}m from center
+                      </td>
+                      <td className="py-3 px-4 font-mono text-[10px] text-slate-400">
+                        {log.deviceHash.substring(0, 18)}...
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                          <CheckCircle2 className="w-3 h-3" />
+                          Verified
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-slate-500">
+                      No attendance audit logs recorded yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      {/* Create New Session Modal */}
+      {isCreateOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-slate-900 border border-white/15 rounded-3xl p-6 shadow-2xl text-slate-100">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+              <div className="flex items-center gap-2">
+                <QrCode className="w-5 h-5 text-[#f06449]" />
+                <h3 className="font-bold text-white text-base">Create Course Attendance Session</h3>
+              </div>
+              <button
+                onClick={() => setIsCreateOpen(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateSession} className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">
+                  Course Code:
+                </label>
+                <input
+                  type="text"
+                  value={courseCode}
+                  onChange={(e) => setCourseCode(e.target.value)}
+                  required
+                  placeholder="e.g. JPN-101, JLPT-N5"
+                  className="w-full bg-slate-950 border border-white/15 focus:border-[#f06449] rounded-2xl px-4 py-2.5 text-xs text-white outline-none"
+                />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
-                <div>
-                  <label className="text-slate-400 font-semibold block mb-1">Select Date:</label>
-                  <input
-                    type="date"
-                    value={historyDate}
-                    onChange={(e) => handleDateChange(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-orange-500 font-mono"
-                  />
-                </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">
+                  Course Name / Title:
+                </label>
+                <input
+                  type="text"
+                  value={courseName}
+                  onChange={(e) => setCourseName(e.target.value)}
+                  required
+                  placeholder="e.g. Elementary Japanese I"
+                  className="w-full bg-slate-950 border border-white/15 focus:border-[#f06449] rounded-2xl px-4 py-2.5 text-xs text-white outline-none"
+                />
+              </div>
 
-                <div>
-                  <label className="text-slate-400 font-semibold block mb-1">JLPT Level:</label>
-                  <select
-                    value={historyLevel}
-                    onChange={(e) => handleFilterChange(e.target.value, historySection)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-orange-500 font-mono"
+              {/* Classroom Geofencing Coordinates */}
+              <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 text-emerald-400" />
+                    Classroom Geofence Center
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleUseCurrentLocation}
+                    className="text-[10px] px-2.5 py-1 rounded-lg bg-[#296ec2]/30 hover:bg-[#296ec2]/50 text-[#93c5fd] font-bold border border-[#93c5fd]/30 cursor-pointer"
                   >
-                    <option value="ALL">All Tiers (N1–N5)</option>
-                    <option value="N1">N1 (Advanced)</option>
-                    <option value="N2">N2 (Pre-Advanced)</option>
-                    <option value="N3">N3 (Intermediate)</option>
-                    <option value="N4">N4 (Elementary)</option>
-                    <option value="N5">N5 (Beginner)</option>
-                  </select>
+                    Use My Current GPS
+                  </button>
                 </div>
 
-                <div>
-                  <label className="text-slate-400 font-semibold block mb-1">Batch:</label>
-                  <select
-                    value={historySection}
-                    onChange={(e) => handleFilterChange(historyLevel, e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-orange-500 font-mono"
-                  >
-                    <option value="ALL">All Batches</option>
-                    <option value="A">Batch A</option>
-                    <option value="B">Batch B</option>
-                    <option value="C">Batch C</option>
-                    <option value="Morning">Morning Batch</option>
-                    <option value="Weekend">Weekend Batch</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-slate-400 font-semibold block mb-1">Search Student:</label>
-                  <div className="relative">
-                    <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5" />
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1">Target Latitude:</label>
                     <input
                       type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Filter candidate..."
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white outline-none focus:border-orange-500"
+                      value={lat}
+                      onChange={(e) => setLat(e.target.value)}
+                      required
+                      className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1">Target Longitude:</label>
+                    <input
+                      type="text"
+                      value={lon}
+                      onChange={(e) => setLon(e.target.value)}
+                      required
+                      className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono"
                     />
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Daily History Table */}
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
-                      <th className="py-3 px-4">Candidate Name</th>
-                      <th className="py-3 px-4">JLPT Tier</th>
-                      <th className="py-3 px-4">Batch</th>
-                      <th className="py-3 px-4">Hour Slot</th>
-                      <th className="py-3 px-4 text-center">Status</th>
-                      <th className="py-3 px-4 text-center">Verification Method</th>
-                      <th className="py-3 px-4">Remark / Safety Log</th>
-                      <th className="py-3 px-4 text-center">Manual Safety Edit</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800 text-slate-300">
-                    {loadingHistory ? (
-                      <tr>
-                        <td colSpan={8} className="py-8 text-center text-slate-500">
-                          Loading day ledger records...
-                        </td>
-                      </tr>
-                    ) : filteredHistory.length === 0 ? (
-                      <tr>
-                        <td colSpan={8} className="py-8 text-center text-slate-500">
-                          No attendance logs recorded for {historyDate}. Open the scanner to take roll call.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredHistory.map((rec) => (
-                        <tr key={rec.id} className="hover:bg-slate-800/40 transition-colors">
-                          <td className="py-3 px-4 font-bold text-white">
-                            <div>
-                              <span>{rec.student?.name || "Student"}</span>
-                              <span className="block text-[11px] text-slate-400 font-normal">
-                                {rec.student?.email}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className="px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-800">
-                              {rec.student?.courseLevel}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 font-mono text-slate-400">
-                            {rec.student?.section || "Batch A"}
-                          </td>
-                          <td className="py-3 px-4 font-mono text-slate-400">{rec.hourSlot}</td>
-                          <td className="py-3 px-4 text-center">
-                            <span
-                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                rec.status === "PRESENT"
-                                  ? "bg-emerald-950 text-emerald-300 border border-emerald-800"
-                                  : rec.status === "ON_LEAVE"
-                                  ? "bg-amber-950 text-amber-300 border border-amber-800"
-                                  : "bg-rose-950 text-rose-300 border border-rose-800"
-                              }`}
-                            >
-                              {rec.status}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            {rec.verifiedByBiometric ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] text-emerald-300 font-mono font-bold bg-emerald-950/80 px-2.5 py-0.5 rounded-lg border border-emerald-800">
-                                <Fingerprint className="w-3 h-3 text-emerald-400" />
-                                FIDO2 Fingerprint Verified
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-[10px] text-amber-300 font-mono font-bold bg-amber-950/80 px-2.5 py-0.5 rounded-lg border border-amber-800">
-                                <UserCheck className="w-3 h-3 text-amber-400" />
-                                Manual Override
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-slate-400 text-[11px] max-w-[200px] truncate">
-                            {rec.remarks || "—"}
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            <button
-                              onClick={() => {
-                                setEditingRecord(rec);
-                                setEditStatus(rec.status);
-                                setEditRemarks(rec.remarks || "");
-                              }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-semibold border border-slate-700 cursor-pointer"
-                              title="Edit status manually for safety reason"
-                            >
-                              <Edit3 className="w-3 h-3 text-amber-400" />
-                              <span>Edit Manual</span>
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Edit Safety Modal in History */}
-            {editingRecord && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                    <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
-                      <ShieldCheck className="w-5 h-5 text-amber-400" />
-                      <span>Safety Attendance Adjustment</span>
-                    </div>
-                    <button
-                      onClick={() => setEditingRecord(null)}
-                      className="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-3 text-xs">
-                    <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                      <span className="text-slate-400 text-[11px] block">Candidate:</span>
-                      <strong className="text-white text-sm block">{editingRecord.student?.name}</strong>
-                      <span className="text-slate-500 font-mono text-[11px]">{editingRecord.student?.email}</span>
-                    </div>
-
-                    <div>
-                      <label className="text-slate-300 font-semibold block mb-1.5">Change Status to:</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { id: "PRESENT", label: "Present" },
-                          { id: "ABSENT", label: "Absent" },
-                          { id: "ON_LEAVE", label: "On Leave" },
-                        ].map((s) => (
-                          <button
-                            key={s.id}
-                            type="button"
-                            onClick={() => setEditStatus(s.id as any)}
-                            className={`py-2 rounded-xl border font-bold text-xs transition-all ${
-                              editStatus === s.id
-                                ? s.id === "PRESENT"
-                                  ? "bg-emerald-600 text-white border-emerald-500"
-                                  : s.id === "ABSENT"
-                                  ? "bg-rose-600 text-white border-rose-500"
-                                  : "bg-amber-600 text-white border-amber-500"
-                                : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white"
-                            }`}
-                          >
-                            {s.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-slate-300 font-semibold block mb-1.5">
-                        Audit Note / Safety Reason:
-                      </label>
-                      <input
-                        type="text"
-                        value={editRemarks}
-                        onChange={(e) => setEditRemarks(e.target.value)}
-                        placeholder="e.g. Excused by faculty, hardware glitch override, etc."
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
-                    <button
-                      type="button"
-                      onClick={() => setEditingRecord(null)}
-                      className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isSavingEdit}
-                      onClick={handleSaveSafetyEdit}
-                      className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-950/30 cursor-pointer"
-                    >
-                      {isSavingEdit ? "Saving..." : "Save Safety Update"}
-                    </button>
-                  </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 block mb-1">
+                    Allowed Radius (Meters):
+                  </label>
+                  <input
+                    type="number"
+                    value={radius}
+                    onChange={(e) => setRadius(e.target.value)}
+                    required
+                    min={10}
+                    max={500}
+                    className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono"
+                  />
                 </div>
               </div>
-            )}
+
+              <div className="pt-2 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="px-5 py-2.5 rounded-xl bg-[#f06449] hover:bg-[#d9533a] disabled:opacity-50 text-xs font-bold text-white shadow-lg shadow-[#f06449]/20 cursor-pointer"
+                >
+                  {creating ? "Creating..." : "Create & Launch Screen"}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-      </main>
+        </div>
+      )}
     </div>
   );
 }
