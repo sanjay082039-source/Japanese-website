@@ -103,11 +103,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate Session Time Window
+    // Validate Session Time Window & Expiry
     const now = new Date();
-    if (now < session.startTime || now > session.endTime) {
+    if (session.isEnded || now > new Date(session.endTime)) {
       return NextResponse.json(
-        { error: "Attendance session is currently closed. Please contact your instructor." },
+        {
+          error: session.isEnded
+            ? "Attendance session was closed by the instructor. Check-ins are no longer accepted."
+            : "Attendance session has expired. The allotted time window has ended.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (now < new Date(session.startTime)) {
+      return NextResponse.json(
+        { error: "Attendance session has not started yet. Please wait for the instructor to begin." },
         { status: 400 }
       );
     }

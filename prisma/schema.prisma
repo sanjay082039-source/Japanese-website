@@ -83,6 +83,7 @@ model CourseSession {
   date            DateTime     @default(now())
   startTime       DateTime
   endTime         DateTime
+  isEnded         Boolean      @default(false)
   
   // Geofence center
   targetLatitude  Float

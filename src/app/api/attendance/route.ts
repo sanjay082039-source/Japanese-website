@@ -183,3 +183,71 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message || "Failed to create session" }, { status: 500 });
   }
 }
+
+// PATCH: Faculty End Course Session Early
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getSessionFromRequest(request);
+    if (!session || session.role !== "ADMIN") {
+      return NextResponse.json({ error: "Administrator privilege required" }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { sessionId, action } = body;
+
+    if (!sessionId) {
+      return NextResponse.json({ error: "Missing sessionId parameter" }, { status: 400 });
+    }
+
+    if (action === "END_SESSION" || !action) {
+      const updated = await prisma.courseSession.update({
+        where: { id: sessionId },
+        data: {
+          isEnded: true,
+          endTime: new Date(),
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Session ended successfully. Attendance check-ins are now closed.",
+        session: updated,
+      });
+    }
+
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+  } catch (error: any) {
+    console.error("Session update error:", error);
+    return NextResponse.json({ error: error.message || "Failed to end session" }, { status: 500 });
+  }
+}
+
+// DELETE: Faculty Delete Course Session
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getSessionFromRequest(request);
+    if (!session || session.role !== "ADMIN") {
+      return NextResponse.json({ error: "Administrator privilege required" }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const sessionId = searchParams.get("sessionId");
+
+    if (!sessionId) {
+      return NextResponse.json({ error: "Missing sessionId parameter" }, { status: 400 });
+    }
+
+    await prisma.courseSession.delete({
+      where: { id: sessionId },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Session and its attendance records were deleted successfully.",
+    });
+  } catch (error: any) {
+    console.error("Session deletion error:", error);
+    return NextResponse.json({ error: error.message || "Failed to delete session" }, { status: 500 });
+  }
+}
+
