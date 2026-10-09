@@ -46,26 +46,15 @@ export async function POST(request: NextRequest) {
     let createdDeviceSessionId: string | null = null;
 
     // Strict Device Concurrency Enforcement for STUDENTS
+    // Maintains max 1 MOBILE and 1 DESKTOP concurrently by auto-revoking any previous session of the same type
     if (user.role === "STUDENT") {
-      // Find existing active sessions for this deviceType
-      const existingDeviceSessions = await prisma.deviceSession.findMany({
+      // Invalidate any existing active session for this deviceType (kicks out older session)
+      await prisma.deviceSession.deleteMany({
         where: {
           userId: user.id,
           deviceType: deviceType,
         },
       });
-
-      // Max 1 MOBILE and 1 DESKTOP concurrently
-      if (existingDeviceSessions.length >= 1) {
-        return NextResponse.json(
-          {
-            error: `Device limit reached. You already have an active ${deviceType} session registered. Contact an administrator to de-authorize an existing device.`,
-            deviceType: deviceType,
-            conflict: true,
-          },
-          { status: 403 }
-        );
-      }
 
       // Register new DeviceSession
       const deviceSession = await prisma.deviceSession.create({
