@@ -414,7 +414,7 @@ export default function AdminAttendancePage() {
                 Anti-Fraud Attendance Audit Log
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Atomic logs recording client GPS distance and unique hardware fingerprint for every check-in.
+                Atomic logs recording client GPS distance and unique hardware signature for every check-in.
               </p>
             </div>
           </div>

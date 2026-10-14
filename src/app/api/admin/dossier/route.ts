@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
       where: { id: studentId },
       include: {
         deviceSessions: { orderBy: { lastActive: "desc" } },
-        biometricCredentials: true,
         attendances: {
           orderBy: { timestamp: "desc" },
           include: { session: true },
@@ -53,7 +52,6 @@ export async function GET(request: NextRequest) {
     const totalSessions = await prisma.courseSession.count();
     const totalClasses = totalSessions;
     const presentCount = student.attendances.length;
-    const biometricVerifiedCount = student.attendances.length;
     const attendanceRate = totalClasses > 0 ? Number(((presentCount / totalClasses) * 100).toFixed(1)) : 100;
 
     const completedExams = student.examAttempts.filter((a) => a.status === "SUBMITTED" || a.status === "AUTO_SUBMITTED");
@@ -84,7 +82,6 @@ export async function GET(request: NextRequest) {
         attendanceRate,
         totalClasses,
         presentCount,
-        biometricVerifiedCount,
         avgExamScore,
         examsAttemptedCount: student.examAttempts.length,
         totalInfractions,
@@ -92,13 +89,6 @@ export async function GET(request: NextRequest) {
         assignmentsCount: student.assignmentSubmissions.length,
       },
       deviceSessions: student.deviceSessions,
-      biometricCredentials: student.biometricCredentials.map((c) => ({
-        id: c.id,
-        credentialId: c.credentialId,
-        deviceType: c.deviceType,
-        counter: c.counter,
-        createdAt: c.createdAt,
-      })),
       attendances: student.attendances,
       examAttempts: student.examAttempts,
       assignmentSubmissions: student.assignmentSubmissions,

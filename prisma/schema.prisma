@@ -31,7 +31,6 @@ model User {
   examAttempts          ExamAttempt[]
   assignmentSubmissions AssignmentSubmission[]
   deviceSessions        DeviceSession[]
-  biometricCredentials  BiometricCredential[]
   conductedSessions     CourseSession[]        @relation("FacultySessions")
   chapterProgresses     ChapterProgress[]
   assignedHomeworks     Assignment[]           @relation("StudentAssignments")
@@ -56,22 +55,6 @@ model DeviceSession {
 
   @@index([userId])
   @@index([userId, deviceType])
-}
-
-// WebAuthn Biometric Hardware Authenticators (FIDO2 / Touch ID / Windows Hello)
-model BiometricCredential {
-  id           String   @id @default(cuid())
-  userId       String
-  credentialId String   @unique
-  publicKey    String   // Base64-encoded public key
-  counter      Int      @default(0)
-  deviceType   String?  // "MOBILE" | "DESKTOP"
-  transports   String?  // JSON array e.g. ["internal", "hybrid"]
-  createdAt    DateTime @default(now())
-
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }
 
 // Course Session for Dynamic Anti-Cheat Attendance

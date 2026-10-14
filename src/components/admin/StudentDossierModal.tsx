@@ -5,7 +5,6 @@ import {
   X,
   Smartphone,
   Monitor,
-  Fingerprint,
   ShieldAlert,
   ShieldCheck,
   RotateCcw,
@@ -143,8 +142,7 @@ export default function StudentDossierModal({
       doc.text(`JLPT Tier: ${student.courseLevel}  |  Batch: ${student.section || "Batch A"}`, 20, 68);
 
       doc.text(`Attendance Rate: ${metrics.attendanceRate}%`, 115, 52);
-      doc.text(`Biometric Enrolled: ${data.biometricCredentials?.length > 0 ? "YES (FIDO2)" : "NO"}`, 115, 60);
-      doc.text(`Average Exam Score: ${metrics.avgExamScore !== null ? `${metrics.avgExamScore}%` : "N/A"}`, 115, 68);
+      doc.text(`Average Exam Score: ${metrics.avgExamScore !== null ? `${metrics.avgExamScore}%` : "N/A"}`, 115, 60);
 
       let currentY = 84;
 
@@ -236,7 +234,7 @@ export default function StudentDossierModal({
     );
   }
 
-  const { student, metrics, deviceSessions, biometricCredentials, attendances, examAttempts, assignmentSubmissions, chapterProgresses } = data;
+  const { student, metrics, deviceSessions, attendances, examAttempts, assignmentSubmissions, chapterProgresses } = data;
 
   const desktopSession = deviceSessions?.find((d: any) => d.deviceType === "DESKTOP");
   const mobileSession = deviceSessions?.find((d: any) => d.deviceType === "MOBILE");
@@ -353,9 +351,9 @@ export default function StudentDossierModal({
                       ({metrics.presentCount}/{metrics.totalClasses})
                     </span>
                   </div>
-                  <div className="mt-2 flex items-center gap-1 text-[10px] text-blue-400">
-                    <Fingerprint className="w-3 h-3" />
-                    <span>{metrics.biometricVerifiedCount} biometric verified</span>
+                  <div className="mt-2 flex items-center gap-1 text-[10px] text-emerald-400">
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span>{metrics.presentCount} sessions verified</span>
                   </div>
                 </div>
 
@@ -410,7 +408,7 @@ export default function StudentDossierModal({
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   {/* Desktop Status */}
                   <div className="p-3 bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
@@ -452,28 +450,6 @@ export default function StudentDossierModal({
                       }`}
                     >
                       {mobileSession ? "1/1 ACTIVE" : "0/1 SLOTS"}
-                    </span>
-                  </div>
-
-                  {/* Biometric Status */}
-                  <div className="p-3 bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <Fingerprint className="w-4 h-4 text-orange-400" />
-                      <div>
-                        <span className="font-bold text-white block">FIDO2 WebAuthn</span>
-                        <span className="text-[10px] text-slate-400">
-                          {biometricCredentials?.length > 0 ? "Hardware Bound" : "Not Enrolled"}
-                        </span>
-                      </div>
-                    </div>
-                    <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold font-mono ${
-                        biometricCredentials?.length > 0
-                          ? "bg-emerald-950 text-emerald-300 border border-emerald-800"
-                          : "bg-rose-950 text-rose-300 border border-rose-800"
-                      }`}
-                    >
-                      {biometricCredentials?.length > 0 ? "ENROLLED" : "MISSING"}
                     </span>
                   </div>
                 </div>
@@ -683,41 +659,6 @@ export default function StudentDossierModal({
                 </div>
               </div>
 
-              {/* Hardware WebAuthn Credentials Card */}
-              <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <div className="flex items-center gap-2">
-                    <Fingerprint className="w-5 h-5 text-orange-400" />
-                    <div>
-                      <h4 className="text-xs font-bold text-white uppercase tracking-wider">WebAuthn Hardware Passkey Bindings</h4>
-                      <p className="text-[11px] text-slate-400">FIDO2 Touch ID / Windows Hello / Android biometric sensors</p>
-                    </div>
-                  </div>
-                  <span className="text-xs font-mono text-slate-400">{biometricCredentials?.length || 0} registered</span>
-                </div>
-
-                {biometricCredentials?.length > 0 ? (
-                  <div className="space-y-2 text-xs">
-                    {biometricCredentials.map((cred: any) => (
-                      <div key={cred.id} className="p-3 bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-between font-mono text-[11px]">
-                        <div>
-                          <span className="text-emerald-400 font-bold block">FIDO2 Authenticator Active</span>
-                          <span className="text-slate-500 text-[10px]">Credential ID: {cred.credentialId.slice(0, 24)}...</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-slate-400 block text-[10px]">Sign Counter: {cred.counter}</span>
-                          <span className="text-slate-500 text-[9px]">{new Date(cred.createdAt).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-4 bg-slate-950 rounded-xl border border-slate-800/80 text-center text-xs text-slate-400">
-                    <AlertTriangle className="w-5 h-5 text-amber-400 mx-auto mb-1.5" />
-                    Student has not yet enrolled biometric hardware. They can enroll via the Biometric Attendance tab.
-                  </div>
-                )}
-              </div>
 
               {/* Nuclear Security Actions */}
               <div className="p-5 bg-rose-950/20 border border-rose-900/30 rounded-2xl space-y-4">

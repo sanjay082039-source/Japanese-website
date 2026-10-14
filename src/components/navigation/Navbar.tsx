@@ -19,7 +19,6 @@ import {
   ChevronRight,
   Bot,
   Video,
-  Fingerprint,
   Sparkles,
   QrCode,
 } from "lucide-react";

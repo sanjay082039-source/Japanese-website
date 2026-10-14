@@ -25,7 +25,6 @@ export async function GET(request: NextRequest) {
         where: { id: studentId },
         include: {
           deviceSessions: true,
-          biometricCredentials: true,
           attendances: { include: { session: true }, orderBy: { timestamp: "desc" } },
           examAttempts: { include: { exam: true }, orderBy: { startedAt: "desc" } },
           assignmentSubmissions: { include: { assignment: true }, orderBy: { submittedAt: "desc" } },
@@ -47,7 +46,6 @@ export async function GET(request: NextRequest) {
       overviewSheet.addRow({ field: "Email Address", value: student.email });
       overviewSheet.addRow({ field: "JLPT Level", value: student.courseLevel });
       overviewSheet.addRow({ field: "Section / Batch", value: student.section });
-      overviewSheet.addRow({ field: "Biometric Enrolled", value: student.biometricCredentials.length > 0 ? "YES (FIDO2)" : "NO" });
       overviewSheet.addRow({ field: "Active Devices", value: student.deviceSessions.map((d) => `${d.deviceType} (${d.ipAddress})`).join(", ") || "None" });
 
       // Sheet 2: Attendance Ledger
@@ -110,7 +108,6 @@ export async function GET(request: NextRequest) {
         attendances: true,
         examAttempts: true,
         deviceSessions: true,
-        biometricCredentials: true,
       },
       orderBy: [{ courseLevel: "asc" }, { name: "asc" }],
     });
@@ -124,7 +121,6 @@ export async function GET(request: NextRequest) {
       { header: "JLPT Level", key: "level", width: 12 },
       { header: "Section", key: "sec", width: 10 },
       { header: "Attendance %", key: "attRate", width: 15 },
-      { header: "Biometric Registered", key: "bio", width: 20 },
       { header: "Active Devices", key: "devs", width: 15 },
       { header: "Total Infractions", key: "infractions", width: 18 },
     ];
@@ -141,7 +137,6 @@ export async function GET(request: NextRequest) {
         level: s.courseLevel,
         sec: s.section,
         attRate: rate,
-        bio: s.biometricCredentials.length > 0 ? "YES" : "NO",
         devs: s.deviceSessions.length,
         infractions,
       });
