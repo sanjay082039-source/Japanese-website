@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Html5Qrcode } from "html5-qrcode";
 import Navbar from "@/components/navigation/Navbar";
 import { UserSession } from "@/lib/types";
 import {
   Camera,
+  CameraOff,
   CheckCircle2,
   AlertTriangle,
   RefreshCw,
@@ -18,7 +19,7 @@ import {
   Compass,
 } from "lucide-react";
 
-type ScannerState = "init" | "scanning" | "submitting" | "success" | "error";
+type ScannerState = "init" | "idle" | "scanning" | "submitting" | "success" | "error";
 
 interface SuccessData {
   courseCode?: string;
@@ -53,7 +54,56 @@ export default function StudentQrScannerPage() {
     return hash;
   };
 
-  // 1. Authenticate user
+  // Explicitly cut off all camera hardware tracks across the document
+  const forceKillAllCameraTracks = useCallback(() => {
+    if (typeof document === "undefined") return;
+
+    try {
+      const videos = document.querySelectorAll("video");
+      videos.forEach((video) => {
+        try {
+          const stream = video.srcObject as MediaStream | null;
+          if (stream && stream.getTracks) {
+            stream.getTracks().forEach((track) => {
+              track.stop();
+              track.enabled = false;
+            });
+          }
+          video.srcObject = null;
+        } catch (e) {
+          // ignore error on stream cleanup
+        }
+      });
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
+  // Stop camera and ensure hardware release
+  const stopCamera = useCallback(async () => {
+    try {
+      if (scannerRef.current) {
+        if (hasStartedRef.current) {
+          try {
+            await scannerRef.current.stop();
+          } catch (e) {
+            console.warn("scanner stop warning:", e);
+          }
+        }
+        try {
+          scannerRef.current.clear();
+        } catch (e) {
+          console.warn("scanner clear warning:", e);
+        }
+      }
+    } finally {
+      hasStartedRef.current = false;
+      scannerRef.current = null;
+      forceKillAllCameraTracks();
+    }
+  }, [forceKillAllCameraTracks]);
+
+  // 1. Authenticate user - do NOT auto-start camera; stay in "idle" state
   useEffect(() => {
     async function loadUser() {
       try {
@@ -64,7 +114,7 @@ export default function StudentQrScannerPage() {
         }
         const data = await res.json();
         setUser(data.user);
-        setState("scanning");
+        setState("idle"); // Scanner is closed by default, user must tap to open
       } catch (err) {
         setErrorMessage("Authentication failed. Please log in again.");
         setState("error");
@@ -73,13 +123,38 @@ export default function StudentQrScannerPage() {
     loadUser();
   }, [router]);
 
-  // 2. Initialize and start camera scanner
-  const startCamera = async () => {
+  // 2. Lifecycle listeners: kill camera when tab is minimized, switched, or navigated away
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Tab hidden / phone locked: cut off camera access immediately!
+        stopCamera();
+        setState((prev) => (prev === "scanning" ? "idle" : prev));
+      }
+    };
+
+    const handlePageHide = () => {
+      stopCamera();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("beforeunload", handlePageHide);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("beforeunload", handlePageHide);
+      stopCamera();
+    };
+  }, [stopCamera]);
+
+  // 3. Initialize and start camera scanner only when state === "scanning"
+  const startCamera = useCallback(async () => {
     if (typeof window === "undefined" || hasStartedRef.current) return;
 
     try {
       setErrorMessage(null);
-      setState("scanning");
 
       const element = document.getElementById("qr-reader-container");
       if (!element) return;
@@ -119,40 +194,42 @@ export default function StudentQrScannerPage() {
         // Fallback failed
       }
 
+      forceKillAllCameraTracks();
       setErrorMessage(
         "Camera access was denied or is unavailable. Please ensure camera permissions are allowed in your browser settings."
       );
       setState("error");
     }
-  };
+  }, [forceKillAllCameraTracks]);
 
   useEffect(() => {
     if (state === "scanning" && user && !hasStartedRef.current) {
       startCamera();
     }
+  }, [state, user, startCamera]);
 
-    return () => {
-      stopCamera();
-    };
-  }, [state, user]);
-
-  const stopCamera = async () => {
-    if (scannerRef.current && hasStartedRef.current) {
-      try {
-        await scannerRef.current.stop();
-        scannerRef.current.clear();
-      } catch (e) {
-        // Ignored
-      } finally {
-        hasStartedRef.current = false;
-        scannerRef.current = null;
-      }
-    }
+  // User manually closes the scanner
+  const handleCloseScanner = async () => {
+    await stopCamera();
+    setState("idle");
   };
 
-  // 3. Handle QR Code Detection
+  // User opens the scanner
+  const handleOpenScanner = () => {
+    setErrorMessage(null);
+    setSuccessData(null);
+    setState("scanning");
+  };
+
+  // User navigates back
+  const handleBackToDashboard = async () => {
+    await stopCamera();
+    router.push("/student/dashboard");
+  };
+
+  // 4. Handle QR Code Detection
   const onQrCodeSuccess = async (decodedText: string) => {
-    // Immediately stop camera to lock viewfinder and conserve battery
+    // Immediately cut off camera to lock viewfinder, preserve privacy, and save battery
     await stopCamera();
 
     let sessionId = "";
@@ -212,7 +289,7 @@ export default function StudentQrScannerPage() {
     );
   };
 
-  // 4. Submit to Check-In API
+  // 5. Submit to Check-In API
   const submitAttendance = async (
     sessionId: string,
     token: string,
@@ -261,9 +338,6 @@ export default function StudentQrScannerPage() {
     setErrorMessage(null);
     setSuccessData(null);
     setState("scanning");
-    setTimeout(() => {
-      startCamera();
-    }, 150);
   };
 
   return (
@@ -287,9 +361,42 @@ export default function StudentQrScannerPage() {
 
         {/* Viewfinder Card */}
         <div className="w-full bg-slate-900/80 border border-white/10 rounded-3xl p-5 shadow-2xl backdrop-blur-xl flex flex-col items-center">
-          {/* STATE 1: SCANNING VIEW */}
+          {/* STATE 0: INIT / LOADING */}
+          {state === "init" && (
+            <div className="py-12 flex flex-col items-center text-center">
+              <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-[#f06449] animate-spin mb-3"></div>
+              <p className="text-xs text-slate-400">Loading scanner...</p>
+            </div>
+          )}
+
+          {/* STATE 1: IDLE - CAMERA OFF / CLOSED */}
+          {state === "idle" && (
+            <div className="py-6 w-full flex flex-col items-center text-center animate-in fade-in duration-200">
+              <div className="relative w-28 h-28 rounded-3xl bg-slate-950 border border-white/10 flex items-center justify-center mb-5 shadow-inner group">
+                <CameraOff className="w-12 h-12 text-slate-500 group-hover:text-slate-400 transition-colors" />
+                <span className="absolute -bottom-2 px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-[10px] font-mono text-slate-300 font-bold uppercase tracking-wider">
+                  Camera Off
+                </span>
+              </div>
+
+              <h2 className="text-lg font-bold text-white">Scanner is Closed</h2>
+              <p className="text-xs text-slate-400 mt-2 max-w-xs leading-relaxed">
+                Camera access is cut off. Whenever you need to scan the attendance QR, tap the button below.
+              </p>
+
+              <button
+                onClick={handleOpenScanner}
+                className="w-full mt-6 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#f06449] to-[#ff7c62] hover:opacity-95 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-lg shadow-[#f06449]/30 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
+                <Camera className="w-4 h-4" />
+                Open Camera &amp; Scan QR
+              </button>
+            </div>
+          )}
+
+          {/* STATE 2: SCANNING VIEW */}
           {state === "scanning" && (
-            <div className="w-full flex flex-col items-center">
+            <div className="w-full flex flex-col items-center animate-in fade-in duration-200">
               {/* Camera Frame Container */}
               <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-3xl overflow-hidden bg-black border-2 border-white/20 shadow-inner">
                 {/* HTML5 QR Code Mount Element */}
@@ -311,8 +418,17 @@ export default function StudentQrScannerPage() {
                 <div className="pointer-events-none absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#f06449] to-transparent animate-pulse top-1/2"></div>
               </div>
 
+              {/* Close Camera Button */}
+              <button
+                onClick={handleCloseScanner}
+                className="mt-4 w-full py-2.5 px-4 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-white/10 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
+                <CameraOff className="w-4 h-4 text-rose-400" />
+                Close Scanner &amp; Cut Off Camera
+              </button>
+
               {/* Security Pill Indicators */}
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-[11px] text-slate-400">
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[11px] text-slate-400">
                 <span className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-950 border border-white/10">
                   <MapPin className="w-3 h-3 text-emerald-400" />
                   GPS Geofencing Active
@@ -325,7 +441,7 @@ export default function StudentQrScannerPage() {
             </div>
           )}
 
-          {/* STATE 2: SUBMITTING / VALIDATING SPINNER */}
+          {/* STATE 3: SUBMITTING / VALIDATING SPINNER */}
           {state === "submitting" && (
             <div className="py-12 flex flex-col items-center text-center">
               <div className="relative mb-5">
@@ -341,7 +457,7 @@ export default function StudentQrScannerPage() {
             </div>
           )}
 
-          {/* STATE 3: SUCCESS FEEDBACK CARD */}
+          {/* STATE 4: SUCCESS FEEDBACK CARD */}
           {state === "success" && (
             <div className="py-8 w-full flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
               <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mb-4 shadow-lg shadow-emerald-950/40">
@@ -382,7 +498,7 @@ export default function StudentQrScannerPage() {
             </div>
           )}
 
-          {/* STATE 4: ERROR FEEDBACK CARD */}
+          {/* STATE 5: ERROR FEEDBACK CARD */}
           {state === "error" && (
             <div className="py-8 w-full flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
               <div className="w-16 h-16 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 flex items-center justify-center mb-4 shadow-lg shadow-rose-950/40">
@@ -398,20 +514,29 @@ export default function StudentQrScannerPage() {
                 {errorMessage || "Unable to verify attendance."}
               </div>
 
-              <button
-                onClick={handleRetry}
-                className="w-full mt-6 py-3 rounded-2xl bg-[#f06449] hover:bg-[#d9533a] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-[#f06449]/30 transition-all cursor-pointer"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Retry Scan
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3 w-full mt-6">
+                <button
+                  onClick={handleRetry}
+                  className="flex-1 py-3 rounded-2xl bg-[#f06449] hover:bg-[#d9533a] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-[#f06449]/30 transition-all cursor-pointer"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Try Again
+                </button>
+                <button
+                  onClick={handleCloseScanner}
+                  className="py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
+                >
+                  <CameraOff className="w-4 h-4" />
+                  Close Camera
+                </button>
+              </div>
             </div>
           )}
         </div>
 
         {/* Back Link */}
         <button
-          onClick={() => router.push("/student/dashboard")}
+          onClick={handleBackToDashboard}
           className="mt-6 text-xs text-slate-400 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
