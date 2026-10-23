@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getGeminiClient, AI_MODELS } from "@/lib/gemini";
+import { getAiTutorHealth, chatWithAiTutor } from "@/lib/ai-tutor";
 
 export const dynamic = "force-dynamic";
 
@@ -72,6 +73,43 @@ Give actionable accent and pronunciation guidance for one highlighted word or ph
 # Formatting Guidelines
 - Use bolding for new vocabulary words.
 - Keep audio-facing sentences under 25 words per turn.`;
+
+    // 1. Check Japanese AI Tutor Integration (Local Fine-Tuned Qwen2.5 QLoRA)
+    const tutorHealth = await getAiTutorHealth();
+    if (tutorHealth.available) {
+      try {
+        const historyTurns = conversationHistory.slice(-8).map((m: any) => ({
+          role: (m.role === "assistant" ? "assistant" : "user") as "user" | "assistant",
+          content: String(m.content || ""),
+        }));
+
+        const tutorPrompt = `You are Sensei AI, an interactive Japanese conversation partner and mistake corrector for college students (JLPT ${studentLevel} track).
+Guidelines:
+- Listen carefully to the student's Japanese. Detect and highlight any particle (は/が/を/に/で) or conjugation errors.
+- Always provide natural Japanese phrasing with Kanji, Furigana readings, and Romaji.
+- Provide practical vocabulary and pitch-accent pronunciation tips.`;
+
+        const aiResult = await chatWithAiTutor({
+          message,
+          history: historyTurns,
+          customSystemPrompt: tutorPrompt,
+          temperature: 0.35,
+          maxTokens: 512,
+        });
+
+        if (aiResult.status === "ok" && aiResult.response) {
+          return NextResponse.json({
+            reply: aiResult.response,
+            provider: "local_qlora",
+            model: aiResult.model,
+            isFineTuned: aiResult.isFineTuned,
+            latencyMs: aiResult.latencyMs,
+          });
+        }
+      } catch (err: any) {
+        console.warn("Local AI tutor error in /api/ai/sensei, falling back:", err);
+      }
+    }
 
     const gemini = getGeminiClient();
 

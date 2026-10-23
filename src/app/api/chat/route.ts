@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getGeminiClient, AI_MODELS } from "@/lib/gemini";
+import { getAiTutorHealth, chatWithAiTutor } from "@/lib/ai-tutor";
 import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -141,7 +142,62 @@ CORE RULES:
 ${courseGrounding}
    When explaining topics covered in the syllabus, cite the corresponding lesson (e.g. "We cover this in Lesson 2!").`;
 
-    // 5. Check LLM Integration
+    // 5. Check Japanese AI Tutor Integration (Local Fine-Tuned Qwen2.5 QLoRA)
+    const tutorHealth = await getAiTutorHealth();
+
+    if (tutorHealth.available) {
+      try {
+        const historyTurns = messages.slice(-8, -1).map((m: any) => ({
+          role: (m.role === "assistant" ? "assistant" : "user") as "user" | "assistant",
+          content: String(m.content || ""),
+        }));
+
+        const tutorSystemPrompt = `You are Sensei, an encouraging bilingual Japanese AI Tutor for college students.
+Core guidelines:
+- Answer Japanese grammar, vocabulary, kanji reading, and particle questions clearly.
+- Provide authentic Japanese examples with Furigana readings and Romaji.
+- Gently detect and correct any particle or conjugation mistakes in student inputs.
+- Keep explanations structured, collegiate, and friendly.`;
+
+        const aiResult = await chatWithAiTutor({
+          message: sanitized,
+          history: historyTurns,
+          customSystemPrompt: tutorSystemPrompt,
+          temperature: 0.35,
+          maxTokens: 512,
+        });
+
+        if (aiResult.status === "ok" && aiResult.response) {
+          const stream = new ReadableStream({
+            async start(controller) {
+              const words = aiResult.response.split(" ");
+              for (let i = 0; i < words.length; i++) {
+                const chunk = words[i] + (i === words.length - 1 ? "" : " ");
+                controller.enqueue(new TextEncoder().encode(chunk));
+                // Micro-delay for natural streaming feel
+                await new Promise((resolve) => setTimeout(resolve, 14));
+              }
+              controller.close();
+            },
+          });
+
+          return new NextResponse(stream, {
+            headers: {
+              "Content-Type": "text/plain; charset=utf-8",
+              "Cache-Control": "no-cache",
+              "Transfer-Encoding": "chunked",
+              "X-AI-Provider": "local-fine-tuned-qlora",
+              "X-AI-Model": aiResult.model,
+              "X-AI-Fine-Tuned": String(aiResult.isFineTuned),
+            },
+          });
+        }
+      } catch (tutorError: any) {
+        console.warn("AI Tutor local engine error, falling back:", tutorError.message);
+      }
+    }
+
+    // 6. Secondary Cloud LLM Integration (Google Gemini)
     const gemini = getGeminiClient();
 
     if (gemini) {
@@ -186,6 +242,7 @@ ${courseGrounding}
             "Content-Type": "text/plain; charset=utf-8",
             "Cache-Control": "no-cache",
             "Transfer-Encoding": "chunked",
+            "X-AI-Provider": "gemini-cloud",
           },
         });
       } catch (geminiError: any) {

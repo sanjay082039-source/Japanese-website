@@ -55,6 +55,17 @@ export default function ChatbotWidget() {
   const [showFurigana, setShowFurigana] = useState(true);
   const [showRomaji, setShowRomaji] = useState(true);
 
+  // Live Fine-Tuned AI Engine Status
+  const [aiStatus, setAiStatus] = useState<{
+    online: boolean;
+    provider: string;
+    model: string;
+    isFineTuned: boolean;
+    adapterPath?: string;
+    gpuAvailable?: boolean;
+    vramAllocatedGb?: number;
+  } | null>(null);
+
   // Audio / TTS state
   const [isTtsEnabled, setIsTtsEnabled] = useState(true);
   const [ttsSpeed, setTtsSpeed] = useState<0.75 | 1 | 1.25>(1);
@@ -147,6 +158,26 @@ export default function ChatbotWidget() {
       isMounted = false;
     };
   }, [pathname]);
+
+  // Load live AI Tutor backend status
+  useEffect(() => {
+    let isMounted = true;
+    async function checkAiStatus() {
+      try {
+        const res = await fetch("/api/ai/status");
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) setAiStatus(data);
+        }
+      } catch (err) {
+        console.warn("Could not retrieve AI Tutor status:", err);
+      }
+    }
+    checkAiStatus();
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen]);
 
 
   // Save to Session Storage
@@ -469,14 +500,25 @@ Click any quick-action chip below or ask your own question in English or Japanes
                 <Bot className="w-5 h-5 text-[#93c5fd]" />
               </div>
               <div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <h2 className="text-sm font-extrabold text-white tracking-tight">Sensei Bot</h2>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
-                    Online
-                  </span>
+                  {aiStatus?.online ? (
+                    <span
+                      title={`Model: ${aiStatus.model} (${aiStatus.adapterPath || "Fine-Tuned"})${aiStatus.vramAllocatedGb ? ` • VRAM: ${aiStatus.vramAllocatedGb} GB` : ""}`}
+                      className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold flex items-center gap-1"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Qwen2.5 QLoRA
+                    </span>
+                  ) : (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">
+                      Online
+                    </span>
+                  )}
                 </div>
                 <p className="text-[10px] text-slate-400">
-                  {user.name} • {user.courseLevel ? `JLPT ${user.courseLevel} Track` : "RIT Japanese Tutor"}
+                  {user?.name ? `${user.name} • ` : ""}
+                  {aiStatus?.online ? "Fine-Tuned Japanese AI Model (GPU)" : (user?.courseLevel ? `JLPT ${user.courseLevel} Track` : "RIT Japanese Tutor")}
                 </p>
               </div>
             </div>

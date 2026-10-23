@@ -59,6 +59,15 @@ export default function AiSenseiPage() {
   const [autoSpeakReply, setAutoSpeakReply] = useState(true);
   const [speechSupported, setSpeechSupported] = useState(true);
   const [speechError, setSpeechError] = useState<string | null>(null);
+  const [aiStatus, setAiStatus] = useState<{
+    online: boolean;
+    provider: string;
+    model: string;
+    isFineTuned: boolean;
+    adapterPath?: string;
+    gpuAvailable?: boolean;
+    vramAllocatedGb?: number;
+  } | null>(null);
 
   const recognitionRef = useRef<any>(null);
 
@@ -75,6 +84,19 @@ export default function AiSenseiPage() {
       }
     }
     loadUser();
+
+    async function loadAiStatus() {
+      try {
+        const res = await fetch("/api/ai/status");
+        if (res.ok) {
+          const data = await res.json();
+          setAiStatus(data);
+        }
+      } catch (e) {
+        console.warn("Could not load AI status", e);
+      }
+    }
+    loadAiStatus();
 
     // Voice loader with onvoiceschanged listener
     const updateVoices = () => {
@@ -465,6 +487,17 @@ export default function AiSenseiPage() {
             <p className="text-xs text-slate-400 mt-0.5">
               Speak or type in Japanese. Sensei actively detects grammar/particle mistakes, provides polite corrections, and coaches pitch accent.
             </p>
+            {aiStatus?.online ? (
+              <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-medium">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Fine-Tuned AI Engine: <strong>Qwen2.5-1.5B QLoRA</strong> (Local GPU • {aiStatus.vramAllocatedGb ? `${aiStatus.vramAllocatedGb} GB` : "1.15 GB"} VRAM)</span>
+              </div>
+            ) : (
+              <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-800/80 border border-white/10 text-slate-300 text-[11px]">
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span>Collegiate Mode (Start local AI Tutor: <code className="bg-slate-950 px-1 py-0.5 rounded text-[10px]">npm run tutor:server</code>)</span>
+              </div>
+            )}
           </div>
 
           {/* Voice Mode Toggles */}

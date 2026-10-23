@@ -9,7 +9,9 @@
     "lint": "next lint",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
-    "db:seed": "node prisma/seed.js"
+    "db:seed": "node prisma/seed.js",
+    "tutor:server": "cd ai-tutor && bash scripts/start_fullstack.sh",
+    "tutor:status": "curl -s http://127.0.0.1:8000/health"
   },
   "dependencies": {
     "@google/genai": "^2.27.0",
