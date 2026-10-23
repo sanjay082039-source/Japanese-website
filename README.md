@@ -77,3 +77,23 @@ All test accounts use the password: `password123`
 - **ORM & Database**: Prisma ORM with SQLite (embedded base64 for Vercel serverless)
 - **Icons**: Lucide React
 - **Auth**: JOSE (JWT) & bcryptjs
+
+---
+
+## 🤖 AI Tutor Backend (`ai-tutor/`)
+
+This repository also houses the dedicated fine-tuned Japanese AI Tutor engine located in [`ai-tutor/`](./ai-tutor):
+- **Model**: Qwen2.5-1.5B-Instruct fine-tuned with QLoRA on Japanese conversation & grammar datasets.
+- **Backend**: FastAPI REST & WebSocket streaming server ([`ai-tutor/app/server.py`](./ai-tutor/app/server.py)).
+- **Voice Pipeline**: Local Faster-Whisper STT + Edge-TTS voice generation.
+- **Interactive UI**: Dedicated Vite Tutor client in [`ai-tutor/frontend`](./ai-tutor/frontend).
+
+To start the AI Tutor service:
+```bash
+cd ai-tutor
+# Activate python environment
+source .venv/bin/activate
+# Run server
+python app/server.py --port 8000
+```
+Refer to [`ai-tutor/README.md`](./ai-tutor/README.md) and [`ai-tutor/docs/`](./ai-tutor/docs/) for complete guides on model training, dataset pipelines, and API specs.
