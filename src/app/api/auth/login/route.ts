@@ -19,9 +19,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
+    const cleanId = (email || "").toLowerCase().trim();
+
+    let user = await prisma.user.findUnique({
+      where: { email: cleanId },
     });
+
+    if (!user) {
+      // Support matching by username prefix or name (e.g. "dhanush", "admin", "sakura")
+      user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: { startsWith: cleanId } },
+            { name: { contains: cleanId } },
+          ],
+        },
+      });
+    }
 
     if (!user) {
       return NextResponse.json(

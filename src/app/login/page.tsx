@@ -86,25 +86,30 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Institutional Email Address
+                Email Address or Username
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                 <input
-                  type="email"
+                  type="text"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@rit.edu or name@student.rit.edu"
+                  placeholder="dhanush, sakura, or name@rit.edu"
                   className="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-200 focus:border-[#f06449] focus:outline-none transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-300">
+                  Password
+                </label>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  Default: <strong className="text-emerald-400 font-bold">password123</strong>
+                </span>
+              </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                 <input
@@ -112,8 +117,8 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-200 focus:border-[#f06449] focus:outline-none transition-colors"
+                  placeholder="password123"
+                  className="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-200 focus:border-[#f06449] focus:outline-none transition-colors font-mono"
                 />
               </div>
             </div>
@@ -128,7 +133,63 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="pt-4 border-t border-white/10 text-center">
+          {/* Quick Demo Login Pills */}
+          <div className="space-y-2 pt-2 border-t border-white/10">
+            <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 text-center">
+              1-Click Demo Accounts (password: password123)
+            </p>
+            <div className="grid grid-cols-2 gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("dhanush@rit.edu");
+                  setPassword("password123");
+                }}
+                className="p-2 rounded-xl bg-slate-900/90 hover:bg-[#296ec2]/20 border border-white/10 hover:border-[#93c5fd]/40 text-[11px] text-left transition-all cursor-pointer flex flex-col"
+              >
+                <span className="font-bold text-white">👤 Dhanush</span>
+                <span className="text-[9px] text-emerald-400">Admin / Sensei</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("sakura.ito@student.rit.edu");
+                  setPassword("password123");
+                }}
+                className="p-2 rounded-xl bg-slate-900/90 hover:bg-[#296ec2]/20 border border-white/10 hover:border-[#93c5fd]/40 text-[11px] text-left transition-all cursor-pointer flex flex-col"
+              >
+                <span className="font-bold text-white">👩‍🎓 Sakura Ito</span>
+                <span className="text-[9px] text-[#93c5fd]">Student • JLPT N1</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("ren.takahashi@student.rit.edu");
+                  setPassword("password123");
+                }}
+                className="p-2 rounded-xl bg-slate-900/90 hover:bg-[#296ec2]/20 border border-white/10 hover:border-[#93c5fd]/40 text-[11px] text-left transition-all cursor-pointer flex flex-col"
+              >
+                <span className="font-bold text-white">🧑‍🎓 Ren Takahashi</span>
+                <span className="text-[9px] text-[#ff7c62]">Student • JLPT N5</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("admin.tanaka@rit.edu");
+                  setPassword("password123");
+                }}
+                className="p-2 rounded-xl bg-slate-900/90 hover:bg-[#296ec2]/20 border border-white/10 hover:border-[#93c5fd]/40 text-[11px] text-left transition-all cursor-pointer flex flex-col"
+              >
+                <span className="font-bold text-white">👨‍🏫 Tanaka Hiroshi</span>
+                <span className="text-[9px] text-amber-400">Sensei / Admin</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="pt-2 text-center">
             <Link
               href="/"
               className="text-xs text-slate-400 hover:text-[#ff7c62] transition-colors inline-flex items-center gap-1.5"

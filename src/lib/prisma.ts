@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import fs from "fs";
+import path from "path";
 import { SEED_DB_BASE64 } from "./initial-db";
 
 function getDatabaseUrl(): string {
@@ -30,7 +31,11 @@ function getDatabaseUrl(): string {
     return "file:/tmp/dev.db";
   }
 
-  return process.env.DATABASE_URL || "file:./dev.db";
+  // Local development: resolve exact writable SQLite path
+  const localDb = path.resolve(process.cwd(), "prisma", "dev.db");
+  const localUrl = `file:${localDb}`;
+  process.env.DATABASE_URL = localUrl;
+  return localUrl;
 }
 
 declare global {

@@ -34,6 +34,7 @@ hf_token*
 *.swo
 
 # Local SQLite temporary files
+dev.db
 prisma/*.db-journal
 prisma/*.db.bak
 
