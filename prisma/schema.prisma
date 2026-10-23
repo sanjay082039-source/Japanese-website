@@ -1,0 +1,293 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User Model: Admin/Staff and Students
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("STUDENT") // "ADMIN", "STUDENT"
+  courseLevel  String   // "N1", "N2", "N3", "N4", "N5"
+  section      String   @default("A")       // e.g. "A", "B", "Weekend"
+  phone        String?
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  attendances           Attendance[]
+  taughtSlots           TimetableSlot[]        @relation("StaffTimetableSlots")
+  examAttempts          ExamAttempt[]
+  assignmentSubmissions AssignmentSubmission[]
+  deviceSessions        DeviceSession[]
+  conductedSessions     CourseSession[]        @relation("FacultySessions")
+  chapterProgresses     ChapterProgress[]
+  assignedHomeworks     Assignment[]           @relation("StudentAssignments")
+
+  @@index([role])
+  @@index([courseLevel])
+  @@index([email])
+}
+
+// Hardware & Device Locked Sessions (Max 1 MOBILE & 1 DESKTOP per Student)
+model DeviceSession {
+  id           String   @id @default(cuid())
+  userId       String
+  deviceType   String   // "MOBILE", "DESKTOP"
+  userAgent    String
+  ipAddress    String?
+  sessionToken String   @unique
+  lastActive   DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, deviceType])
+}
+
+// Course Session for Dynamic Anti-Cheat Attendance
+model CourseSession {
+  id              String       @id @default(cuid())
+  courseCode      String
+  courseName      String?
+  facultyId       String
+  date            DateTime     @default(now())
+  startTime       DateTime
+  endTime         DateTime
+  isEnded         Boolean      @default(false)
+  
+  // Geofence center
+  targetLatitude  Float
+  targetLongitude Float
+  radiusMeters    Float        @default(50.0)
+
+  // Rotating salt used to sign dynamic tokens
+  secretKey       String       @default(uuid())
+  
+  attendances     Attendance[]
+  faculty         User?        @relation("FacultySessions", fields: [facultyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([facultyId])
+  @@index([courseCode])
+}
+
+// Attendance with anti-fraud audit fields
+model Attendance {
+  id              String        @id @default(cuid())
+  sessionId       String
+  studentId       String
+  studentName     String?
+  timestamp       DateTime      @default(now())
+  
+  // Anti-fraud audit fields
+  deviceHash      String
+  ipAddress       String
+  clientLatitude  Float
+  clientLongitude Float
+  distanceMeters  Float
+
+  session         CourseSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student         User?         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentId])
+  @@unique([sessionId, deviceHash])
+  @@index([sessionId])
+  @@index([studentId])
+}
+
+// Hourly Timetable Slot
+model TimetableSlot {
+  id          String   @id @default(cuid())
+  dayOfWeek   Int      // 1 = Monday, 2 = Tuesday, ..., 6 = Saturday, 7 = Sunday
+  startTime   String   // "09:00"
+  endTime     String   // "10:00"
+  courseLevel String   // "N1", "N2", "N3", "N4", "N5"
+  subject     String   // e.g. "Kanji & Vocabulary", "Grammar & Dokkai", "Listening Comprehension"
+  room        String?  @default("Room 101")
+  staffId     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  staff       User?    @relation("StaffTimetableSlots", fields: [staffId], references: [id], onDelete: SetNull)
+
+  @@index([courseLevel, dayOfWeek])
+  @@index([staffId])
+}
+
+// Curriculum Chapters with Video Progress Gating & Attached Quizzes
+model Chapter {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  courseLevel     String   // "N1", "N2", "N3", "N4", "N5"
+  chapterNumber   Int      @default(1)
+  videoUrl        String   // YouTube/Vimeo/Direct MP4
+  durationSeconds Int      @default(600)
+  notesContent    String   // Markdown notes & study resources
+  resourcesJson   String?  // Array of attachments / download links
+  quizQuestionsJson String? // JSON Array of [{ id, questionText, options: [], correctOption: 0, explanation: "" }]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  progresses      ChapterProgress[]
+
+  @@index([courseLevel, chapterNumber])
+}
+
+// Student Chapter Progression & Watch Completion Gate
+model ChapterProgress {
+  id              String   @id @default(cuid())
+  studentId       String
+  chapterId       String
+  watchPercentage Float    @default(0) // 0 to 100
+  videoCompleted  Boolean  @default(false) // Unlocks quiz strictly at 100%
+  completedAt     DateTime?
+  quizSubmitted   Boolean  @default(false)
+  quizScore       Float?
+  quizAnswersJson String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  student         User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  chapter         Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, chapterId])
+  @@index([studentId])
+  @@index([chapterId])
+}
+
+// Examination Management
+model Exam {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  courseLevel     String   // "N1", "N2", "N3", "N4", "N5"
+  startTime       DateTime
+  endTime         DateTime
+  durationMinutes Int
+  totalMarks      Int
+  passingMarks    Int      @default(50)
+  isPublished     Boolean  @default(false)
+  isAiGenerated   Boolean  @default(false)
+  proctoringRules String?  // JSON string: { clipboardBlock: true, devtoolsBlock: true, tabSwitchLimit: 3, fullScreenRequired: true }
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  questions       ExamQuestion[]
+  attempts        ExamAttempt[]
+
+  @@index([courseLevel, isPublished])
+  @@index([startTime, endTime])
+}
+
+// Questions belonging to an Exam
+model ExamQuestion {
+  id            String   @id @default(cuid())
+  examId        String
+  questionText  String
+  questionType  String   @default("MCQ") // "MCQ" or "SUBJECTIVE"
+  optionsJson   String   // JSON string array of options: ["Option A", "Option B", ...]
+  correctOption String   // "0", "1", "2", "3" or correct text
+  marks         Int      @default(1)
+  orderIndex    Int      @default(0)
+  explanation   String?  // AI or sensei rationale
+
+  exam          Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@index([examId])
+}
+
+// Student Attempt for an Exam
+model ExamAttempt {
+  id           String      @id @default(cuid())
+  examId       String
+  studentId    String
+  startedAt    DateTime    @default(now())
+  submittedAt  DateTime?
+  score        Float?
+  status       String      @default("IN_PROGRESS") // "IN_PROGRESS", "SUBMITTED", "AUTO_SUBMITTED", "DISQUALIFIED"
+  answersJson  String?     // JSON of student answers: { [questionId]: answer }
+  cheatLogJson String?     // JSON log of violations: [{ type, timestamp, details }]
+  cheatCount   Int         @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  exam         Exam        @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student      User        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  violations   CheatViolationLog[]
+
+  @@unique([examId, studentId])
+  @@index([studentId])
+  @@index([examId])
+}
+
+// Granular Proctoring & Anti-Cheat Violation Forensics
+model CheatViolationLog {
+  id          String      @id @default(cuid())
+  attemptId   String
+  violationType String    // "TAB_SWITCH", "DEVTOOLS_ATTEMPT", "CLIPBOARD_COPY", "CLIPBOARD_PASTE", "FULLSCREEN_EXIT", "WINDOW_BLUR"
+  details     String?
+  timestamp   DateTime    @default(now())
+  severity    String      @default("WARNING") // "INFO", "WARNING", "CRITICAL"
+
+  attempt     ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId])
+  @@index([violationType])
+}
+
+// Assignments & Daily AI Unique Homework
+model Assignment {
+  id                  String   @id @default(cuid())
+  title               String
+  description         String
+  courseLevel         String   // "N1", "N2", "N3", "N4", "N5"
+  dueDate             DateTime
+  maxMarks            Int      @default(100)
+  isPublished         Boolean  @default(true)
+  isUniqueAiGenerated Boolean  @default(false)
+  studentId           String?  // If assigned uniquely to 1 student for anti-collusion
+  questionsJson       String?  // JSON Array of dynamic questions
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  assignedStudent     User?    @relation("StudentAssignments", fields: [studentId], references: [id], onDelete: Cascade)
+  submissions         AssignmentSubmission[]
+
+  @@index([courseLevel, dueDate])
+  @@index([studentId])
+}
+
+// Student Assignment Submissions
+model AssignmentSubmission {
+  id           String     @id @default(cuid())
+  assignmentId String
+  studentId    String
+  content      String     // Rich-text, textual response, or JSON answer object
+  fileUrl      String?    // Uploaded document URL or relative file path
+  submittedAt  DateTime   @default(now())
+  grade        Float?
+  feedback     String?
+  status       String     @default("SUBMITTED") // "SUBMITTED", "GRADED", "LATE"
+
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student      User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@index([assignmentId, studentId])
+  @@index([studentId])
+}
