@@ -1,0 +1,150 @@
+{
+  "summary": {
+    "total_processed_examples": 33,
+    "train_examples": 26,
+    "val_examples": 3,
+    "test_examples": 4,
+    "sample_examples": 30
+  },
+  "categories": {
+    "clarification_handling": 2,
+    "sentence_correction": 2,
+    "jlpt_practice_n1": 2,
+    "translation_ja_to_en": 4,
+    "general_knowledge_and_chat": 2,
+    "context_dependent_questions": 1,
+    "multiturn_dialogue": 2,
+    "translation_en_to_ja": 3,
+    "jlpt_practice_n2": 2,
+    "uncertainty_acknowledgment": 2,
+    "jlpt_practice_n4": 2,
+    "jlpt_practice_n3": 2,
+    "vocabulary_and_kanji": 2,
+    "grammar_and_particles": 2,
+    "jlpt_practice_n5": 2,
+    "polite_and_casual_styles": 1
+  },
+  "languages": {
+    "English Primary": 9,
+    "Bilingual (JA + EN)": 23,
+    "Japanese Primary": 4
+  },
+  "provenances": {
+    "synthetic": 15,
+    "human_verified": 18
+  },
+  "licenses": {
+    "Apache-2.0": 30,
+    "CC-BY 2.0 FR": 3
+  },
+  "splits": {
+    "train": {
+      "file": "data/processed/train.jsonl",
+      "exists": true,
+      "total_examples": 26,
+      "categories": {
+        "clarification_handling": 2,
+        "sentence_correction": 2,
+        "jlpt_practice_n1": 2,
+        "translation_ja_to_en": 2,
+        "general_knowledge_and_chat": 2,
+        "context_dependent_questions": 1,
+        "multiturn_dialogue": 2,
+        "translation_en_to_ja": 3,
+        "jlpt_practice_n2": 2,
+        "uncertainty_acknowledgment": 1,
+        "jlpt_practice_n4": 1,
+        "jlpt_practice_n3": 1,
+        "vocabulary_and_kanji": 2,
+        "grammar_and_particles": 2,
+        "jlpt_practice_n5": 1
+      },
+      "languages": {
+        "English Primary": 8,
+        "Bilingual (JA + EN)": 17,
+        "Japanese Primary": 4
+      },
+      "provenances": {
+        "synthetic": 13,
+        "human_verified": 13
+      },
+      "licenses": {
+        "Apache-2.0": 24,
+        "CC-BY 2.0 FR": 2
+      },
+      "user_length": {
+        "mean": 60.6,
+        "min": 26,
+        "max": 132
+      },
+      "assistant_length": {
+        "mean": 383.3,
+        "min": 75,
+        "max": 820
+      }
+    },
+    "val": {
+      "file": "data/processed/val.jsonl",
+      "exists": true,
+      "total_examples": 3,
+      "categories": {
+        "polite_and_casual_styles": 1,
+        "uncertainty_acknowledgment": 1,
+        "translation_ja_to_en": 1
+      },
+      "languages": {
+        "English Primary": 1,
+        "Bilingual (JA + EN)": 2
+      },
+      "provenances": {
+        "human_verified": 2,
+        "synthetic": 1
+      },
+      "licenses": {
+        "Apache-2.0": 2,
+        "CC-BY 2.0 FR": 1
+      },
+      "user_length": {
+        "mean": 78.0,
+        "min": 59,
+        "max": 112
+      },
+      "assistant_length": {
+        "mean": 496.7,
+        "min": 272,
+        "max": 707
+      }
+    },
+    "test": {
+      "file": "data/processed/test.jsonl",
+      "exists": true,
+      "total_examples": 4,
+      "categories": {
+        "jlpt_practice_n4": 1,
+        "jlpt_practice_n3": 1,
+        "translation_ja_to_en": 1,
+        "jlpt_practice_n5": 1
+      },
+      "languages": {
+        "Bilingual (JA + EN)": 4
+      },
+      "provenances": {
+        "human_verified": 3,
+        "synthetic": 1
+      },
+      "licenses": {
+        "Apache-2.0": 4
+      },
+      "user_length": {
+        "mean": 77.2,
+        "min": 65,
+        "max": 94
+      },
+      "assistant_length": {
+        "mean": 536.2,
+        "min": 443,
+        "max": 629
+      }
+    }
+  }
+}

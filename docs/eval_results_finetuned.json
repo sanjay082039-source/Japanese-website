@@ -1,0 +1,349 @@
+{
+  "metadata": {
+    "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "is_fine_tuned": true,
+    "adapter_path": "adapters/japanese-ai-tutor-qlora",
+    "quantization": "4bit",
+    "generation_parameters": {
+      "temperature": 0.2,
+      "top_p": 0.9,
+      "max_new_tokens": 450,
+      "seed": 42
+    },
+    "timestamp": "2026-10-22 23:01:08"
+  },
+  "aggregate_metrics": {
+    "total_tests": 12,
+    "overall_check_pass_rate_pct": 87.7,
+    "total_checks_evaluated": 57,
+    "total_checks_passed": 50,
+    "mean_latency_seconds": 6.84,
+    "mean_throughput_tok_per_sec": 34.5,
+    "peak_vram_gb": 1.19
+  },
+  "test_results": [
+    {
+      "test_id": "test_01_en_to_ja_translation",
+      "category": "English-to-Japanese translation",
+      "description": "Evaluate natural business-register translation with Kanji, Romaji, and politeness explanation.",
+      "user_prompt": "How do I naturally say 'I am looking forward to working with you from now on' in a business setting in Japanese? Please provide Kanji, Romaji, and explain the politeness level.",
+      "model_response": "### Natural Way:\n**「これからもお付き合いさせていただきます。」**\n*Kawakaze mo otokonami shite imasu.**\n*(Kawakaze) will continue to cooperate with you.*\n- **Kanji:** これから (kawakaze): これから (from now on)\n- **Romaji:** Kawa-kaze mo otoko-nai shite imasu.\n- **Polarity:** Polite (尊敬語 / Keigo).\n### Explanation:\n1. **「これからも」 (Kawakaze mo)**: *From now on* or *starting from now on*. It's a polite way of saying \"since then\" or \"ever since.\"\n2. **「お付き合いさせていただきます」 (Otoko-nai shite imasu)**: *Please be my guest.* This is a respectful way of accepting someone as your superior or colleague.\n3. **「お付き合いさせていただきます」 (Otoko-nai shite imasu)**: *Please accept me as your subordinate.* It shows humility while still acknowledging authority.",
+      "metrics": {
+        "latency_seconds": 6.676,
+        "generated_tokens": 226,
+        "throughput_tok_per_sec": 33.9,
+        "peak_vram_gb": 1.17
+      },
+      "automated_checks": {
+        "checks": {
+          "non_empty": true,
+          "no_repetitive_loop": true,
+          "has_japanese": true,
+          "contains_yoroshiku": false,
+          "has_romaji": false,
+          "explains_politeness": true
+        },
+        "total_checks": 6,
+        "passed_checks": 4,
+        "pass_rate_pct": 66.7,
+        "failures": [],
+        "all_passed": false
+      }
+    },
+    {
+      "test_id": "test_02_ja_to_en_translation",
+      "category": "Japanese-to-English translation",
+      "description": "Evaluate accurate English translation and cultural explanation of 'おかげさまで'.",
+      "user_prompt": "Translate this Japanese sentence into natural English and explain the nuance of 'おかげさまで': 「おかげさまで、試験に合格することができました。」",
+      "model_response": "**「おかげさまで、試験に合格することができました。」**\n*(Konnichiwa!)* *Thank you very much for your help/encouragement; I was able to pass the exam.*\n### Nuance:\n- **「おかげさまで」 (kouzousama) - Thanks a lot! / Much obliged!**\n  - This is a polite way to express gratitude when someone has helped or encouraged you.\n  - It emphasizes the positive impact of their support on your success.\n  - The character 「おかげ」 (kouzu) means \"helpful\" or \"beneficial,\" while 「さまで」 (sama) expresses gratitude.\n### Full Sentence Breakdown:\n- **「おかげさまで」 (kouzousama):** Thank you so much!\n- **「試験に合格しました」 (shiken ni kouki shite imasu):** I passed the exam with great effort/help from you!",
+      "metrics": {
+        "latency_seconds": 5.777,
+        "generated_tokens": 200,
+        "throughput_tok_per_sec": 34.6,
+        "peak_vram_gb": 1.17
+      },
+      "automated_checks": {
+        "checks": {
+          "non_empty": true,
+          "no_repetitive_loop": true,
+          "contains_pass": true,
+          "contains_exam": true,
+          "explains_okagesamade": true
+        },
+        "total_checks": 5,
+        "passed_checks": 5,
+        "pass_rate_pct": 100.0,
+        "failures": [],
+        "all_passed": true
+      }
+    },
+    {
+      "test_id": "test_03_grammar_explanation",
+      "category": "Grammar explanations",
+      "description": "Evaluate deep structural distinction between 〜なければならない and 〜なくてはいけない.",
+      "user_prompt": "What is the difference between 〜なければならない (nakereba naranai) and 〜なくてはいけない (nakute wa ikenai)? Are there situations where one is preferred over the other?",
+      "model_response": "Absolutely! Understanding these two particles is crucial for natural Japanese expression.\n### 1. **〜なければならない (Nakereba Naranai)**\n- **Meaning:** \"It must be done / It's necessary to do\"\n- **Usage:**\n  - When you have a strong obligation or necessity to do something.\n  - Example: 「学校に着く**なければならない**、早めに家を出る。」(Kouka ni oku nakereba, tsuyoshi o eiru.) *I must arrive at school early because it's very important.*\n### 2. **〜なくてはいけない (Nakute Wa Ikenai)**\n- **Meaning:** \"It cannot be avoided / It has to happen\"\n- **Usage:**\n  - When something unavoidable or inevitable happens.\n  - Example: 「雨が降っている**なくてはいけない**、公園に行きましょう。」(Ue ga tsumareru nakute wa ikenai, kawafuku ni ikimashou.) *Since it's raining, let's go to the park anyway.*",
+      "metrics": {
+        "latency_seconds": 6.771,
+        "generated_tokens": 232,
+        "throughput_tok_per_sec": 34.3,
+        "peak_vram_gb": 1.17
+      },
+      "automated_checks": {
+        "checks": {
+          "non_empty": true,
+          "no_repetitive_loop": true,
+          "explains_obligation": true,
+          "contrasts_usage": false
+        },
+        "total_checks": 4,
+        "passed_checks": 3,
+        "pass_rate_pct": 75.0,
+        "failures": [],
+        "all_passed": false
+      }
+    },
+    {
+      "test_id": "test_04_particle_usage",
+      "category": "Particle usage",
+      "description": "Evaluate grammatical rule for potential verbs and case particles (が vs を).",
+      "user_prompt": "In the sentence 「私はスキー（　）できます」, should the particle be が (ga) or を (o)? Explain the grammatical rule behind potential verbs and particles.",
+      "model_response": "### Grammar Point: Potential Verbs and Particles\n- **「～ます」 (masu):** The polite form of a regular verb.\n- **「～できます」 (kudasai):** The polite future tense for verbs that take the negative form with 〜ない (nai).\n### Sentence Analysis:\n「私はスキー（　）ことができます。」\n- **「スキーする」 (sukiyaki suru):** Verb + noun phrase = action performed by someone.\n- **「スキーできる」 (sukiyaki dekiru):** Future perfect conjugation of the verb 「スキーする」 (sukiyaki suru).\n### Particle Choice:\n- **「～できます」 (kudasai):** Used when expressing ability to perform an action in the future.\n- **「～ことができます」 (dekiru):** Used when expressing past or present ability to perform an action.\n### Conclusion:\nThe correct particle is **～ことができます** (dekiru), as it expresses the ability to perform the action \"スキーする\" (sukiyaki suru) in the future.",
+      "metrics": {
+        "latency_seconds": 6.663,
+        "generated_tokens": 234,
+        "throughput_tok_per_sec": 35.1,
+        "peak_vram_gb": 1.17
+      },
+      "automated_checks": {
+        "checks": {
+          "non_empty": true,
+          "no_repetitive_loop": true,
+          "identifies_ga": true,
+          "explains_potential": true
+        },
+        "total_checks": 4,
+        "passed_checks": 4,
+        "pass_rate_pct": 100.0,
+        "failures": [],
+        "all_passed": true
+      }
+    },
+    {
+      "test_id": "test_05_kanji_readings",
+      "category": "Kanji readings and vocabulary",
+      "description": "Evaluate On'yomi vs Kun'yomi distinction across 先生, 生きる, and 生ビール.",
+      "user_prompt": "Explain the readings and meanings of the kanji 生 in these three words: 先生 (sensei), 生きる (ikiru), and 生ビール (namabiiru). Why does this single kanji have such different readings?",
+      "model_response": "### 1. Sensei (先生 - sensei)\n- **Reading:** 「さん」 (san).\n- **Meaning:** Teacher, Master.\n- **Etymology:** From Chinese *shishang* (teacher/master).\n- **Note:** This is a respectful term for teachers or elders.\n### 2. 生きる (生きる - ikiru)\n- **Reading:** 「生きる」 (nikkari) / 「生きてる」 (nikki toru).\n- **Meaning:** To live, to survive.\n- **Etymology:** From *sui* (to live).\n- **Usage:** Used as a verb when talking about survival or living through difficult times.\n### 3. 生ビール (ナムビール - namabiiru)\n- **Reading:** 「ナムビール」 (nami biru).\n- **Meaning:** Beer.\n- **Etymology:** From *nihon shizai* (beer).\n- **Note:** While it sounds like \"beer,\" its pronunciation differs significantly from English due to historical reasons related to Japan's unique brewing tradition.",
+      "metrics": {
+        "latency_seconds": 6.672,
+        "generated_tokens": 233,
+        "throughput_tok_per_sec": 34.9,
+        "peak_vram_gb": 1.17
+      },
+      "automated_checks": {
+        "checks": {
+          "non_empty": true,
+          "no_repetitive_loop": true,
+          "identifies_sei": true,
+          "identifies_ikiru": true,
+          "identifies_nama": true,
+          "mentions_onyomi_or_kunyomi": true
+        },
+        "total_checks": 6,
+        "passed_checks": 6,
+        "pass_rate_pct": 100.0,
+        "failures": [],
+        "all_passed": true
+      }
+    },
+    {
+      "test_id": "test_06_naturalness_check",
+      "category": "Naturalness of Japanese sentences",
+      "description": "Evaluate ability to diagnose unnatural nominalization and provide native phrasing.",
+      "user_prompt": "A learner wrote: 「私は毎朝、朝ご飯を食べることをします。」 Is this natural Japanese? If not, how would a native speaker say it, and why is the original awkward?",
+      "model_response": "The sentence 「私は毎朝、朝ご飯を食べることをします。」 is grammatically correct but feels slightly unnatural in natural Japanese.\n### Why It's Awkward:\n1. **「食べる** (taberu)** is used for passive actions like being hit by something or eaten by someone else.**\n2. **「食べることをする** (tabe o suru)** is more commonly used when you actively do something yourself.\n### Natural Alternative:\nTo express that you eat breakfast every morning naturally, you could use:\n- **毎日、朝ご飯を食べます。** *(Mada, asagohan o tabe masu.)*\n- Or even simpler: **毎日、朝ご飯を食べています。** *(Mada, asagohan o tabete imasu.)*\nThis version directly expresses your habitual action without using passive language.",
+      "metrics": {
+        "latency_seconds": 5.439,
+        "generated_tokens": 186,
+        "throughput_tok_per_sec": 34.2,
+        "peak_vram_gb": 1.17
+      },
+      "automated_checks": {
+        "checks": {
+          "non_empty": true,
+          "no_repetitive_loop": true,
+          "identifies_unnatural": true,
+          "provides_natural_form": true
+        },
+        "total_checks": 4,
+        "passed_checks": 4,
+        "pass_rate_pct": 100.0,
+        "failures": [],
+        "all_passed": true
+      }
+    },
+    {
+      "test_id": "test_07_sentence_correction",
+      "category": "Sentence correction",
+      "description": "Evaluate detection of faulty causal conjunction (から) and contrast correction (が/けど).",
+      "user_prompt": "Please correct and explain the errors in this sentence: 「昨日、友達と映画を見に行きましたから、とても面白くなかったです。」",
+      "model_response": "Your sentence is almost correct, but there's a small grammatical mistake:\n1. The particle \"は\" should be changed to \"が\".\n2. The verb conjugation needs adjustment.\nHere’s the corrected version:\n「昨日、友達と一緒に映画を見に行きましたから、とても面白くありませんでした。」\n### Explanation:\n- **「一緒に」 (kore ni)**: Together/With each other.\n- **「見に行きました** (mie iru kudasai):** You went together to see it.\n- **「面白くありませんでした** (banaku arimasen deshita):** It wasn't very interesting at all.",
+      "metrics": {
+        "latency_seconds": 4.029,
+        "generated_tokens": 137,
+        "throughput_tok_per_sec": 34.0,
+        "peak_vram_gb": 1.16
+      },
+      "automated_checks": {
+        "checks": {
+          "non_empty": true,
+          "no_repetitive_loop": true,
+          "detects_conjunction_error": true,
+          "provides_contrastive_fix": true
+        },
+        "total_checks": 4,
+        "passed_checks": 4,
+        "pass_rate_pct": 100.0,
+        "failures": [],
+        "all_passed": true
+      }
+    },
+    {
+      "test_id": "test_08_multiturn_context",
+      "category": "Multi-turn conversational context",
+      "description": "Evaluate multi-turn reference resolution (identifying 'the second one' as Kiyomizu-dera).",
+      "user_prompt": "How do I ask a bus driver in polite Japanese if this bus goes to the second one we discussed?",
+      "model_response": "To politely inquire about transportation options from a bus driver in Japanese, you can say:\n「バスに乗って、**どこまで行きますか？**」(Bus Shidaiko, **Doko ni ikimasu ka?**) - \"Will you take me all the way there?\"",
+      "metrics": {
+        "latency_seconds": 1.727,
+        "generated_tokens": 59,
+        "throughput_tok_per_sec": 34.2,
+        "peak_vram_gb": 1.19
+      },
+      "automated_checks": {
+        "checks": {
+          "non_empty": true,
+          "no_repetitive_loop": true,
+          "resolves_kiyomizu": false,
+          "provides_polite_question": true
+        },
+        "total_checks": 4,
+        "passed_checks": 3,
+        "pass_rate_pct": 75.0,
+        "failures": [],
+        "all_passed": false
+      }
+    },
+    {
+      "test_id": "test_09_jlpt_practice",
+      "category": "JLPT practice",
+      "description": "Evaluate JLPT N3 multiple choice grammar question with distractor elimination.",
+      "user_prompt": "JLPT N3 Grammar Drill: Choose the correct option to fill in the blank and explain why the other choices are incorrect:\n「山田さんは今、会議中（　）、後でお電話いただけますか。」\n1. にとって\n2. なので\n3. にかんして\n4. について",
+      "model_response": "The correct answer is **3. にかんして**.\n### Why?\n- **「にかんして」(nikkan shite) means \"regarding\" or \"concerning\". It's used when you're talking about something specific that has already been discussed or decided upon.\n- In this sentence, 「山田さん」(Yamada-san) is addressing someone named Yamada, who is currently in a meeting. The speaker wants to know if he/she can take a call after the meeting ends.\n- **「にかんして」(nikkan shite)** fits perfectly here because it indicates that the following information is relevant to what was previously agreed upon during the meeting.\n- **「にとって」(to ni oshiete iru) (1):** This means \"as for... / regarding...\" but implies a general consideration rather than being specifically related to a previous discussion.\n- **「ので」(de mo de):** Indicates a consequence or result, not a specific reference point from past discussions.\n- **「について」(arukatta wa):** Refers to something mentioned before without specifying which part of the conversation they were referring to.",
+      "metrics": {
+        "latency_seconds": 6.998,
+        "generated_tokens": 243,
+        "throughput_tok_per_sec": 34.7,
+        "peak_vram_gb": 1.17
+      },
+      "automated_checks": {
+        "checks": {
+          "non_empty": true,
+          "no_repetitive_loop": true,
+          "identifies_option_2": false,
+          "refutes_distractors": true
+        },
+        "total_checks": 4,
+        "passed_checks": 3,
+        "pass_rate_pct": 75.0,
+        "failures": [],
+        "all_passed": false
+      }
+    },
+    {
+      "test_id": "test_10_general_questions",
+      "category": "General questions",
+      "description": "Evaluate accurate general knowledge explanation with Japanese tea terminology.",
+      "user_prompt": "What is the difference between green tea (Ryokucha), Matcha, and Sencha? Please include the relevant Japanese terms in kanji and hiragana.",
+      "model_response": "### 1. **Matcha (抹茶):**\n- **Character:** 適茶 (machi-te)\n- **Definition:** A finely ground powdered green tea.\n- **Characteristics:**\n  - Very rich in nutrients due to its high concentration of catechins.\n  - Often used for ceremonial purposes like tea ceremonies.\n  - Comes from the same Camellia sinensis plant as regular green tea but harvested differently.\n- **Recipe:**\n  ```plaintext\n  水を注ぐ → 砂糖を入れる → 茶粉を振りかける\n  ```\n### 2. **Sencha (煎茶):**\n- **Character:** 煎茶 (sencha)\n- **Definition:** Regular green tea without special processing.\n- **Characteristics:**\n  - Less concentrated than Matcha but still very healthy.\n  - More widely available and affordable compared to Matcha.\n- **Recipe:**\n  ```plaintext\n  水を注ぐ → 砂糖を入れる → 茶葉を振る\n  ```\n### 3. **Ryokucha (抹茶):**\n- **Character:** 抹茶 (ryokucha)\n- **Definition:** Light-colored green tea that has been lightly steamed or roasted.\n- **Characteristics:**\n  - Similar taste to Sencha but milder.\n  - Popular among office workers who prefer a lighter drink.\n- **Recipe:**\n  ```plaintext\n  水を注ぐ → 砂糖を入れる → 茶葉を振る\n  ```\n### Summary:\n- **Matcha** is the most expensive and nutrient-dense option, while **Sencha** is more common and slightly less potent.\n- **Ryokucha** is a light version of Sencha often enjoyed by office workers.",
+      "metrics": {
+        "latency_seconds": 10.845,
+        "generated_tokens": 380,
+        "throughput_tok_per_sec": 35.0,
+        "peak_vram_gb": 1.17
+      },
+      "automated_checks": {
+        "checks": {
+          "non_empty": true,
+          "no_repetitive_loop": true,
+          "mentions_ryokucha": true,
+          "mentions_sencha": true,
+          "mentions_matcha": true,
+          "explains_steeped_vs_powder": true
+        },
+        "total_checks": 6,
+        "passed_checks": 6,
+        "pass_rate_pct": 100.0,
+        "failures": [],
+        "all_passed": true
+      }
+    },
+    {
+      "test_id": "test_11_ambiguous_questions",
+      "category": "Ambiguous questions",
+      "description": "Evaluate disambiguation of homophones 'hashi' (chopsticks vs bridge vs edge).",
+      "user_prompt": "What does 'hashi' mean in Japanese?",
+      "model_response": "**Hashi** is a versatile Japanese word that can refer to:\n1. **Pen**: 「筆」(ひびき /ひびき) - for writing with a pen or brush.\n2. **Bridge**: 「橋」(はし) - the wooden structure over water.\n3. **Spoon**: 「匙」(しき) - used in traditional tea ceremonies.\n4. **Eyesight**: 「目」(め) - referring to vision.\n5. **Rope**: 「線」(せん) - in kanji as 「縁」(えん).\n6. **Branches**: 「枝」(はし) - of trees or plants.\n7. **Supporting Beam**: 「梁」(まわし) - in architecture.\n8. **Tongue**: 「舌」(ぜつ) - when describing speech patterns.\n9. **Stool**: 「 stool」 (座り台 / 机 / 桌 / 席 / 診断台 / 結論台 / テーブル / イベントスペース / リラクゼーションスペース / ランドスケープ / レンタルスペース / マーケティングスペース / プロジェクトスペース / ディスプレイスペース / ダイニングスペース / パソコンスタンド / ボランティアスペース / ファミリーホーム / ビジネススペース / ワークスペース / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト / ハウスクリエイト /",
+      "metrics": {
+        "latency_seconds": 12.892,
+        "generated_tokens": 450,
+        "throughput_tok_per_sec": 34.9,
+        "peak_vram_gb": 1.17
+      },
+      "automated_checks": {
+        "checks": {
+          "non_empty": true,
+          "no_repetitive_loop": false,
+          "identifies_chopsticks": false,
+          "identifies_bridge": true,
+          "notes_disambiguation": true
+        },
+        "total_checks": 5,
+        "passed_checks": 3,
+        "pass_rate_pct": 60.0,
+        "failures": [
+          "repetitive_loop_detected"
+        ],
+        "all_passed": false
+      }
+    },
+    {
+      "test_id": "test_12_uncertain_etymology",
+      "category": "Questions where the correct answer is uncertain",
+      "description": "Evaluate historical etymology of ごちそうさまでした and intellectual humility.",
+      "user_prompt": "Where does the Japanese meal greeting 'ごちそうさまでした' (Gochisousama deshita) historically originate, and why does the word contain the kanji 走 (to run)?",
+      "model_response": "The phrase \"ごちそうさまでした\" (Gochisousama deshita), meaning \"Thank you very much for your delicious food,\" originates from a historical context related to samurai etiquette.\nHistorically, this expression was used by guests to thank their hosts after eating together at a formal meal in Edo period Japan (1603-1867).\n### The Origin:\n- **ごち** (gochi): means \"food\"\n- **おっしゃる** (o-saru): is a polite way of saying \"you have done something.\"\n- **すみません** (sumimasen): apologizes when one makes a mistake or inconvenience others.\n### The Character 走 (走):\n- In ancient times, the character 走 (うつろ) originally represented running quickly.\n- It also had another meaning: to follow closely behind someone on horseback.\n- Samurai would use it as a respectful term of address when following their lord around the castle grounds.\n- Over time, the character evolved into its current form, becoming synonymous with politeness and respectfulness.\nSo, when you hear someone say \"ごちそうさまでした\", they are expressing gratitude not just for the food itself but for being treated with such courtesy!",
+      "metrics": {
+        "latency_seconds": 7.596,
+        "generated_tokens": 262,
+        "throughput_tok_per_sec": 34.5,
+        "peak_vram_gb": 1.17
+      },
+      "automated_checks": {
+        "checks": {
+          "non_empty": true,
+          "no_repetitive_loop": true,
+          "mentions_running_concept": true,
+          "mentions_chisou": true,
+          "mentions_hospitality": true
+        },
+        "total_checks": 5,
+        "passed_checks": 5,
+        "pass_rate_pct": 100.0,
+        "failures": [],
+        "all_passed": true
+      }
+    }
+  ]
+}

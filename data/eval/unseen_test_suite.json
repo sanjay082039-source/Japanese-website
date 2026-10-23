@@ -1,0 +1,250 @@
+[
+  {
+    "id": "test_01_en_to_ja_translation",
+    "category": "English-to-Japanese translation",
+    "description": "Evaluate natural business-register translation with Kanji, Romaji, and politeness explanation.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "How do I naturally say 'I am looking forward to working with you from now on' in a business setting in Japanese? Please provide Kanji, Romaji, and explain the politeness level."
+      }
+    ],
+    "gold_reference": {
+      "key_japanese_phrases": ["これからよろしくお願いします", "今後ともよろしくお願いいたします", "よろしくお願いいたします"],
+      "expected_romaji": "yoroshiku",
+      "expected_politeness": "Kenjougo (humble) or Teineigo (polite business register)"
+    },
+    "automated_checks": {
+      "requires_japanese": true,
+      "required_keywords": ["よろしく"],
+      "required_romaji": ["yoroshiku"],
+      "politeness_indicators": ["polite", "business", "keigo", "formal", "humble"]
+    }
+  },
+  {
+    "id": "test_02_ja_to_en_translation",
+    "category": "Japanese-to-English translation",
+    "description": "Evaluate accurate English translation and cultural explanation of 'おかげさまで'.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Translate this Japanese sentence into natural English and explain the nuance of 'おかげさまで': 「おかげさまで、試験に合格することができました。」"
+      }
+    ],
+    "gold_reference": {
+      "translation": "Thanks to you / Fortunately, I was able to pass the exam.",
+      "nuance": "Expresses modesty and gratitude for external support or favorable circumstances."
+    },
+    "automated_checks": {
+      "required_keywords_en": ["pass", "exam"],
+      "nuance_keywords_en": ["thanks", "gratitude", "fortunate", "help", "support"]
+    }
+  },
+  {
+    "id": "test_03_grammar_explanation",
+    "category": "Grammar explanations",
+    "description": "Evaluate deep structural distinction between 〜なければならない and 〜なくてはいけない.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the difference between 〜なければならない (nakereba naranai) and 〜なくてはいけない (nakute wa ikenai)? Are there situations where one is preferred over the other?"
+      }
+    ],
+    "gold_reference": {
+      "meaning": "Both express obligation ('must / have to').",
+      "distinction": "〜なければならない is formal, written, and objective. 〜なくてはいけない is spoken, conversational, and interpersonal."
+    },
+    "automated_checks": {
+      "obligation_keywords": ["must", "have to", "obligation"],
+      "contrast_keywords": ["formal", "written", "spoken", "conversational", "casual"]
+    }
+  },
+  {
+    "id": "test_04_particle_usage",
+    "category": "Particle usage",
+    "description": "Evaluate grammatical rule for potential verbs and case particles (が vs を).",
+    "messages": [
+      {
+        "role": "user",
+        "content": "In the sentence 「私はスキー（　）できます」, should the particle be が (ga) or を (o)? Explain the grammatical rule behind potential verbs and particles."
+      }
+    ],
+    "gold_reference": {
+      "correct_particle": "が (ga)",
+      "grammatical_rule": "Potential verbs express a state or ability, so the target of ability is traditionally marked by が, although を is colloquial in modern Japanese."
+    },
+    "automated_checks": {
+      "target_particle": ["が", "ga"],
+      "rule_keywords": ["potential", "ability", "できる", "dekiru"]
+    }
+  },
+  {
+    "id": "test_05_kanji_readings",
+    "category": "Kanji readings and vocabulary",
+    "description": "Evaluate On'yomi vs Kun'yomi distinction across 先生, 生きる, and 生ビール.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain the readings and meanings of the kanji 生 in these three words: 先生 (sensei), 生きる (ikiru), and 生ビール (namabiiru). Why does this single kanji have such different readings?"
+      }
+    ],
+    "gold_reference": {
+      "sensei": "sei (On'yomi - Chinese loan reading)",
+      "ikiru": "i (Kun'yomi - native Japanese verb reading)",
+      "namabiiru": "nama (Kun'yomi - fresh/draft/raw)",
+      "linguistic_context": "On'yomi (Sino-Japanese) vs Kun'yomi (native Japanese) historical adaptation."
+    },
+    "automated_checks": {
+      "required_readings": ["sei", "ikiru", "nama"],
+      "linguistic_concepts": ["on'yomi", "kun'yomi", "chinese", "native"]
+    }
+  },
+  {
+    "id": "test_06_naturalness_check",
+    "category": "Naturalness of Japanese sentences",
+    "description": "Evaluate ability to diagnose unnatural nominalization and provide native phrasing.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "A learner wrote: 「私は毎朝、朝ご飯を食べることをします。」 Is this natural Japanese? If not, how would a native speaker say it, and why is the original awkward?"
+      }
+    ],
+    "gold_reference": {
+      "verdict": "Unnatural / wordy",
+      "native_expression": "「毎朝、朝ご飯を食べます」 (or 朝食をとります)",
+      "explanation": "Overusing 〜ことをする when a direct transitive verb exists creates redundant nominalization."
+    },
+    "automated_checks": {
+      "unnatural_verdict": ["unnatural", "awkward", "redundant", "not natural", "weird"],
+      "native_phrasing": ["朝ご飯を食べます", "食べます", "朝食", "tabemasu"]
+    }
+  },
+  {
+    "id": "test_07_sentence_correction",
+    "category": "Sentence correction",
+    "description": "Evaluate detection of faulty causal conjunction (から) and contrast correction (が/けど).",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Please correct and explain the errors in this sentence: 「昨日、友達と映画を見に行きましたから、とても面白くなかったです。」"
+      }
+    ],
+    "gold_reference": {
+      "diagnosed_error": "から (because) creates an illogical causal link. The sentence requires a contrastive conjunction like が or けど (but).",
+      "correction": "「昨日、友達と映画を見に行きましたが、あまり面白くなかったです。」"
+    },
+    "automated_checks": {
+      "error_diagnosis": ["から", "kara", "cause", "causal", "because", "illogical", "contradiction"],
+      "correction_conjunction": ["が", "けど", "けれど", "however", "but"]
+    }
+  },
+  {
+    "id": "test_08_multiturn_context",
+    "category": "Multi-turn conversational context",
+    "description": "Evaluate multi-turn reference resolution (identifying 'the second one' as Kiyomizu-dera).",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I am visiting Kyoto for three days. What are two must-visit temples?"
+      },
+      {
+        "role": "assistant",
+        "content": "Two quintessential temples in Kyoto are:\n1. **Kinkaku-ji (金閣寺)** — The famous Golden Pavilion covered in gold leaf, surrounded by a pond.\n2. **Kiyomizu-dera (清水寺)** — The historic Pure Water Temple famous for its massive wooden stage overlooking cherry blossoms and maple trees."
+      },
+      {
+        "role": "user",
+        "content": "How do I ask a bus driver in polite Japanese if this bus goes to the second one we discussed?"
+      }
+    ],
+    "gold_reference": {
+      "resolved_entity": "Kiyomizu-dera (清水寺)",
+      "target_phrase": "「すみません、このバスは清水寺に行きますか？」",
+      "negative_entity": "Kinkaku-ji (Must NOT mistakenly choose the first temple)"
+    },
+    "automated_checks": {
+      "required_target": ["清水寺", "kiyomizu"],
+      "polite_question_pattern": ["行きますか", "ikimasu ka", "向かいますか", "止まりますか"]
+    }
+  },
+  {
+    "id": "test_09_jlpt_practice",
+    "category": "JLPT practice",
+    "description": "Evaluate JLPT N3 multiple choice grammar question with distractor elimination.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "JLPT N3 Grammar Drill: Choose the correct option to fill in the blank and explain why the other choices are incorrect:\n「山田さんは今、会議中（　）、後でお電話いただけますか。」\n1. にとって\n2. なので\n3. にかんして\n4. について"
+      }
+    ],
+    "gold_reference": {
+      "correct_option": "Option 2: なので",
+      "explanation": "会議中 (in a meeting) functions as a noun/state, so なので explains the polite reason. 1 (にとって = for), 3 (に関して = regarding), 4 (について = about) do not fit the causal context."
+    },
+    "automated_checks": {
+      "correct_answer": ["2", "なので", "nanode"],
+      "distractor_refutation": ["にとって", "に関して", "について", "regarding", "about"]
+    }
+  },
+  {
+    "id": "test_10_general_questions",
+    "category": "General questions",
+    "description": "Evaluate accurate general knowledge explanation with Japanese tea terminology.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the difference between green tea (Ryokucha), Matcha, and Sencha? Please include the relevant Japanese terms in kanji and hiragana."
+      }
+    ],
+    "gold_reference": {
+      "ryokucha": "緑茶 (りょくちゃ) - General category of unfermented green tea.",
+      "sencha": "煎茶 (せんちゃ) - Most common steeped whole-leaf green tea.",
+      "matcha": "抹茶 (まっちゃ) - Powdered shade-grown green tea (from tencha)."
+    },
+    "automated_checks": {
+      "required_kanji": ["緑茶", "煎茶", "抹茶"],
+      "distinction_concepts": ["powder", "powdered", "leaf", "steep", "whole"]
+    }
+  },
+  {
+    "id": "test_11_ambiguous_questions",
+    "category": "Ambiguous questions",
+    "description": "Evaluate disambiguation of homophones 'hashi' (chopsticks vs bridge vs edge).",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What does 'hashi' mean in Japanese?"
+      }
+    ],
+    "gold_reference": {
+      "chopsticks": "箸 (はし) - Chopsticks (high-low pitch)",
+      "bridge": "橋 (はし) - Bridge (low-high pitch)",
+      "edge": "端 (はし) - Edge or border",
+      "disambiguation_guidance": "Notes the ambiguity and explains pitch accent or kanji context."
+    },
+    "automated_checks": {
+      "chopsticks_term": ["箸", "chopstick"],
+      "bridge_term": ["橋", "bridge"],
+      "distinction_note": ["kanji", "pitch", "accent", "homophone", "context"]
+    }
+  },
+  {
+    "id": "test_12_uncertain_etymology",
+    "category": "Questions where the correct answer is uncertain",
+    "description": "Evaluate historical etymology of ごちそうさまでした and intellectual humility.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Where does the Japanese meal greeting 'ごちそうさまでした' (Gochisousama deshita) historically originate, and why does the word contain the kanji 走 (to run)?"
+      }
+    ],
+    "gold_reference": {
+      "running_origin": "馳走 (chisou) historically meant 'to gallop or run about' — hosts literally running around to collect food and ingredients to entertain guests.",
+      "evolution": "Became a fixed post-meal greeting during the late Edo period; demonstrates intellectual humility regarding historical transition."
+    },
+    "automated_checks": {
+      "running_concepts": ["run", "running", "gallop", "rush", "gather"],
+      "chisou_reference": ["馳走", "馳", "chisou"],
+      "hospitality_context": ["guest", "host", "meal", "food", "entertain"]
+    }
+  }
+]

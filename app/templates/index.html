@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Sensei - Japanese AI Tutor with Voice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #131b2e;
+            --bg-card: rgba(19, 27, 46, 0.85);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(244, 114, 182, 0.3);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-pink: #f472b6;
+            --accent-pink-hover: #ec4899;
+            --accent-glow: rgba(244, 114, 182, 0.25);
+            --accent-cyan: #38bdf8;
+            --accent-green: #34d399;
+            --accent-amber: #fbbf24;
+            --accent-red: #f87171;
+            --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-jp: 'Noto Sans JP', 'Outfit', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(244, 114, 182, 0.08) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(56, 189, 248, 0.06) 0px, transparent 50%);
+            color: var(--text-primary);
+            font-family: var(--font-jp);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            padding: 1.25rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(11, 15, 25, 0.7);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            font-size: 1.75rem;
+            background: linear-gradient(135deg, #f472b6, #fb7185);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: var(--font-main);
+            letter-spacing: -0.02em;
+        }
+
+        .logo-badge {
+            background: rgba(244, 114, 182, 0.15);
+            color: var(--accent-pink);
+            font-size: 0.75rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            border: 1px solid rgba(244, 114, 182, 0.25);
+        }
+
+        .privacy-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(52, 211, 153, 0.1);
+            color: var(--accent-green);
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .privacy-pill:hover {
+            background: rgba(52, 211, 153, 0.18);
+        }
+
+        /* Main Layout */
+        main {
+            flex: 1;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Banner / Status */
+        .status-banner {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.85rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+
+        /* Chat History */
+        .chat-box {
+            flex: 1;
+            min-height: 340px;
+            max-height: 520px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+        }
+
+        .message-bubble {
+            padding: 0.9rem 1.2rem;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .user .message-bubble {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .assistant .message-bubble {
+            background: #1e293b;
+            color: #f1f5f9;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user .message-meta {
+            justify-content: flex-end;
+        }
+
+        .audio-play-btn {
+            background: rgba(244, 114, 182, 0.12);
+            color: var(--accent-pink);
+            border: 1px solid rgba(244, 114, 182, 0.3);
+            border-radius: 9999px;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+            transition: all 0.2s;
+            font-family: var(--font-main);
+        }
+
+        .audio-play-btn:hover {
+            background: rgba(244, 114, 182, 0.25);
+            transform: translateY(-1px);
+        }
+
+        /* Voice & Input Controls */
+        .input-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Language & Audio Settings */
+        .controls-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .select-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        select {
+            background: #0f172a;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--accent-pink);
+        }
+
+        .mic-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .mic-button {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f472b6, #fb7185);
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px var(--accent-glow);
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .mic-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(244, 114, 182, 0.4);
+        }
+
+        .mic-button.recording {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            animation: pulseRecord 1.5s infinite;
+        }
+
+        @keyframes pulseRecord {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 16px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .mic-status-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .mic-status-label.recording {
+            color: var(--accent-red);
+            font-weight: 600;
+        }
+
+        /* Transcription Review Box */
+        .transcription-review-box {
+            display: none;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px dashed var(--accent-pink);
+            border-radius: 12px;
+            padding: 1rem;
+            flex-direction: column;
+            gap: 0.6rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .transcription-review-box.active {
+            display: flex;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--accent-pink);
+            font-weight: 600;
+        }
+
+        .editable-transcript {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: #ffffff;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 60px;
+            outline: none;
+        }
+
+        .editable-transcript:focus {
+            border-color: var(--accent-pink);
+        }
+
+        /* Text Input Bar */
+        .input-bar {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .text-input {
+            flex: 1;
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.85rem 1.1rem;
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .text-input:focus {
+            border-color: var(--accent-pink);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #f472b6, #ec4899);
+            color: white;
+            border: none;
+            padding: 0.85rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .send-btn:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        .send-btn:disabled {
+            background: #334155;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Error Banner */
+        .error-banner {
+            display: none;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #fca5a5;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .error-banner.active {
+            display: flex;
+        }
+
+        .error-close {
+            background: none;
+            border: none;
+            color: #fca5a5;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        /* Modal for Privacy */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #131b2e;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            max-width: 540px;
+            width: 100%;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-body {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .modal-close-btn {
+            align-self: flex-end;
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo-area">
+            <span class="logo-icon">🌸</span>
+            <div class="logo-title">Sensei AI Tutor</div>
+            <span class="logo-badge">Voice (Experimental)</span>
+        </div>
+        <div class="privacy-pill" id="privacyBtn" title="Click to inspect privacy policy">
+            <span>🛡️</span>
+            <span>Local STT • Zero Storage</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main>
+        <!-- System Status Bar -->
+        <div class="status-banner">
+            <div>
+                <span class="status-dot"></span>
+                <span id="modelInfo">Loading AI Tutor Model...</span>
+            </div>
+            <div>
+                <span id="asrInfo">STT: Faster-Whisper (Local)</span> | 
+                <span id="ttsInfo">TTS: Edge Neural (Bilingual)</span>
+            </div>
+        </div>
+
+        <!-- Error Notification Banner -->
+        <div class="error-banner" id="errorBanner">
+            <span id="errorMessage">An error occurred</span>
+            <button class="error-close" id="errorCloseBtn">&times;</button>
+        </div>
+
+        <!-- Conversation History -->
+        <div class="chat-box" id="chatBox">
+            <div class="message assistant">
+                <div class="message-bubble">
+                    こんにちは！私は日本語の先生 (Sensei) です。🌸<br>
+                    Welcome to your Japanese lesson! You can type in English or Japanese, or click the pink microphone button below to speak.
+                </div>
+                <div class="message-meta">
+                    <span>Sensei</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input & Voice Controls -->
+        <div class="input-card">
+            <!-- Toolbar for Settings -->
+            <div class="controls-toolbar">
+                <div class="mic-section">
+                    <button class="mic-button" id="micBtn" title="Click to Record Voice (Microphone permission required)">
+                        <span id="micIcon">🎙️</span>
+                    </button>
+                    <div>
+                        <div class="mic-status-label" id="micStatus">Click mic to speak</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);" id="micSub">Microphone audio processed locally</div>
+                    </div>
+                </div>
+
+                <div class="select-group">
+                    <label for="languageSelect">Speech Language:</label>
+                    <select id="languageSelect">
+                        <option value="ja" selected>🇯🇵 日本語 (Japanese)</option>
+                        <option value="en">🇺🇸 English</option>
+                        <option value="auto">🌐 Auto-Detect</option>
+                    </select>
+
+                    <label style="margin-left: 0.5rem;">
+                        <input type="checkbox" id="ttsCheckbox" checked> Speak Answer
+                    </label>
+                </div>
+            </div>
+
+            <!-- Editable Transcription Review Box (Shows transcribed speech before sending) -->
+            <div class="transcription-review-box" id="reviewBox">
+                <div class="review-header">
+                    <span>✏️ Review / Edit Transcribed Speech Before Sending</span>
+                    <span id="reviewLangBadge" style="font-size: 0.75rem; color: var(--text-muted);">Detected: Japanese</span>
+                </div>
+                <textarea class="editable-transcript" id="editableTranscript" rows="2" placeholder="Your speech transcription will appear here for review..."></textarea>
+                <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                    <button id="discardTranscriptBtn" style="background: none; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">Discard</button>
+                    <button id="submitTranscriptBtn" class="send-btn" style="padding: 0.4rem 0.9rem; font-size: 0.85rem;">Send to Sensei 🚀</button>
+                </div>
+            </div>
+
+            <!-- Standard Text Input Bar -->
+            <div class="input-bar">
+                <input type="text" class="text-input" id="textInput" placeholder="Ask Sensei a question or type in Japanese / English...">
+                <button class="send-btn" id="sendBtn">
+                    <span>Send</span>
+                    <span>➔</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Privacy & Architecture Modal -->
+    <div class="modal-overlay" id="privacyModal">
+        <div class="modal-card">
+            <div class="modal-title">
+                <span>🛡️</span>
+                <span>Privacy & Voice Architecture</span>
+            </div>
+            <div class="modal-body">
+                <p><strong>1. Speech Recognition (STT):</strong><br>
+                Audio is transcribed <strong>100% locally on your machine</strong> using <em>Faster-Whisper (CTranslate2)</em>. No microphone audio is ever transmitted to third-party clouds or external servers.</p>
+                <br>
+                <p><strong>2. Audio Storage Policy:</strong><br>
+                <strong>Zero Audio Retention.</strong> Ephemeral audio buffers are decoded in-memory and immediately destroyed after transcription. No microphone recordings are ever saved to disk.</p>
+                <br>
+                <p><strong>3. Text-to-Speech (TTS):</strong><br>
+                Sensei's answers are converted to natural speech via <em>Microsoft Edge Neural TTS</em> over secure HTTPS. Only the tutor's response text is sent for audio synthesis (₹0 budget, no user tracking).</p>
+                <br>
+                <p><strong>4. Transcription Review:</strong><br>
+                You can review, edit, or cancel every voice transcription before it is submitted to the language model.</p>
+            </div>
+            <button class="modal-close-btn" id="modalCloseBtn">Close</button>
+        </div>
+    </div>
+
+    <!-- Hidden Audio Player for TTS Playback -->
+    <audio id="ttsAudioPlayer" style="display: none;"></audio>
+
+    <script>
+        // DOM Elements
+        const micBtn = document.getElementById('micBtn');
+        const micIcon = document.getElementById('micIcon');
+        const micStatus = document.getElementById('micStatus');
+        const micSub = document.getElementById('micSub');
+        const textInput = document.getElementById('textInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const chatBox = document.getElementById('chatBox');
+        const reviewBox = document.getElementById('reviewBox');
+        const editableTranscript = document.getElementById('editableTranscript');
+        const reviewLangBadge = document.getElementById('reviewLangBadge');
+        const submitTranscriptBtn = document.getElementById('submitTranscriptBtn');
+        const discardTranscriptBtn = document.getElementById('discardTranscriptBtn');
+        const languageSelect = document.getElementById('languageSelect');
+        const ttsCheckbox = document.getElementById('ttsCheckbox');
+        const errorBanner = document.getElementById('errorBanner');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorCloseBtn = document.getElementById('errorCloseBtn');
+        const privacyBtn = document.getElementById('privacyBtn');
+        const privacyModal = document.getElementById('privacyModal');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const ttsAudioPlayer = document.getElementById('ttsAudioPlayer');
+        const modelInfo = document.getElementById('modelInfo');
+
+        // State
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let conversationHistory = [];
+
+        // Error Banner Helper
+        function showError(msg) {
+            errorMessage.textContent = msg;
+            errorBanner.classList.add('active');
+        }
+
+        errorCloseBtn.addEventListener('click', () => {
+            errorBanner.classList.remove('active');
+        });
+
+        // Privacy Modal Handlers
+        privacyBtn.addEventListener('click', () => privacyModal.classList.add('active'));
+        modalCloseBtn.addEventListener('click', () => privacyModal.classList.remove('active'));
+        privacyModal.addEventListener('click', (e) => {
+            if (e.target === privacyModal) privacyModal.classList.remove('active');
+        });
+
+        // Fetch Initial System Status
+        async function fetchStatus() {
+            try {
+                const res = await fetch('/api/status');
+                if (res.ok) {
+                    const data = await res.json();
+                    modelInfo.textContent = `Tutor: ${data.model} | LoRA: ${data.adapter_active ? 'Active' : 'Base'}`;
+                }
+            } catch (err) {
+                modelInfo.textContent = 'Tutor API Connected';
+            }
+        }
+        fetchStatus();
+
+        // Append Message to Chat
+        function appendMessage(role, content, audioBase64 = null) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${role}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = content;
+            msgDiv.appendChild(bubble);
+
+            if (role === 'assistant' && audioBase64) {
+                const playBtn = document.createElement('button');
+                playBtn.className = 'audio-play-btn';
+                playBtn.innerHTML = '<span>🔊</span><span>Listen to Sensei</span>';
+                playBtn.onclick = () => {
+                    ttsAudioPlayer.src = `data:audio/mp3;base64,${audioBase64}`;
+                    ttsAudioPlayer.play();
+                };
+                msgDiv.appendChild(playBtn);
+
+                // Auto-play if enabled
+                if (ttsCheckbox.checked) {
+                    ttsAudioPlayer.src = `data:audio/mp3;base64,${audioBase64}`;
+                    ttsAudioPlayer.play().catch(() => {});
+                }
+            }
+
+            const meta = document.createElement('div');
+            meta.className = 'message-meta';
+            meta.textContent = role === 'user' ? 'You' : 'Sensei';
+            msgDiv.appendChild(meta);
+
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Send Text Query to Tutor LLM
+        async function sendQuery(queryText) {
+            if (!queryText || !queryText.trim()) return;
+
+            errorBanner.classList.remove('active');
+            appendMessage('user', queryText);
+            textInput.value = '';
+            reviewBox.classList.remove('active');
+
+            sendBtn.disabled = true;
+            micBtn.disabled = true;
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: queryText,
+                        history: conversationHistory,
+                        language: languageSelect.value,
+                        enable_tts: ttsCheckbox.checked
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok || data.status === 'error') {
+                    throw new Error(data.error || 'Failed to receive tutor response');
+                }
+
+                // Add to turn history
+                conversationHistory.push({ role: 'user', content: queryText });
+                conversationHistory.push({ role: 'assistant', content: data.response });
+
+                appendMessage('assistant', data.response, data.audio_base64);
+
+            } catch (err) {
+                showError(`Sensei Error: ${err.message}`);
+            } finally {
+                sendBtn.disabled = false;
+                micBtn.disabled = false;
+            }
+        }
+
+        // Text input submit
+        sendBtn.addEventListener('click', () => sendQuery(textInput.value));
+        textInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') sendQuery(textInput.value);
+        });
+
+        // Submit edited transcription
+        submitTranscriptBtn.addEventListener('click', () => {
+            const edited = editableTranscript.value.trim();
+            if (edited) sendQuery(edited);
+        });
+
+        discardTranscriptBtn.addEventListener('click', () => {
+            reviewBox.classList.remove('active');
+            editableTranscript.value = '';
+        });
+
+        // Microphone Audio Recording Handler
+        micBtn.addEventListener('click', async () => {
+            if (isRecording) {
+                // Stop Recording
+                mediaRecorder.stop();
+                isRecording = false;
+                micBtn.classList.remove('recording');
+                micIcon.textContent = '⏳';
+                micStatus.textContent = 'Transcribing locally...';
+                micStatus.classList.remove('recording');
+                return;
+            }
+
+            // Request Microphone Permission
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('Your browser does not support microphone audio capture.');
+                }
+
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioChunks = [];
+
+                // Select supported MIME type
+                let mimeType = 'audio/webm';
+                if (!MediaRecorder.isTypeSupported('audio/webm')) {
+                    if (MediaRecorder.isTypeSupported('audio/ogg')) mimeType = 'audio/ogg';
+                    else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+                }
+
+                mediaRecorder = new MediaRecorder(stream, { mimeType });
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    // Stop all audio tracks to release microphone hardware immediately
+                    stream.getTracks().forEach(track => track.stop());
+
+                    const audioBlob = new Blob(audioChunks, { type: mimeType });
+                    if (audioBlob.size < 100) {
+                        showError('Recording was empty. Please check your microphone.');
+                        micIcon.textContent = '🎙️';
+                        micStatus.textContent = 'Click mic to speak';
+                        return;
+                    }
+
+                    // Send audio to local Faster-Whisper STT endpoint
+                    await uploadAudioForTranscription(audioBlob);
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                micBtn.classList.add('recording');
+                micIcon.textContent = '⏹️';
+                micStatus.textContent = 'Listening... (Click to stop)';
+                micStatus.classList.add('recording');
+                errorBanner.classList.remove('active');
+
+            } catch (err) {
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    showError('Microphone permission denied. Please allow microphone access in your browser settings.');
+                } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+                    showError('No microphone detected on your system. Please connect an audio input device.');
+                } else {
+                    showError(`Audio error: ${err.message}`);
+                }
+                micIcon.textContent = '🎙️';
+                micStatus.textContent = 'Click mic to speak';
+            }
+        });
+
+        // Transcribe Audio via Backend
+        async function uploadAudioForTranscription(audioBlob) {
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.webm');
+            formData.append('language', languageSelect.value);
+
+            try {
+                const res = await fetch('/api/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (!res.ok || data.status === 'error') {
+                    throw new Error(data.error || 'Transcription failed');
+                }
+
+                // Requirement 3: Display the transcription so the user can correct it before sending!
+                editableTranscript.value = data.transcription;
+                reviewLangBadge.textContent = `Language: ${data.language || 'Auto'} • Confidence: ${Math.round(data.confidence * 100)}%`;
+                reviewBox.classList.add('active');
+                editableTranscript.focus();
+
+                micIcon.textContent = '🎙️';
+                micStatus.textContent = 'Transcription ready! Review below:';
+
+            } catch (err) {
+                showError(`Speech Recognition: ${err.message}`);
+                micIcon.textContent = '🎙️';
+                micStatus.textContent = 'Click mic to speak';
+            }
+        }
+    </script>
+</body>
+</html>

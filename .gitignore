@@ -1,0 +1,55 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Python Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+.env.local
+
+# Model Weights, Large Checkpoints, Adapters & Cache
+models/
+weights/
+checkpoints/
+adapters/
+*.bin
+*.pt
+*.pth
+*.safetensors
+*.gguf
+*.onnx
+
+# Hugging Face & PyTorch Cache Directories
+.cache/
+hf_cache/
+huggingface/
+wandb/
+
+# Datasets (Large raw and downloaded files)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Local Credentials, Tokens & Secrets
+.env
+*.env
+secrets.json
+token.txt
+hf_token*
+*.key
+*.pem
+
+# IDE & Editor Configurations
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Generated Files
+.DS_Store
+Thumbs.db

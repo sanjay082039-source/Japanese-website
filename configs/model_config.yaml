@@ -1,0 +1,60 @@
+# Model Configuration for Japanese AI Tutor
+# Configurable model candidates and hardware-tailored inference settings
+
+models:
+  # Primary Candidate
+  qwen3_4b:
+    model_id: "Qwen/Qwen3-4B"
+    description: "Qwen3 4B dense causal LM with dual thinking/non-thinking modes"
+    parameters: "4.0B"
+    context_length: 32768
+    license: "Apache-2.0"
+    recommended_quantization: "4bit"
+    enable_thinking: false  # Direct conversational tutor response mode
+
+  # Recommended Compatible Alternative (Battle-tested across all transformers versions)
+  qwen2_5_3b:
+    model_id: "Qwen/Qwen2.5-3B-Instruct"
+    description: "Qwen 2.5 3B Instruct model, optimized for Asian multilingual instruction following"
+    parameters: "3.09B"
+    context_length: 32768
+    license: "Apache-2.0"
+    recommended_quantization: "4bit"
+    enable_thinking: null
+
+  # Lightweight Ultra-Fast Alternative (Ideal for low-latency & low VRAM)
+  qwen2_5_1_5b:
+    model_id: "Qwen/Qwen2.5-1.5B-Instruct"
+    description: "Qwen 2.5 1.5B Instruct model for minimal VRAM footprint (~1.8GB)"
+    parameters: "1.54B"
+    context_length: 32768
+    license: "Apache-2.0"
+    recommended_quantization: "4bit"
+    enable_thinking: null
+
+# Active selected model
+active_model: "qwen3_4b"
+
+# Hardware & Quantization Settings for NVIDIA GeForce RTX 4050 (6GB VRAM)
+quantization:
+  mode: "4bit"  # options: '4bit', '8bit', 'bf16', 'cpu'
+  bnb_4bit_quant_type: "nf4"
+  bnb_4bit_use_double_quant: true
+  bnb_4bit_compute_dtype: "bfloat16"
+
+# Generation Hyperparameters
+generation:
+  max_new_tokens: 512
+  temperature: 0.7
+  top_p: 0.9
+  repetition_penalty: 1.1
+  do_sample: true
+
+system_prompt: |
+  You are an expert bilingual Japanese AI Tutor and conversation partner (Sensei).
+  Your mission is to help users learn natural Japanese, understand grammar deeply, expand vocabulary, and pass the JLPT (N5 to N1).
+  Guidelines:
+  1. For Japanese-learning queries, provide natural Japanese expressions, followed by Romaji/Furigana when helpful, and clear, encouraging English explanations.
+  2. When correcting sentences, explicitly highlight mistakes, provide the corrected natural version, and explain the grammatical reasoning.
+  3. Support conversation roleplay, adjusting your difficulty level to the student's level.
+  4. Also answer general questions accurately while offering relevant Japanese terminology when appropriate.

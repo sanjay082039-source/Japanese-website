@@ -1,0 +1,35 @@
+# Core PyTorch with CUDA support
+torch>=2.4.0
+
+# Hugging Face Ecosystem
+transformers>=4.45.0
+accelerate>=0.34.0
+peft>=0.13.0
+trl>=0.11.0
+datasets>=2.20.0
+bitsandbytes>=0.43.0
+sentencepiece>=0.2.0
+tiktoken>=0.7.0
+safetensors>=0.4.5
+
+# Japanese language & NLP utilities
+fugashi>=1.3.0
+unidic-lite>=1.0.8
+pyyaml>=6.0
+tqdm>=4.66.0
+rich>=13.8.0
+pytest>=8.0.0
+
+# Voice Support (STT, TTS, Audio Web Server)
+faster-whisper>=1.0.0
+edge-tts>=7.0.0
+scipy>=1.14.0
+aiohttp>=3.9.0
+
+# REST API Backend
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.9.0
+httpx>=0.27.0
+
+

@@ -1,0 +1,39 @@
+# Dataset Ingestion, Quality Filter, and Partition Configuration
+# Allows configuring dataset size, quality thresholds, and split ratios without changing code
+
+dataset_limits:
+  max_total_samples: 100         # Maximum total examples to include (null for unlimited)
+  max_samples_per_category: 15   # Per-category balancing cap (null for unlimited)
+
+partition:
+  train_ratio: 0.8
+  val_ratio: 0.1
+  test_ratio: 0.1
+  seed: 42
+
+quality_filtering:
+  # Reject examples where prompt or assistant turns fall outside length bounds
+  min_prompt_chars: 5
+  max_prompt_chars: 2000
+  min_response_chars: 10
+  max_response_chars: 4000
+
+  # Translation sanity checks: Japanese to English character length ratio bounds
+  min_length_ratio: 0.15
+  max_length_ratio: 8.0
+
+  # Repetition filter: flag/reject texts where any 4-gram repeats more than this count
+  max_ngram_repetition: 6
+
+  # Character preservation rules
+  preserve_japanese_punctuation: true  # 「」『』。、・〜！？
+
+licensing_policy:
+  enforce_strict_licenses: true
+  allowed_licenses:
+    - "Apache-2.0"
+    - "MIT"
+    - "CC-BY 4.0"
+    - "CC-BY 2.0 FR"
+    - "Public Domain / CC0"
+  quarantine_unclear_licenses: true

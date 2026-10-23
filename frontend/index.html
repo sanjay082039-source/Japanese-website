@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/jpeg" href="/sensei.jpg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌸 先生 (Sensei) - Japanese AI Tutor Chatbot</title>
+  <meta name="description" content="State-of-the-art conversational Japanese AI Tutor powered by fine-tuned QLoRA with real-time voice, Furigana annotations, and gentle sentence correction." />
+  
+  <!-- Modern Japanese & Latin Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <!-- Collapsible Sidebar (Sessions & Learning Modes) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <img src="/sensei.jpg" alt="Sensei Logo" class="brand-avatar" />
+          <div class="brand-info">
+            <h1 class="brand-title">先生 <span class="brand-badge">AI Tutor</span></h1>
+            <p class="brand-subtitle">Qwen2.5-1.5B • QLoRA</p>
+          </div>
+        </div>
+        <button class="icon-btn close-sidebar-btn" id="closeSidebarBtn" title="Close sidebar">&times;</button>
+      </div>
+
+      <div class="sidebar-action">
+        <button class="new-chat-btn" id="newChatBtn">
+          <span>✨</span>
+          <span>New Conversation</span>
+        </button>
+      </div>
+
+      <!-- Learning Modes Quick Select -->
+      <div class="sidebar-section">
+        <div class="section-label">LEARNING PATHWAYS</div>
+        <div class="modes-list">
+          <button class="mode-item active" data-mode="conversation">
+            <span class="mode-icon">🌸</span>
+            <div class="mode-text">
+              <span class="mode-name">Free Conversation</span>
+              <span class="mode-desc">Natural bilingual chat</span>
+            </div>
+          </button>
+          <button class="mode-item" data-mode="corrector">
+            <span class="mode-icon">🔍</span>
+            <div class="mode-text">
+              <span class="mode-name">Sentence Fixer</span>
+              <span class="mode-desc">Gentle native feedback</span>
+            </div>
+          </button>
+          <button class="mode-item" data-mode="particles">
+            <span class="mode-icon">🎯</span>
+            <div class="mode-text">
+              <span class="mode-name">Particle Mastery</span>
+              <span class="mode-desc">は vs が, に vs で</span>
+            </div>
+          </button>
+          <button class="mode-item" data-mode="jlpt">
+            <span class="mode-icon">⛩️</span>
+            <div class="mode-text">
+              <span class="mode-name">JLPT Drill (N5–N1)</span>
+              <span class="mode-desc">Grammar & reading prep</span>
+            </div>
+          </button>
+          <button class="mode-item" data-mode="roleplay">
+            <span class="mode-icon">🍵</span>
+            <div class="mode-text">
+              <span class="mode-name">Tokyo Roleplay</span>
+              <span class="mode-desc">Izakaya & travel practice</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Saved Chat History List -->
+      <div class="sidebar-section history-section">
+        <div class="section-label">SAVED SESSIONS</div>
+        <div class="history-list" id="historyList">
+          <!-- Dynamically populated from localStorage -->
+        </div>
+      </div>
+
+      <!-- Sidebar Footer (VRAM & Flashcards) -->
+      <div class="sidebar-footer">
+        <button class="sidebar-nav-btn" id="openDeckBtn">
+          <span>📚</span>
+          <span>Study Deck (<span id="deckCount">0</span>)</span>
+        </button>
+        <button class="sidebar-nav-btn" id="openSettingsBtn">
+          <span>⚙️</span>
+          <span>Diagnostics & Settings</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Chat Workspace -->
+    <main class="main-content">
+      <!-- Top Navigation Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn menu-btn" id="toggleSidebarBtn" title="Toggle Sidebar">☰</button>
+          <div class="active-mode-badge" id="activeModeBadge">
+            <span class="badge-dot"></span>
+            <span id="activeModeText">🌸 Free Conversation</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Live VRAM Monitor Indicator -->
+          <div class="vram-pill" id="vramPill" title="NVIDIA GPU VRAM Usage">
+            <span class="vram-dot"></span>
+            <span id="vramStatusText">GPU: 1.14 GB / 5.72 GB</span>
+          </div>
+
+          <!-- Speech Audio Toggle -->
+          <button class="toggle-audio-btn active" id="audioToggleBtn" title="Toggle Voice Audio Responses">
+            <span id="audioToggleIcon">🔊</span>
+            <span id="audioToggleText">Voice On</span>
+          </button>
+
+          <!-- Speech Speed Control -->
+          <select id="playbackSpeedSelect" class="speed-select" title="Speech Playback Speed">
+            <option value="0.8">0.8x (Slow)</option>
+            <option value="1.0" selected>1.0x (Normal)</option>
+            <option value="1.2">1.2x (Fast)</option>
+          </select>
+        </div>
+      </header>
+
+      <!-- Chat Messages Container -->
+      <section class="messages-container" id="messagesContainer">
+        <!-- Welcome Hero Screen -->
+        <div class="welcome-hero" id="welcomeHero">
+          <div class="hero-avatar-wrap">
+            <img src="/sensei.jpg" alt="Sensei" class="hero-avatar" />
+            <div class="hero-pulse"></div>
+          </div>
+          <h2 class="hero-title">こんにちは！ Sensei AI Tutor へようこそ</h2>
+          <p class="hero-desc">
+            I am your bilingual Japanese tutor powered by fine-tuned QLoRA weights.
+            Ask me anything in Japanese or English, practice natural dialogues, or paste a sentence for gentle correction.
+          </p>
+
+          <!-- Quick Suggestion Cards -->
+          <div class="quick-prompts-grid">
+            <button class="quick-card" data-prompt="How do I politely say 'I am looking forward to working with you' in Japanese business context?">
+              <span class="quick-icon">💼</span>
+              <div class="quick-title">Business Japanese</div>
+              <div class="quick-sub">「これからもよろしくお願いします」</div>
+            </button>
+            <button class="quick-card" data-prompt="Please explain the difference between に (ni) and で (de) particles with 2 examples each.">
+              <span class="quick-icon">🎯</span>
+              <div class="quick-title">Particle Breakdown</div>
+              <div class="quick-sub">に vs. で usage rules</div>
+            </button>
+            <button class="quick-card" data-prompt="Please gently correct this sentence: きのう、デパートへ行って、新しい靴を買いましたから、とても高かったですので、買いませんでした。">
+              <span class="quick-icon">✏️</span>
+              <div class="quick-title">Sentence Correction</div>
+              <div class="quick-sub">Fix grammar & natural phrasing</div>
+            </button>
+            <button class="quick-card" data-prompt="Let's roleplay! You are the waiter at an Izakaya in Tokyo, and I just sat down. Start in Japanese!">
+              <span class="quick-icon">🍢</span>
+              <div class="quick-title">Izakaya Roleplay</div>
+              <div class="quick-sub">Ordering food & drinks</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat history items will be appended here -->
+      </section>
+
+      <!-- Human-In-The-Loop Transcription Review Card (Requirement 3) -->
+      <div class="review-drawer" id="reviewDrawer">
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-title">
+              <span>🎙️</span>
+              <span>Transcribed Speech Review (Local Faster-Whisper)</span>
+            </div>
+            <span class="review-lang-tag" id="reviewLangTag">Detected: Japanese</span>
+          </div>
+          <p class="review-hint">You can edit any kanji or misheard words before sending to Sensei:</p>
+          <textarea id="reviewTextarea" class="review-textarea" rows="2" placeholder="Your speech transcription will appear here..."></textarea>
+          <div class="review-actions">
+            <button class="btn btn-ghost" id="discardVoiceBtn">Discard</button>
+            <button class="btn btn-primary" id="confirmVoiceBtn">Send to Sensei 🚀</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Voice Visualizer Bar (When Recording) -->
+      <div class="voice-bar" id="voiceBar">
+        <div class="recording-pulse"></div>
+        <span class="voice-status-text" id="voiceStatusText">Listening to your microphone... Click mic to stop</span>
+        <canvas id="visualizerCanvas" class="visualizer-canvas" width="120" height="30"></canvas>
+      </div>
+
+      <!-- Input Bar Area -->
+      <footer class="input-area">
+        <div class="input-wrapper">
+          <!-- Voice Input Button -->
+          <button class="mic-btn" id="micBtn" title="Hold/Click to speak Japanese or English">
+            <span id="micIcon">🎙️</span>
+          </button>
+
+          <!-- Text Input -->
+          <textarea 
+            id="chatInput" 
+            class="chat-input" 
+            placeholder="Type in Japanese or English, or click the mic to speak..." 
+            rows="1"
+            maxlength="2000"
+          ></textarea>
+
+          <!-- Language Selector -->
+          <select id="voiceLanguageSelect" class="lang-select" title="Voice Recognition Language">
+            <option value="ja" selected>🇯🇵 JA</option>
+            <option value="en">🇺🇸 EN</option>
+            <option value="auto">🌐 Auto</option>
+          </select>
+
+          <!-- Send Button -->
+          <button class="send-btn" id="sendBtn" title="Send Message">
+            <span>➔</span>
+          </button>
+        </div>
+        <div class="input-footer-note">
+          <span>🔒 100% On-Device Local Inference (Qwen2.5-1.5B QLoRA) • Zero Microphone Recordings Retained</span>
+        </div>
+      </footer>
+    </main>
+
+    <!-- Study Deck / Saved Flashcards Drawer -->
+    <div class="deck-overlay" id="deckOverlay">
+      <div class="deck-modal">
+        <div class="deck-header">
+          <div class="deck-title">
+            <span>📚</span>
+            <span>Study Deck & Saved Vocabulary</span>
+          </div>
+          <button class="icon-btn" id="closeDeckBtn">&times;</button>
+        </div>
+        <div class="deck-body" id="deckList">
+          <!-- Populated from saved study cards -->
+        </div>
+        <div class="deck-footer">
+          <button class="btn btn-ghost" id="clearDeckBtn">Clear Deck</button>
+          <button class="btn btn-primary" id="exportAnkiBtn">Export to Anki / CSV 📥</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagnostics & Settings Modal -->
+    <div class="settings-overlay" id="settingsOverlay">
+      <div class="settings-modal">
+        <div class="settings-header">
+          <div class="settings-title">
+            <span>⚙️</span>
+            <span>System Diagnostics & Controls</span>
+          </div>
+          <button class="icon-btn" id="closeSettingsBtn">&times;</button>
+        </div>
+        <div class="settings-body">
+          <!-- Hardware Card -->
+          <div class="diag-card">
+            <h4 class="diag-title">🎮 GPU Hardware & Model VRAM</h4>
+            <div class="diag-metric">
+              <span class="diag-label">Active Model:</span>
+              <span class="diag-val" id="diagModelVal">Qwen/Qwen2.5-1.5B-Instruct</span>
+            </div>
+            <div class="diag-metric">
+              <span class="diag-label">LoRA Adapter:</span>
+              <span class="diag-val badge-green" id="diagAdapterVal">✅ Active (adapters/japanese-ai-tutor-qlora)</span>
+            </div>
+            <div class="diag-metric">
+              <span class="diag-label">GPU Device:</span>
+              <span class="diag-val" id="diagGpuVal">NVIDIA GeForce RTX 4050 Laptop GPU</span>
+            </div>
+            <div class="diag-progress-wrap">
+              <div class="diag-progress-label">
+                <span>VRAM Allocation</span>
+                <span id="vramBarPercent">20%</span>
+              </div>
+              <div class="diag-progress-bar">
+                <div class="diag-progress-fill" id="vramBarFill" style="width: 20%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hyperparameter Controls -->
+          <div class="diag-card">
+            <h4 class="diag-title">🎛️ Generation Parameters</h4>
+            <div class="param-row">
+              <label for="tempSlider">Temperature: <span id="tempValDisplay">0.3</span></label>
+              <input type="range" id="tempSlider" min="0.0" max="1.5" step="0.05" value="0.3" />
+            </div>
+            <div class="param-row">
+              <label for="tokensSlider">Max New Tokens: <span id="tokensValDisplay">384</span></label>
+              <input type="range" id="tokensSlider" min="64" max="1024" step="32" value="384" />
+            </div>
+            <div class="param-row">
+              <label for="topPSlider">Top P (Nucleus): <span id="topPValDisplay">0.9</span></label>
+              <input type="range" id="topPSlider" min="0.1" max="1.0" step="0.05" value="0.9" />
+            </div>
+          </div>
+        </div>
+        <div class="settings-footer">
+          <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden Audio Player for Speech Playback -->
+    <audio id="globalAudioPlayer" style="display: none;"></audio>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+# Japanese AI Tutor - QLoRA Training Configuration
+# Specifically tuned for NVIDIA GeForce RTX 4050 (6GB VRAM)
+
+model:
+  base_model_name_or_path: "Qwen/Qwen2.5-3B-Instruct"
+  fallback_model_name_or_path: "Qwen/Qwen2.5-1.5B-Instruct"
+  torch_dtype: "bfloat16"
+  trust_remote_code: true
+
+quantization:
+  load_in_4bit: true
+  bnb_4bit_quant_type: "nf4"
+  bnb_4bit_use_double_quant: true
+  bnb_4bit_compute_dtype: "bfloat16"
+
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  bias: "none"
+  task_type: "CAUSAL_LM"
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+
+training:
+  output_dir: "./adapters/japanese-ai-tutor-qwen3b"
+  max_seq_length: 1024
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 0.0002
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.05
+  num_train_epochs: 3
+  logging_steps: 10
+  save_strategy: "steps"
+  save_steps: 100
+  save_total_limit: 2
+  fp16: false
+  bf16: true
+  gradient_checkpointing: true
+  optim: "paged_adamw_8bit"
+  dataloader_num_workers: 2
+  report_to: "none"
+
+system_prompt: |
+  You are an expert bilingual Japanese AI Tutor and conversation partner (Sensei).
+  Your mission is to help users learn natural Japanese, understand grammar deeply, expand vocabulary, and pass the JLPT (N5 to N1).
+  Guidelines:
+  1. For Japanese-learning queries, provide natural Japanese expressions, followed by Romaji/Furigana when helpful, and clear, encouraging English explanations.
+  2. When correcting sentences, explicitly highlight mistakes, provide the corrected natural version, and explain the grammatical reasoning.
+  3. Support conversation roleplay, adjusting your difficulty level to the student's level.
+  4. Also answer general questions accurately while offering relevant Japanese terminology when appropriate.

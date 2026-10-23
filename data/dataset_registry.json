@@ -1,0 +1,82 @@
+{
+  "curated_tutor_human": {
+    "name": "Curated Japanese Tutor Human Benchmark",
+    "source_url": "internal/curated_benchmark",
+    "license": "Apache-2.0",
+    "license_status": "approved",
+    "commercial_use_allowed": true,
+    "attribution_required": false,
+    "attribution_text": "Japanese AI Tutor Project (Internal Curated Benchmark)",
+    "language_pair": "ja-en",
+    "provenance": "human_verified",
+    "preprocessing": [
+      "strict_schema_validation",
+      "manual_linguistic_audit",
+      "kanji_kana_preservation",
+      "prompt_deduplication"
+    ]
+  },
+  "tatoeba_ja_en_curated": {
+    "name": "Tatoeba Japanese-English Curated Sentence Pairs",
+    "source_url": "https://tatoeba.org",
+    "license": "CC-BY 2.0 FR",
+    "license_status": "approved",
+    "commercial_use_allowed": true,
+    "attribution_required": true,
+    "attribution_text": "Tatoeba.org contributors under Creative Commons CC-BY 2.0 FR",
+    "language_pair": "ja-en",
+    "provenance": "human_verified",
+    "preprocessing": [
+      "quality_length_ratio_filter",
+      "furigana_enrichment",
+      "fullwidth_punctuation_normalization",
+      "exact_and_fuzzy_deduplication"
+    ]
+  },
+  "tanaka_corpus_edrdg": {
+    "name": "Tanaka Corpus of Japanese-English Sentences",
+    "source_url": "http://www.edrdg.org/wiki/index.php/Tanaka_Corpus",
+    "license": "Public Domain / CC0",
+    "license_status": "approved",
+    "commercial_use_allowed": true,
+    "attribution_required": false,
+    "attribution_text": "Public Domain (Tanaka Corpus / EDRDG)",
+    "language_pair": "ja-en",
+    "provenance": "human_verified",
+    "preprocessing": [
+      "archaic_expression_filter",
+      "conversational_reformatting",
+      "whitespace_normalization"
+    ]
+  },
+  "kunishou_dolly_15k_ja": {
+    "name": "Databricks Dolly-15k Japanese Translation (kunishou)",
+    "source_url": "https://huggingface.co/datasets/kunishou/databricks-dolly-15k-ja",
+    "license": "Apache-2.0",
+    "license_status": "approved",
+    "commercial_use_allowed": true,
+    "attribution_required": true,
+    "attribution_text": "Databricks Inc. & kunishou under Apache 2.0",
+    "language_pair": "ja-en",
+    "provenance": "synthetic",
+    "preprocessing": [
+      "general_qa_filtering",
+      "japanese_character_density_verification",
+      "deduplication"
+    ]
+  },
+  "unverified_scraped_corpus": {
+    "name": "Generic Web Scraped Japanese Grammar Exercises",
+    "source_url": "unknown/unverified_web_scraping",
+    "license": "unclear",
+    "license_status": "quarantined",
+    "commercial_use_allowed": false,
+    "attribution_required": false,
+    "attribution_text": "None (License unverified)",
+    "language_pair": "ja-en",
+    "provenance": "unverified",
+    "preprocessing": [
+      "quarantined_pending_license_verification"
+    ]
+  }
+}

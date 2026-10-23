@@ -1,0 +1,77 @@
+{
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "quantization": "4bit",
+  "timestamp": "2026-10-22 22:45:10",
+  "gpu": {
+    "cuda_available": true,
+    "device_id": 0,
+    "device_name": "NVIDIA GeForce RTX 4050 Laptop GPU",
+    "allocated_gb": 1.082089900970459,
+    "reserved_gb": 1.169921875,
+    "free_gb": 4.3900146484375,
+    "total_gb": 5.7158203125,
+    "summary": "GPU: NVIDIA GeForce RTX 4050 Laptop GPU | VRAM Total: 5.72 GB | Allocated: 1.08 GB | Reserved: 1.17 GB | Available Free: 4.39 GB"
+  },
+  "results": [
+    {
+      "id": "test_01_translation",
+      "category": "English-to-Japanese Translation",
+      "prompt": "How do I naturally ask 'Excuse me, could you tell me how to get to the nearest train station?' in polite Japanese? Provide Romaji, Kanji, and a breakdown of polite expressions.",
+      "response": "To politely inquire about directions using Japanese, you can use the following sentence:\n\n「お手伝いしていただけますか？」(Ohotsumata shite o kudasai ka?)\n\nThis translates to \"Could you please help me?\" or \"May I trouble you?\"\n\nThe key components here are:\n- 「お手伝いしていただけますか？」 (Ohotsumata shite o kudasaima ka?) - This phrase means \"Could you assist me?\"\n  \nBreaking it down further:\n- お手伝いしていただく（ohotsumatta shite o kudasai） - To assist (someone)\n- いただきます（daiten-kimasu) - You/Your\n\nAlternatively, you might also consider:\n\n「ご教示ください。」(Kokujin-teki dekudasai.)\n\nWhich translates to \"Please show me.\"\n\nHere's the breakdown for this option:\n- 「ご教示ください」 (Kokujin-teki dekudasai) - Could you show me?\n\nBoth options are polite ways to express your need for assistance with directions.\n\nRemember, depending on the context, you might adjust your tone or add more politeness if necessary, such as adding 「申し証します。」(Sugoi-tsutoru.) which translates to \"I am requesting.\" This indicates that you're asking someone to perform a task for you.",
+      "prompt_tokens": 186,
+      "generated_tokens": 290,
+      "latency_seconds": 5.01,
+      "tokens_per_second": 57.9,
+      "vram_allocated_gb": 1.08,
+      "vram_free_gb": 4.4
+    },
+    {
+      "id": "test_02_grammar",
+      "category": "Japanese Grammar Question",
+      "prompt": "What is the difference between the Japanese conditional forms 〜たら (tara), 〜ば (ba), and 〜と (to)? When is it unnatural to use 〜と?",
+      "response": "The Japanese conditional forms 〜たら (tara), 〜ば (ba), and 〜と (to) serve different purposes in a sentence.\n\n1. 〜たら (tara):\nThis form expresses something that is expected or assumed to happen as a result of some action. It indicates a cause-and-effect relationship where one thing leads to another. For example, \"私は日本に帰ったら、友人を連れてきます\" (Watashi wa nihon no kigen to tadaite, yasui wo naorou shimashita) means \"I will go back to Japan if I am invited.\"\n\n2. 〜ば (ba):\nThis form indicates a possibility or likelihood rather than causality. It suggests that something may happen but does not guarantee its occurrence. For instance, \"もし来月のパーティーが開かれば、一緒に参加したいと思います\" (Moshi mo kamoshirenai party ga okaeru ba, hajimeru shikai surimashita) means \"If the party next month happens,\" implying a possibility.\n\n3. 〜と (to):\nThis form is used when you want to express a consequence following two actions without necessarily causing them. For example, \"彼はいつも勉強しているので、試験の日は必ずそのようにするつもりです\" (Kare wa hitori wakaru no de, seishun no ato ha nani o doushiteru hitotsu) means \"He always studies hard because he plans to study on exam days.\"\n\nUsing these forms appropriately can vary depending on context. The choice depends on whether you need to express inevitability (\"〜たら\"), possibility (\"〜ば\"), or consequences (\"〜と\").\n\nIt is generally considered more natural to avoid using 〜と for situations where you're merely expressing a consequence without intending to cause it. This helps maintain clarity and avoids ambiguity. Instead, you might say \"彼はいつも勉強しているので、試験の日必ずそのようにするつもりです\" (Kare wa hitori wakaru no de, seishun no ato ha nani o doushiteru hitotsu) which directly conveys the intention.",
+      "prompt_tokens": 184,
+      "generated_tokens": 456,
+      "latency_seconds": 6.82,
+      "tokens_per_second": 66.9,
+      "vram_allocated_gb": 1.08,
+      "vram_free_gb": 4.39
+    },
+    {
+      "id": "test_03_correction",
+      "category": "Sentence Correction",
+      "prompt": "Please correct and explain this sentence written by a Japanese learner: 「きのう、デパートへ行って、新しい靴を買いました。とても高かったですから、買いませんでした。」",
+      "response": "The sentence you provided is in natural Japanese, but it could be improved for clarity and fluency. Here's a corrected and revised version:\n\n「先週、デパートに足りない靴を探して行き、高い値段だったので買わなかったです。」\n\nExplanation of changes:\n1. \"きのう\" (ki noku) - Changed to \"先週\" (sen jū), which means \"last week.\" It's more commonly used than \"きのう.\"\n2. \"新しい靴を買いました\" (konnichi wa kake shimasu) - Changed to \"足りない靴を探して行き、高い値段だったので買わなかったです\" (fuuri na shoe tsukerashii ni yasashiku de kakeru natte o kaeraratta desu), which conveys that the speaker was looking for shoes they needed or wanted. This makes sense as the reason why they didn't buy the new shoes.\n3. The rest of the sentence follows naturally.\n\nThis sentence expresses that the speaker went shopping at a department store last week because they were looking for shoes they needed, but found them too expensive, so they decided not to buy them. The use of \"fuuri na\" (足りない) emphasizes their desire for these specific shoes, indicating they were very interested in purchasing them.",
+      "prompt_tokens": 182,
+      "generated_tokens": 278,
+      "latency_seconds": 4.15,
+      "tokens_per_second": 67.1,
+      "vram_allocated_gb": 1.08,
+      "vram_free_gb": 4.39
+    },
+    {
+      "id": "test_04_conversation",
+      "category": "Japanese Conversation Prompt",
+      "prompt": "こんにちは！休日はいつも何をしていますか？おすすめのリラックス方法があれば、日本語で教えてください。",
+      "response": "こんにちは！休日はいつも何か特別なことをしていますか？例えば読書、旅行、料理、音楽など、おすすめのリラックス方法があれば教えてください。\n休日の過ごし方には個人差がありますね。読書や旅行が好きなら、ゆっくりとした旅先を選んでみてはどうですか？また、美味しい食事やお茶を楽しみながら時間を過ごすのも良いですね。音楽もリラックスさせるのに効果的です。例えば、CDショップやオンラインストアで新曲を探してみるのもいいアイデアかもしれません。あなたの好みに合わせて選ぶと、休日のリラックス方法はより楽しめると思いますよ。お手伝いできることがあればと思います。",
+      "prompt_tokens": 170,
+      "generated_tokens": 150,
+      "latency_seconds": 2.27,
+      "tokens_per_second": 66.0,
+      "vram_allocated_gb": 1.08,
+      "vram_free_gb": 4.39
+    },
+    {
+      "id": "test_05_general_knowledge",
+      "category": "General Knowledge Question",
+      "prompt": "Why do Japanese kanji have two different types of readings (On'yomi and Kun'yomi)? How did this system historically develop?",
+      "response": "Japanese characters called \"kanji\" have two main reading systems because they were originally written in a Chinese script that used separate pronunciations for each character.\n\nThe two types of readings are:\n\n- **On'yomi**: This refers to the pronunciation of a kanji based on its Chinese origin. The characters were originally created in China thousands of years ago, so their meanings reflect Chinese phonetic patterns. \n\n- **Kun'yomi**: This refers to the pronunciation of a kanji based on how it was read during Japan's time as a part of China. During the Tang Dynasty period (618–907), many kanji were adapted from Chinese characters into Japanese, but they didn't always sound exactly the same.\n\nHistorically, this dual system developed due to historical reasons related to Japan's long history as part of China. The adaptation of Chinese characters into Japanese was gradual over centuries, with some characters being more directly inherited and others having evolved through multiple generations. \n\nThis system allows for flexibility: if a new meaning is assigned to a character after its original use in Chinese, its On'yomi can change or evolve to fit modern usage. Conversely, kun'yomi characters might remain stable throughout Japanese history despite changes in meaning.\n\nUnderstanding these distinctions helps us appreciate the rich linguistic heritage and cultural evolution of Japanese writing.",
+      "prompt_tokens": 172,
+      "generated_tokens": 268,
+      "latency_seconds": 4.05,
+      "tokens_per_second": 66.1,
+      "vram_allocated_gb": 1.08,
+      "vram_free_gb": 4.39
+    }
+  ]
+}
