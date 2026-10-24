@@ -102,21 +102,21 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
     });
   };
 
-  // Color mapping by JLPT level matching logo palette
+  // Color mapping by JLPT level matching Japandi light palette
   const getLevelBadgeColor = (level: CourseLevel) => {
     switch (level) {
       case "N1":
-        return "bg-indigo-950/80 border-indigo-500/40 text-indigo-200 hover:border-indigo-400";
+        return "bg-indigo-50/90 border-indigo-200 text-indigo-950 hover:border-indigo-400 shadow-2xs";
       case "N2":
-        return "bg-orange-950/80 border-orange-500/40 text-orange-200 hover:border-orange-400";
+        return "bg-orange-50/90 border-orange-200 text-orange-950 hover:border-orange-400 shadow-2xs";
       case "N3":
-        return "bg-amber-950/80 border-amber-500/40 text-amber-200 hover:border-amber-400";
+        return "bg-amber-50/90 border-amber-200 text-amber-950 hover:border-amber-400 shadow-2xs";
       case "N4":
-        return "bg-sky-950/80 border-sky-500/40 text-sky-200 hover:border-sky-400";
+        return "bg-sky-50/90 border-sky-200 text-sky-950 hover:border-sky-400 shadow-2xs";
       case "N5":
-        return "bg-blue-950/80 border-blue-500/40 text-blue-200 hover:border-blue-400";
+        return "bg-emerald-50/90 border-emerald-200 text-emerald-950 hover:border-emerald-400 shadow-2xs";
       default:
-        return "bg-slate-900 border-slate-700 text-slate-300";
+        return "bg-slate-50 border-[#E2DDD5] text-slate-800";
     }
   };
 
@@ -127,21 +127,21 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
   }, [selectedDay]);
 
   return (
-    <div className="w-full bg-slate-900/90 border border-slate-800 rounded-3xl p-3 sm:p-6 shadow-2xl backdrop-blur-xl">
+    <div className="w-full bg-white border border-[#E2DDD5] rounded-3xl p-3 sm:p-6 shadow-sm">
       {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[#E2DDD5]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/15 text-blue-300 border border-blue-500/30">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-[#7A8B6B] border border-[#7A8B6B]/30">
               Class Timetable
             </span>
-            <span className="text-xs text-slate-400">AM / PM Synchronized Timetable</span>
+            <span className="text-xs text-slate-500">AM / PM Synchronized Timetable</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-1 flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-orange-400" />
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mt-1 flex items-center gap-2">
+            <Calendar className="w-6 h-6 text-[#C5A059]" />
             Academic Hourly Timetable
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-600 mt-0.5">
             {userRole === "ADMIN"
               ? "Click any scheduled slot to edit start/end times, JLPT tier, subject, and classroom."
               : "Synchronized lecture schedule with real-time active session indicator."}
@@ -150,15 +150,15 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
 
         {/* JLPT Level Filter Controls */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
-          <div className="flex items-center bg-slate-950/80 border border-slate-800 rounded-xl p-1 overflow-x-auto max-w-full">
+          <div className="flex items-center bg-[#F5F2EC] border border-[#E2DDD5] rounded-xl p-1 overflow-x-auto max-w-full">
             {(["ALL", "N1", "N2", "N3", "N4", "N5"] as const).map((lvl) => (
               <button
                 key={lvl}
                 onClick={() => setSelectedLevel(lvl)}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
                   selectedLevel === lvl
-                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-bold shadow-md shadow-orange-950/40"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                    ? "bg-gradient-to-r from-[#2E3033] to-[#7A8B6B] text-white font-bold shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
                 }`}
               >
                 {lvl}
@@ -170,10 +170,10 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
           <div className="flex md:hidden items-center gap-1 overflow-x-auto w-full pb-1">
             <button
               onClick={() => setSelectedDay("ALL")}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                 selectedDay === "ALL"
-                  ? "bg-orange-500 text-slate-950 font-bold"
-                  : "bg-slate-950 text-slate-400 border border-slate-800"
+                  ? "bg-[#2E3033] text-white font-bold"
+                  : "bg-white text-slate-600 border border-[#E2DDD5]"
               }`}
             >
               All Days
@@ -182,10 +182,10 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
               <button
                 key={d.id}
                 onClick={() => setSelectedDay(d.id)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                   selectedDay === d.id
-                    ? "bg-orange-500 text-slate-950 font-bold"
-                    : "bg-slate-950 text-slate-400 border border-slate-800"
+                    ? "bg-[#2E3033] text-white font-bold"
+                    : "bg-white text-slate-600 border border-[#E2DDD5]"
                 }`}
               >
                 {d.name.slice(0, 3)}
@@ -196,12 +196,12 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
       </div>
 
       {/* Timetable Desktop Grid with AM & PM Formatting */}
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-800/80 shadow-inner">
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-[#E2DDD5] shadow-xs">
         <table className={`w-full text-left border-collapse ${selectedDay === "ALL" ? "min-w-[820px]" : "min-w-[320px]"}`}>
           <thead>
-            <tr className="bg-slate-950 text-slate-300 border-b border-slate-800 text-xs font-semibold uppercase tracking-wider">
-              <th className="py-4 px-3 sm:px-4 w-36 sm:w-44 border-r border-slate-800 text-center">
-                <div className="flex items-center justify-center gap-1.5 text-orange-400">
+            <tr className="bg-[#FAF8F5] text-slate-700 border-b border-[#E2DDD5] text-xs font-semibold uppercase tracking-wider">
+              <th className="py-4 px-3 sm:px-4 w-36 sm:w-44 border-r border-[#E2DDD5] text-center">
+                <div className="flex items-center justify-center gap-1.5 text-[#C5A059]">
                   <Clock className="w-3.5 h-3.5" />
                   <span>Time (AM/PM)</span>
                 </div>
@@ -209,9 +209,9 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
               {displayedDays.map((day) => (
                 <th
                   key={day.id}
-                  className={`py-4 px-3 border-r border-slate-800 last:border-r-0 ${
+                  className={`py-4 px-3 border-r border-[#E2DDD5] last:border-r-0 ${
                     day.id === currentDayOfWeek
-                      ? "bg-blue-950/40 text-blue-300 font-bold border-t-2 border-t-orange-400"
+                      ? "bg-emerald-50/50 text-[#7A8B6B] font-bold border-t-2 border-t-[#C5A059]"
                       : ""
                   }`}
                 >
@@ -220,22 +220,22 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 text-sm">
+          <tbody className="divide-y divide-[#E2DDD5] text-sm">
             {displayTimeRows.map((row) => {
               const isLunchBreak = row.isBreak;
 
               return (
                 <tr
                   key={row.labelAmPm}
-                  className={`hover:bg-slate-800/20 transition-colors ${
-                    isLunchBreak ? "bg-slate-950/40" : ""
+                  className={`hover:bg-[#FAF8F5]/80 transition-colors ${
+                    isLunchBreak ? "bg-[#FAF8F5]" : ""
                   }`}
                 >
                   {/* Time Column with Strict AM and PM Format */}
-                  <td className="py-3.5 px-2 sm:px-3 border-r border-slate-800 text-center text-xs font-mono font-bold text-slate-200 bg-slate-950/60 whitespace-nowrap">
-                    <span className="text-white block">{row.labelAmPm}</span>
+                  <td className="py-3.5 px-2 sm:px-3 border-r border-[#E2DDD5] text-center text-xs font-mono font-bold text-slate-800 bg-[#FAF8F5] whitespace-nowrap">
+                    <span className="text-slate-900 block">{row.labelAmPm}</span>
                     {isLunchBreak && (
-                      <span className="text-[10px] text-amber-400 font-sans font-medium block mt-0.5">
+                      <span className="text-[10px] text-[#C5A059] font-sans font-medium block mt-0.5">
                         Lunch Break
                       </span>
                     )}
@@ -250,9 +250,9 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
                       return (
                         <td
                           key={day.id}
-                          className="py-2.5 px-2 border-r border-slate-800 last:border-r-0 text-center bg-slate-950/20"
+                          className="py-2.5 px-2 border-r border-[#E2DDD5] last:border-r-0 text-center bg-[#FAF8F5]/60"
                         >
-                          <span className="text-xs text-slate-600 italic">
+                          <span className="text-xs text-slate-400 italic">
                             Recess
                           </span>
                         </td>
@@ -262,69 +262,69 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
                     return (
                       <td
                         key={day.id}
-                        className={`py-2 px-2 border-r border-slate-800 last:border-r-0 align-top transition-all ${
-                          isNow ? "bg-blue-950/20" : ""
+                        className={`py-2 px-2 border-r border-[#E2DDD5] last:border-r-0 align-top transition-all ${
+                          isNow ? "bg-amber-50/30" : ""
                         }`}
                       >
                         {slot ? (
                           <div
                             onClick={() => onSlotClick && onSlotClick(slot)}
-                            className={`p-2.5 rounded-2xl border transition-all cursor-pointer hover:scale-[1.02] shadow-sm relative group ${getLevelBadgeColor(
+                            className={`p-2.5 rounded-2xl border transition-all cursor-pointer hover:scale-[1.02] shadow-2xs relative group ${getLevelBadgeColor(
                               slot.courseLevel
                             )} ${
                               isNow
-                                ? "ring-2 ring-orange-500 shadow-orange-950/50"
+                                ? "ring-2 ring-[#C5A059] shadow-md shadow-[#C5A059]/10"
                                 : ""
                             }`}
                           >
                             {/* Hover Edit Indicator for Admin */}
                             {userRole === "ADMIN" && (
-                              <span className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 rounded-md bg-black/60 text-orange-300 transition-opacity">
+                              <span className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 rounded-md bg-white/80 text-[#C5A059] border border-[#E2DDD5] transition-opacity">
                                 <Edit3 className="w-3 h-3" />
                               </span>
                             )}
 
                             <div className="flex items-center justify-between gap-1 mb-1">
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-black/50 text-white font-mono">
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-white/90 border border-[#E2DDD5] text-slate-800 font-mono shadow-2xs">
                                 {slot.courseLevel}
                               </span>
 
                               {isNow && (
                                 <span className="flex h-2 w-2 relative" title="Active Session">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C5A059] opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C5A059]"></span>
                                 </span>
                               )}
                             </div>
 
-                            <p className="font-bold text-xs leading-snug text-white line-clamp-2">
+                            <p className="font-bold text-xs leading-snug text-slate-900 line-clamp-2">
                               {slot.subject}
                             </p>
 
                             {/* Exact Slot Time in AM/PM */}
-                            <div className="mt-1.5 pt-1 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-slate-300">
-                              <span className="text-orange-300 font-semibold">
+                            <div className="mt-1.5 pt-1 border-t border-slate-200/60 flex items-center justify-between text-[10px] font-mono text-slate-600">
+                              <span className="text-[#C5A059] font-bold">
                                 {formatTimeRangeAmPm(slot.startTime, slot.endTime)}
                               </span>
                             </div>
 
-                            <div className="mt-1 flex flex-col gap-0.5 text-[10px] text-slate-400">
+                            <div className="mt-1 flex flex-col gap-0.5 text-[10px] text-slate-600">
                               {slot.staffName && (
-                                <div className="flex items-center gap-1 truncate text-slate-300">
+                                <div className="flex items-center gap-1 truncate text-slate-700 font-medium">
                                   <UserIcon className="w-3 h-3 text-slate-400 shrink-0" />
                                   <span className="truncate">{slot.staffName}</span>
                                 </div>
                               )}
                               {slot.room && (
-                                <div className="flex items-center gap-1 text-slate-400">
-                                  <MapPin className="w-3 h-3 text-blue-400 shrink-0" />
+                                <div className="flex items-center gap-1 text-slate-500">
+                                  <MapPin className="w-3 h-3 text-[#7A8B6B] shrink-0" />
                                   <span>{slot.room}</span>
                                 </div>
                               )}
                             </div>
                           </div>
                         ) : (
-                          <div className="h-full min-h-[82px] flex items-center justify-center p-2 rounded-2xl border border-dashed border-slate-800/70 hover:border-slate-700 group transition-colors">
+                          <div className="h-full min-h-[82px] flex items-center justify-center p-2 rounded-2xl border border-dashed border-[#E2DDD5] hover:border-slate-400 group transition-colors">
                             {userRole === "ADMIN" && onAddSlot ? (
                               <button
                                 onClick={() => {
@@ -334,13 +334,13 @@ export const HourlyTimetable: React.FC<HourlyTimetableProps> = ({
                                     selectedLevel === "ALL" ? "N5" : selectedLevel
                                   );
                                 }}
-                                className="opacity-0 group-hover:opacity-100 flex items-center gap-1 text-[11px] font-semibold text-orange-400 hover:text-orange-300 transition-opacity"
+                                className="opacity-0 group-hover:opacity-100 flex items-center gap-1 text-[11px] font-semibold text-[#C5A059] hover:text-amber-800 transition-opacity cursor-pointer"
                               >
                                 <Plus className="w-3.5 h-3.5" />
                                 Assign Slot
                               </button>
                             ) : (
-                              <span className="text-[11px] text-slate-600">
+                              <span className="text-[11px] text-slate-400">
                                 Self-Study
                               </span>
                             )}

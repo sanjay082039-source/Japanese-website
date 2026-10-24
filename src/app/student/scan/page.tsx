@@ -341,7 +341,7 @@ export default function StudentQrScannerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#081220] text-slate-100 flex flex-col justify-between selection:bg-[#f06449] selection:text-white">
+    <div className="min-h-screen bg-japanese-canvas text-slate-100 flex flex-col justify-between selection:bg-[#e0533c] selection:text-white">
       {user && <Navbar user={user} />}
 
       <main className="flex-1 max-w-md w-full mx-auto p-4 flex flex-col justify-center items-center">

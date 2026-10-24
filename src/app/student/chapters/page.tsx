@@ -149,7 +149,7 @@ export default function StudentChaptersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#081220] text-slate-100 pb-16">
+    <div className="min-h-screen bg-japanese-canvas text-slate-100 pb-16">
       {user && <Navbar user={user} />}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">

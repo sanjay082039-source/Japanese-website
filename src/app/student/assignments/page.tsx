@@ -423,7 +423,7 @@ export default function StudentAssignmentsPage() {
 
     return (
       <div
-        className="min-h-screen bg-[#070D18] text-slate-100 select-none pb-24"
+        className="min-h-screen bg-japanese-canvas text-slate-100 select-none pb-24"
         onCopy={(e) => e.preventDefault()}
         onCut={(e) => e.preventDefault()}
         onPaste={(e) => e.preventDefault()}
@@ -831,20 +831,20 @@ export default function StudentAssignmentsPage() {
   // VIEW: MAIN ASSIGNMENTS DIRECTORY FOR STUDENTS
   // =========================================================================
   return (
-    <div className="min-h-screen bg-[#070D18] pb-16 text-slate-100">
+    <div className="min-h-screen bg-japanese-canvas pb-16 text-slate-800">
       <Navbar user={user} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <div className="mb-8">
           <div className="flex items-center gap-2">
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 font-semibold border border-orange-500/30">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-50 text-[#C5A059] font-semibold border border-[#C5A059]/30">
               Course Assignments
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
             Course Practicums & Assignments
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-600 mt-1">
             Access your JLPT {user.courseLevel} assignments, submit responses, and view evaluated marks.
           </p>
         </div>
@@ -855,10 +855,10 @@ export default function StudentAssignmentsPage() {
         {/* Assignments Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {assignments.length === 0 ? (
-            <div className="col-span-2 p-12 text-center bg-slate-900/60 border border-slate-800 rounded-3xl">
-              <FileCheck className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-white">No assignments assigned</h3>
-              <p className="text-xs text-slate-400 mt-1">
+            <div className="col-span-2 p-12 text-center bg-white border border-[#E2DDD5] rounded-3xl shadow-sm">
+              <FileCheck className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+              <h3 className="text-base font-bold text-slate-900">No assignments assigned</h3>
+              <p className="text-xs text-slate-500 mt-1">
                 You are all caught up! New homework exercises for JLPT {user.courseLevel} will appear here.
               </p>
             </div>
@@ -871,16 +871,16 @@ export default function StudentAssignmentsPage() {
               return (
                 <div
                   key={assign.id}
-                  className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition-all space-y-4"
+                  className="bg-white border border-[#E2DDD5] rounded-3xl p-6 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all space-y-4"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-orange-950 text-orange-400 border border-orange-800 font-mono">
+                        <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-[#FAF8F5] text-slate-800 border border-[#E2DDD5] font-mono">
                           {assign.courseLevel}
                         </span>
                         {isGoogleForm && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-950 text-blue-300 border border-blue-800 font-semibold">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-semibold">
                             Interactive MCQ
                           </span>
                         )}
@@ -890,44 +890,44 @@ export default function StudentAssignmentsPage() {
                       <span
                         className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
                           submission
-                            ? "bg-emerald-950 text-emerald-300 border border-emerald-800"
+                            ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                             : isDuePassed
-                            ? "bg-rose-950 text-rose-300 border border-rose-800"
-                            : "bg-amber-950 text-amber-300 border border-amber-800"
+                            ? "bg-rose-50 text-rose-800 border border-rose-200"
+                            : "bg-amber-50 text-amber-800 border border-amber-200"
                         }`}
                       >
                         {submission ? "Submitted" : isDuePassed ? "Overdue" : "Pending"}
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-bold text-white mb-2">{assign.title}</h3>
-                    <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line line-clamp-3">
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">{assign.title}</h3>
+                    <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line line-clamp-3">
                       {isGoogleForm && assign.formData?.instructions
                         ? assign.formData.instructions
                         : assign.description}
                     </p>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-800 space-y-3">
-                    <div className="flex items-center justify-between text-xs text-slate-400">
+                  <div className="pt-4 border-t border-[#E2DDD5] space-y-3">
+                    <div className="flex items-center justify-between text-xs text-slate-500">
                       <span className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-orange-400" />
+                        <Calendar className="w-3.5 h-3.5 text-[#C5A059]" />
                         Due: {new Date(assign.dueDate).toLocaleDateString()}
                       </span>
-                      <span className="font-mono text-orange-400 font-bold">
+                      <span className="font-mono text-[#C5A059] font-bold">
                         {assign.maxMarks} Marks
                       </span>
                     </div>
 
                     {submission && (
-                      <div className="p-3 bg-slate-950/80 border border-slate-800/80 rounded-xl text-xs space-y-1">
-                        <div className="flex items-center justify-between text-emerald-400 font-semibold">
+                      <div className="p-3 bg-[#FAF8F5] border border-[#E2DDD5] rounded-xl text-xs space-y-1">
+                        <div className="flex items-center justify-between text-emerald-800 font-semibold">
                           <span className="flex items-center gap-1">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#7A8B6B]" />
                             Submitted: {new Date(submission.submittedAt).toLocaleDateString()}
                           </span>
                           {submission.grade !== null && (
-                            <span className="font-mono bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">
+                            <span className="font-mono bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded border border-emerald-300">
                               Score: {submission.grade}/{assign.maxMarks}
                             </span>
                           )}
@@ -941,8 +941,8 @@ export default function StudentAssignmentsPage() {
                         onClick={() => handleOpenGoogleForm(assign)}
                         className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           submission
-                            ? "bg-slate-800 hover:bg-slate-700 text-slate-300"
-                            : "bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-orange-950/40"
+                            ? "bg-[#FAF8F5] hover:bg-slate-100 text-slate-800 border border-[#E2DDD5]"
+                            : "bg-gradient-to-r from-[#2E3033] to-[#7A8B6B] hover:opacity-95 text-white shadow-xs"
                         }`}
                       >
                         <Lock className="w-3.5 h-3.5" />

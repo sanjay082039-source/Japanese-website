@@ -131,20 +131,20 @@ export default function FlashcardShowcase() {
       {/* Title & Level Selector */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f06449]/15 border border-[#f06449]/35 text-[#ff7c62] text-xs font-semibold mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-[#ff7c62]" />
-            <span>Interactive 3D Sensory Study Deck</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#7A8B6B]/15 border border-[#7A8B6B]/30 text-[#7A8B6B] text-xs font-semibold mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
+            <span>Interactive 3D Sensory Study Deck • 立体単語帳</span>
           </div>
-          <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Kanji & Kana 3D Flip Flashcards
           </h3>
-          <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
+          <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-xl">
             Click or tap any card to trigger a seamless 180° 3D flip. Inspect stroke counts, Onyomi & Kunyomi readings, and tap the speaker icon to listen to native pronunciation.
           </p>
         </div>
 
         {/* Level Filters with Springy Pill */}
-        <div className="flex items-center gap-1.5 p-1.5 rounded-2xl glass-panel bg-[#0b1a2d]/80 border border-white/10 self-start md:self-auto overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-white border border-[#E2DDD5] shadow-xs self-start md:self-auto overflow-x-auto">
           {levels.map((lvl) => (
             <button
               key={lvl}
@@ -152,8 +152,8 @@ export default function FlashcardShowcase() {
               onClick={() => setSelectedLevel(lvl)}
               className={`btn-spring px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 selectedLevel === lvl
-                  ? "bg-gradient-to-r from-[#296ec2] to-[#f06449] text-white shadow-lg shadow-blue-950/60"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
+                  ? "bg-gradient-to-r from-[#2E3033] via-[#7A8B6B] to-[#C5A059] text-white shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
               {lvl === "ALL" ? "All Levels" : `JLPT ${lvl}`}

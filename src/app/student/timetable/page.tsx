@@ -36,7 +36,7 @@ export default async function StudentTimetablePage() {
   const batchDisplay = session.section ? (session.section.startsWith("Batch") ? session.section : `Batch ${session.section}`) : "Batch A";
 
   return (
-    <div className="min-h-screen bg-[#070D18] pb-16">
+    <div className="min-h-screen bg-japanese-canvas pb-16">
       <Navbar user={session} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/navigation/Navbar";
 import { UserSession } from "@/lib/types";
+import VoiceComposerChat8 from "@/components/chatbot/VoiceComposerChat8";
 import {
   Bot,
   Send,
@@ -27,6 +28,7 @@ interface Message {
 
 export default function AiSenseiPage() {
   const [user, setUser] = useState<UserSession | null>(null);
+  const [viewMode, setViewMode] = useState<"voice-composer" | "detailed-stream">("voice-composer");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "initial-sensei",
@@ -374,9 +376,9 @@ export default function AiSenseiPage() {
       <div className="space-y-3.5">
         {/* Real-time Mistake Correction Callout */}
         {hasCorrection && correctionText && (
-          <div className="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/35 text-amber-200 text-xs shadow-lg shadow-amber-950/20">
-            <div className="flex items-center gap-2 pb-2 mb-2 border-b border-amber-500/20 text-amber-300 font-bold text-[11px]">
-              <Lightbulb className="w-4 h-4 text-amber-400 shrink-0" />
+          <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 text-xs shadow-sm">
+            <div className="flex items-center gap-2 pb-2 mb-2 border-b border-amber-200 text-amber-900 font-bold text-[11px]">
+              <Lightbulb className="w-4 h-4 text-amber-600 shrink-0" />
               💡 文法・表現の訂正 (Sensei's Real-Time Correction & Grammar Tip)
             </div>
             <div className="whitespace-pre-wrap text-xs leading-relaxed space-y-1.5 font-sans">
@@ -387,26 +389,26 @@ export default function AiSenseiPage() {
 
         {/* Natural Phrasing Praise Badge */}
         {hasPraise && !hasCorrection && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-semibold">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
             ✨ 自然な日本語です！ (Natural Phrasing Confirmed)
           </div>
         )}
 
         {/* Block 1: Conversation Voice Focus */}
         {convText && (
-          <div className="p-3.5 rounded-2xl bg-slate-950/75 border border-[#93c5fd]/30 shadow-inner">
-            <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-white/10">
-              <span className="text-[11px] font-bold text-[#93c5fd] flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#93c5fd] animate-pulse"></span>
+          <div className="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200 shadow-xs">
+            <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-blue-100">
+              <span className="text-[11px] font-bold text-[#1d4ed8] flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#1d4ed8] animate-pulse"></span>
                 💬 Conversation (Voice Output Focus)
               </span>
               <button
                 onClick={() => handleSpeak(raw, msg.id, 0.85)}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                   speakingMsgId === msg.id
-                    ? "bg-[#f06449] text-white animate-pulse"
-                    : "bg-[#296ec2]/30 hover:bg-[#296ec2]/50 text-[#93c5fd] border border-[#93c5fd]/30"
+                    ? "bg-[#d9381e] text-white animate-pulse"
+                    : "bg-white hover:bg-slate-50 text-[#1d4ed8] border border-blue-200 shadow-xs"
                 }`}
                 title="Play native conversational audio"
               >
@@ -414,7 +416,7 @@ export default function AiSenseiPage() {
                 {speakingMsgId === msg.id ? "Playing Voice..." : "Play Voice (0.85x)"}
               </button>
             </div>
-            <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-100 font-sans">
+            <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-800 font-sans">
               {convText}
             </div>
           </div>
@@ -422,12 +424,12 @@ export default function AiSenseiPage() {
 
         {/* Block 2: Word Bank */}
         {wordsText && (
-          <div className="p-3.5 rounded-2xl bg-[#081220]/80 border border-emerald-500/30">
-            <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 pb-2 mb-2 border-b border-white/10">
-              <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200">
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 pb-2 mb-2 border-b border-emerald-100">
+              <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
               📖 Word Bank & Explanations (Vocabulary Builder)
             </div>
-            <div className="whitespace-pre-wrap text-xs leading-relaxed text-slate-300">
+            <div className="whitespace-pre-wrap text-xs leading-relaxed text-slate-700">
               {wordsText}
             </div>
           </div>
@@ -435,16 +437,16 @@ export default function AiSenseiPage() {
 
         {/* Block 3: Accent Coach */}
         {accentText && (
-          <div className="p-3.5 rounded-2xl bg-[#081220]/80 border border-[#f06449]/35">
-            <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-white/10">
-              <span className="text-[11px] font-bold text-[#ff7c62] flex items-center gap-1.5">
-                <Mic className="w-3.5 h-3.5 text-[#ff7c62]" />
+          <div className="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200">
+            <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-rose-100">
+              <span className="text-[11px] font-bold text-rose-800 flex items-center gap-1.5">
+                <Mic className="w-3.5 h-3.5 text-[#d9381e]" />
                 🎙️ Accent & Pronunciation Coach
               </span>
               {accentTargetWord && (
                 <button
                   onClick={() => handleSpeakWord(accentTargetWord)}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] bg-[#f06449]/20 hover:bg-[#f06449]/30 text-[#ff7c62] border border-[#f06449]/40 transition-colors cursor-pointer"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] bg-white hover:bg-slate-50 text-[#d9381e] border border-rose-200 shadow-xs transition-colors cursor-pointer"
                   title="Listen to isolated pitch-accent target"
                 >
                   <Headphones className="w-3 h-3" />
@@ -462,69 +464,102 @@ export default function AiSenseiPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#081220] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-japanese-canvas text-slate-900 flex flex-col selection:bg-[#d9381e]/15 selection:text-slate-900">
       {user && <Navbar user={user} />}
 
       <main className="flex-1 max-w-5xl w-full mx-auto p-3 sm:p-6 lg:p-8 flex flex-col">
         {/* Header with Voice Mode Controls */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/10 mb-5 shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#e7e2d7] mb-5 shrink-0">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#f06449]/20 text-[#ff7c62] font-semibold border border-[#f06449]/30 flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3 text-[#ff7c62]" />
+              <span className="hanko-badge">
+                <Sparkles className="w-3 h-3 text-[#d9381e]" />
                 Interactive Voice Partner & Mistake Corrector
               </span>
               {user && (
-                <span className="text-xs text-slate-400 font-mono">
+                <span className="text-xs text-slate-500 font-mono">
                   JLPT {user.courseLevel} Track
                 </span>
               )}
             </div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mt-1 flex items-center gap-2.5">
-              <Bot className="w-6 h-6 sm:w-7 sm:h-7 text-[#93c5fd]" />
-              Sensei AI (音声会話パートナー & 添削コーチ)
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mt-1.5 flex items-center gap-2.5">
+              <Bot className="w-6 h-6 sm:w-7 sm:h-7 text-[#1d4ed8]" />
+              <span>Sensei AI</span>
+              <span className="font-japanese text-sm sm:text-base font-semibold text-slate-500">
+                (音声会話パートナー & 添削コーチ)
+              </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Speak or type in Japanese. Sensei actively detects grammar/particle mistakes, provides polite corrections, and coaches pitch accent.
             </p>
             {aiStatus?.online ? (
-              <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-medium font-mono">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>Fine-Tuned AI Engine: <strong>Qwen2.5-1.5B QLoRA</strong> (Local GPU • {aiStatus.vramAllocatedGb ? `${aiStatus.vramAllocatedGb} GB` : "1.15 GB"} VRAM)</span>
               </div>
             ) : (
-              <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-800/80 border border-white/10 text-slate-300 text-[11px]">
-                <span className="w-2 h-2 rounded-full bg-amber-400" />
-                <span>Collegiate Mode (Start local AI Tutor: <code className="bg-slate-950 px-1 py-0.5 rounded text-[10px]">npm run tutor:server</code>)</span>
+              <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 text-[11px]">
+                <span className="w-2 h-2 rounded-full bg-[#b45309]" />
+                <span>Collegiate Mode (Start local AI Tutor: <code className="bg-white px-1 py-0.5 rounded text-[10px] border border-slate-200">npm run tutor:server</code>)</span>
               </div>
             )}
           </div>
 
-          {/* Voice Mode Toggles */}
+          {/* View Mode & Voice Mode Toggles */}
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => setAutoSpeakReply(!autoSpeakReply)}
-              className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                autoSpeakReply
-                  ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
-                  : "bg-slate-900 border-white/10 text-slate-400"
-              }`}
-              title="Toggle automatic speech of Sensei's reply"
-            >
-              {autoSpeakReply ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-              <span>Auto-Speak: {autoSpeakReply ? "ON" : "OFF"}</span>
-            </button>
+            {/* View Mode Switcher */}
+            <div className="inline-flex items-center gap-1 p-1 bg-slate-100 border border-[#e7e2d7] rounded-xl">
+              <button
+                type="button"
+                onClick={() => setViewMode("voice-composer")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  viewMode === "voice-composer"
+                    ? "bg-white text-slate-900 shadow-sm border border-slate-200/80"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                AI Chat 8 (Voice Studio)
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("detailed-stream")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  viewMode === "detailed-stream"
+                    ? "bg-white text-slate-900 shadow-sm border border-slate-200/80"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Pedagogical Analysis Mode
+              </button>
+            </div>
 
-            <button
-              onClick={() => setSpeechLang(speechLang === "ja-JP" ? "en-US" : "ja-JP")}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 hover:border-[#93c5fd]/40 text-xs text-slate-300 flex items-center gap-1.5 transition-all cursor-pointer"
-              title="Toggle microphone recognition language"
-            >
-              <span>Mic:</span>
-              <span className="font-semibold text-[#93c5fd]">
-                {speechLang === "ja-JP" ? "🇯🇵 日本語" : "🇺🇸 English"}
-              </span>
-            </button>
+            {viewMode === "detailed-stream" && (
+              <>
+                <button
+                  onClick={() => setAutoSpeakReply(!autoSpeakReply)}
+                  className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                    autoSpeakReply
+                      ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
+                      : "bg-slate-900 border-white/10 text-slate-400"
+                  }`}
+                  title="Toggle automatic speech of Sensei's reply"
+                >
+                  {autoSpeakReply ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                  <span>Auto-Speak: {autoSpeakReply ? "ON" : "OFF"}</span>
+                </button>
+
+                <button
+                  onClick={() => setSpeechLang(speechLang === "ja-JP" ? "en-US" : "ja-JP")}
+                  className="px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 hover:border-[#93c5fd]/40 text-xs text-slate-300 flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="Toggle microphone recognition language"
+                >
+                  <span>Mic:</span>
+                  <span className="font-semibold text-[#93c5fd]">
+                    {speechLang === "ja-JP" ? "🇯🇵 日本語" : "🇺🇸 English"}
+                  </span>
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -544,8 +579,11 @@ export default function AiSenseiPage() {
           </div>
         )}
 
-        {/* Chat Stream Window */}
-        <div className="flex-1 min-h-[480px] bg-slate-900/60 border border-white/10 rounded-3xl p-3 sm:p-6 flex flex-col justify-between overflow-hidden shadow-2xl backdrop-blur-xl">
+        {/* AI Chat 8 Voice Composer or Detailed Stream Window */}
+        {viewMode === "voice-composer" ? (
+          <VoiceComposerChat8 studentLevel={user?.courseLevel || "N3"} />
+        ) : (
+          <div className="flex-1 min-h-[480px] bg-slate-900/60 border border-white/10 rounded-3xl p-3 sm:p-6 flex flex-col justify-between overflow-hidden shadow-2xl backdrop-blur-xl">
           <div className="flex-1 overflow-y-auto space-y-4 pr-1">
             {messages.map((m) => {
               const isSensei = m.role === "assistant";
@@ -689,6 +727,7 @@ export default function AiSenseiPage() {
             </form>
           </div>
         </div>
+        )}
       </main>
     </div>
   );

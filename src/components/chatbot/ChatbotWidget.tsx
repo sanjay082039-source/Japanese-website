@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { UserSession } from "@/lib/types";
 import {
   MessageSquare,
@@ -21,6 +22,7 @@ import {
   Check,
   ShieldCheck,
   Globe,
+  Headphones,
 } from "lucide-react";
 
 interface ChatMessage {
@@ -460,22 +462,24 @@ Click any quick-action chip below or ask your own question in English or Japanes
             aria-label="Open Sensei Bot Japanese tutor chat"
             aria-expanded={isOpen}
             aria-controls="sensei-chatbot-panel"
-            className="group relative flex items-center gap-2.5 px-4 py-3.5 rounded-full bg-gradient-to-r from-[#081220] via-[#10243e] to-[#f06449] border border-[#f06449]/50 text-white shadow-2xl hover:shadow-[#f06449]/40 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+            className="group relative flex items-center gap-2.5 px-4 py-3 rounded-full bg-white/95 hover:bg-white border-2 border-[#d9381e]/30 text-slate-800 shadow-xl hover:shadow-2xl hover:border-[#d9381e] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer backdrop-blur-md"
           >
             <div className="relative">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute -top-0.5 -right-0.5 animate-ping"></span>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute -top-0.5 -right-0.5"></span>
-              <Bot className="w-6 h-6 text-[#93c5fd]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 absolute -top-0.5 -right-0.5 animate-ping"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 absolute -top-0.5 -right-0.5"></span>
+              <div className="w-7 h-7 rounded-xl bg-[rgba(217,56,30,0.08)] border border-[rgba(217,56,30,0.25)] flex items-center justify-center">
+                <Bot className="w-4 h-4 text-[#d9381e]" />
+              </div>
             </div>
 
             <div className="text-left hidden sm:block">
-              <div className="text-xs font-bold leading-tight flex items-center gap-1">
+              <div className="text-xs font-bold leading-tight flex items-center gap-1.5 text-slate-900">
                 <span>Sensei Bot</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#f06449]/20 text-[#ff7c62] border border-[#f06449]/30 font-mono">
+                <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-[rgba(217,56,30,0.08)] text-[#d9381e] border border-[rgba(217,56,30,0.3)] font-mono font-bold">
                   AI Tutor
                 </span>
               </div>
-              <div className="text-[10px] text-slate-300">Ask Japanese Questions</div>
+              <div className="text-[10px] text-slate-500">Ask Japanese Questions</div>
             </div>
 
             <span className="sr-only">Open Japanese Tutor Chat</span>
@@ -491,32 +495,32 @@ Click any quick-action chip below or ask your own question in English or Japanes
           role="dialog"
           aria-label="Sensei Bot Japanese Tutor"
           aria-modal="true"
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-32px)] max-w-sm sm:max-w-md h-[580px] max-h-[88vh] bg-[#081220]/95 backdrop-blur-2xl border border-[#296ec2]/35 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-100 font-sans animate-in fade-in slide-in-from-bottom-4 duration-200"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-32px)] max-w-sm sm:max-w-md h-[580px] max-h-[88vh] bg-white/98 backdrop-blur-2xl border border-[#e7e2d7] rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-800 font-sans animate-in fade-in slide-in-from-bottom-4 duration-200"
         >
           {/* Header */}
-          <div className="px-4 py-3.5 bg-slate-900/90 border-b border-white/10 flex items-center justify-between gap-3 shrink-0">
+          <div className="px-4 py-3.5 bg-gradient-to-r from-white to-[#faf8f4] border-b border-[#e7e2d7] flex items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#296ec2] to-[#0f294d] border border-[#93c5fd]/30 flex items-center justify-center shrink-0 shadow-md">
-                <Bot className="w-5 h-5 text-[#93c5fd]" />
+              <div className="w-9 h-9 rounded-2xl bg-[rgba(217,56,30,0.08)] border border-[rgba(217,56,30,0.25)] flex items-center justify-center shrink-0 shadow-sm">
+                <Bot className="w-5 h-5 text-[#d9381e]" />
               </div>
               <div>
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <h2 className="text-sm font-extrabold text-white tracking-tight">Sensei Bot</h2>
+                  <h2 className="text-sm font-extrabold text-slate-900 tracking-tight">Sensei Bot</h2>
                   {aiStatus?.online ? (
                     <span
                       title={`Model: ${aiStatus.model} (${aiStatus.adapterPath || "Fine-Tuned"})${aiStatus.vramAllocatedGb ? ` • VRAM: ${aiStatus.vramAllocatedGb} GB` : ""}`}
-                      className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold flex items-center gap-1"
+                      className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold flex items-center gap-1 font-mono"
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       Qwen2.5 QLoRA
                     </span>
                   ) : (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-semibold">
                       Online
                     </span>
                   )}
                 </div>
-                <p className="text-[10px] text-slate-400">
+                <p className="text-[10px] text-slate-500">
                   {user?.name ? `${user.name} • ` : ""}
                   {aiStatus?.online ? "Fine-Tuned Japanese AI Model (GPU)" : (user?.courseLevel ? `JLPT ${user.courseLevel} Track` : "RIT Japanese Tutor")}
                 </p>
@@ -524,11 +528,22 @@ Click any quick-action chip below or ask your own question in English or Japanes
             </div>
 
             <div className="flex items-center gap-1">
+              <Link
+                href="/student/ai-sensei"
+                onClick={() => setIsOpen(false)}
+                aria-label="Open AI Chat 8 Voice Composer"
+                title="Launch AI Chat 8 (Voice Composer with Live Transcript)"
+                className="p-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 transition-colors flex items-center gap-1 text-[11px] font-semibold"
+              >
+                <Headphones className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Voice Studio</span>
+              </Link>
+
               <button
                 onClick={clearChat}
                 aria-label="Clear chat history"
                 title="Clear chat"
-                className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
@@ -537,7 +552,7 @@ Click any quick-action chip below or ask your own question in English or Japanes
                 onClick={() => setIsOpen(false)}
                 aria-label="Close Sensei Bot"
                 title="Close (Esc)"
-                className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -545,15 +560,15 @@ Click any quick-action chip below or ask your own question in English or Japanes
           </div>
 
           {/* Bilingual & Voice Controls Toolbar */}
-          <div className="px-3.5 py-2 bg-slate-950/60 border-b border-white/5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-300 shrink-0">
+          <div className="px-3.5 py-2 bg-[#f8f6f0] border-b border-[#e7e2d7] flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600 shrink-0">
             {/* Bilingual Display Toggles */}
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setShowFurigana(!showFurigana)}
                 className={`px-2 py-0.5 rounded-lg border text-[10px] font-medium transition-colors cursor-pointer ${
                   showFurigana
-                    ? "bg-[#296ec2]/30 border-[#93c5fd]/40 text-[#93c5fd]"
-                    : "bg-slate-900 border-white/10 text-slate-400"
+                    ? "bg-white border-[#1d4ed8]/40 text-[#1d4ed8] shadow-2xs font-bold"
+                    : "bg-white/60 border-[#e7e2d7] text-slate-500 hover:text-slate-700"
                 }`}
                 title="Toggle Furigana reading display"
               >
@@ -564,8 +579,8 @@ Click any quick-action chip below or ask your own question in English or Japanes
                 onClick={() => setShowRomaji(!showRomaji)}
                 className={`px-2 py-0.5 rounded-lg border text-[10px] font-medium transition-colors cursor-pointer ${
                   showRomaji
-                    ? "bg-[#296ec2]/30 border-[#93c5fd]/40 text-[#93c5fd]"
-                    : "bg-slate-900 border-white/10 text-slate-400"
+                    ? "bg-white border-[#1d4ed8]/40 text-[#1d4ed8] shadow-2xs font-bold"
+                    : "bg-white/60 border-[#e7e2d7] text-slate-500 hover:text-slate-700"
                 }`}
                 title="Toggle Romaji phonetic alphabet display"
               >
@@ -579,8 +594,8 @@ Click any quick-action chip below or ask your own question in English or Japanes
                 onClick={() => setIsTtsEnabled(!isTtsEnabled)}
                 className={`p-1 rounded-lg border transition-colors cursor-pointer ${
                   isTtsEnabled
-                    ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-                    : "bg-slate-900 border-white/10 text-slate-400"
+                    ? "bg-emerald-50 border-emerald-300 text-emerald-700"
+                    : "bg-white/60 border-[#e7e2d7] text-slate-400"
                 }`}
                 title={isTtsEnabled ? "Mute automatic replies" : "Enable automatic voice reply"}
               >
@@ -594,7 +609,7 @@ Click any quick-action chip below or ask your own question in English or Japanes
                   else if (ttsSpeed === 1) setTtsSpeed(1.25);
                   else setTtsSpeed(0.75);
                 }}
-                className="px-1.5 py-0.5 rounded-lg bg-slate-900 border border-white/10 hover:border-[#93c5fd]/40 text-[10px] text-slate-300 transition-colors cursor-pointer"
+                className="px-1.5 py-0.5 rounded-lg bg-white border border-[#e7e2d7] hover:border-[#1d4ed8]/40 text-[10px] text-slate-700 font-medium transition-colors cursor-pointer"
                 title="Change TTS voice playback speed"
               >
                 {ttsSpeed}x
@@ -603,7 +618,7 @@ Click any quick-action chip below or ask your own question in English or Japanes
           </div>
 
           {/* Messages Stream */}
-          <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 scrollbar-thin scrollbar-thumb-slate-700">
+          <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 bg-[#faf8f4] scrollbar-thin scrollbar-thumb-slate-300">
             {messages.map((m) => {
               const isAssistant = m.role === "assistant";
               return (
@@ -612,28 +627,30 @@ Click any quick-action chip below or ask your own question in English or Japanes
                   className={`flex items-start gap-2 ${isAssistant ? "justify-start" : "justify-end"}`}
                 >
                   {isAssistant && (
-                    <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#296ec2] to-[#0f294d] border border-[#93c5fd]/30 flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                      <Bot className="w-4 h-4 text-[#93c5fd]" />
+                    <div className="w-7 h-7 rounded-xl bg-white border border-[#e7e2d7] flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
+                      <Bot className="w-4 h-4 text-[#d9381e]" />
                     </div>
                   )}
 
                   <div
                     className={`max-w-[88%] sm:max-w-[85%] rounded-2xl p-3 text-xs leading-relaxed ${
                       isAssistant
-                        ? "bg-[#0b1a2d]/90 border border-[#296ec2]/30 text-slate-200"
-                        : "bg-[#f06449] text-white font-medium shadow-md shadow-[#f06449]/20"
+                        ? "bg-white border border-[#e7e2d7] text-slate-800 shadow-sm"
+                        : "bg-gradient-to-r from-[#d9381e] to-[#c53018] text-white font-medium shadow-sm"
                     }`}
                   >
                     <div className="whitespace-pre-wrap font-sans">
                       {isAssistant ? formatBilingualContent(m.content) : m.content}
                     </div>
 
-                    <div className="flex items-center justify-between gap-3 mt-2 pt-1.5 border-t border-white/10 text-[10px] text-slate-400">
+                    <div className={`flex items-center justify-between gap-3 mt-2 pt-1.5 border-t text-[10px] ${
+                      isAssistant ? "border-slate-100 text-slate-400" : "border-white/20 text-white/80"
+                    }`}>
                       <span>{m.timestamp}</span>
                       {isAssistant && m.content && (
                         <button
                           onClick={() => handlePlayVoice(m.content, m.id)}
-                          className="hover:text-white flex items-center gap-1 text-[#93c5fd] transition-colors cursor-pointer"
+                          className="hover:text-blue-800 flex items-center gap-1 text-blue-600 transition-colors cursor-pointer"
                           title="Read message aloud"
                         >
                           <Volume2 className="w-3 h-3" />
@@ -649,13 +666,13 @@ Click any quick-action chip below or ask your own question in English or Japanes
             {/* Typing / Streaming Indicator */}
             {isStreaming && (
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#296ec2] to-[#0f294d] border border-[#93c5fd]/30 flex items-center justify-center shrink-0">
-                  <Bot className="w-4 h-4 text-[#93c5fd] animate-pulse" />
+                <div className="w-7 h-7 rounded-xl bg-white border border-[#e7e2d7] flex items-center justify-center shrink-0 shadow-2xs">
+                  <Bot className="w-4 h-4 text-[#d9381e] animate-pulse" />
                 </div>
-                <div className="px-3 py-2 rounded-2xl bg-[#0b1a2d]/90 border border-[#296ec2]/30 text-slate-400 text-xs flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#f06449] animate-bounce"></span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#93c5fd] animate-bounce [animation-delay:0.2s]"></span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:0.4s]"></span>
+                <div className="px-3 py-2 rounded-2xl bg-white border border-[#e7e2d7] text-slate-500 text-xs flex items-center gap-1.5 shadow-2xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#d9381e] animate-bounce"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#1d4ed8] animate-bounce [animation-delay:0.2s]"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:0.4s]"></span>
                   <span className="text-[11px] ml-1">Sensei is formulating answer...</span>
                 </div>
               </div>
@@ -664,17 +681,17 @@ Click any quick-action chip below or ask your own question in English or Japanes
           </div>
 
           {/* Quick-Action Chips */}
-          <div className="px-3 py-1.5 bg-slate-950/70 border-t border-white/5 shrink-0">
+          <div className="px-3 py-1.5 bg-[#f8f6f0] border-t border-[#e7e2d7] shrink-0">
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-              <span className="text-[10px] text-slate-400 shrink-0 flex items-center gap-0.5">
-                <Sparkles className="w-2.5 h-2.5 text-[#f06449]" /> Topics:
+              <span className="text-[10px] text-slate-500 shrink-0 flex items-center gap-0.5">
+                <Sparkles className="w-2.5 h-2.5 text-[#d9381e]" /> Topics:
               </span>
               {QUICK_CHIPS.map((chip, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSendMessage(chip.prompt)}
                   disabled={isStreaming}
-                  className="px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 disabled:opacity-50 border border-white/10 text-[10px] text-slate-300 hover:text-white whitespace-nowrap transition-colors cursor-pointer"
+                  className="px-2 py-0.5 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-50 border border-[#e7e2d7] text-[10px] text-slate-700 hover:text-slate-900 whitespace-nowrap transition-colors cursor-pointer shadow-2xs"
                 >
                   {chip.label}
                 </button>
@@ -684,7 +701,7 @@ Click any quick-action chip below or ask your own question in English or Japanes
 
           {/* STT Error Alert */}
           {sttError && (
-            <div className="px-3 py-1.5 bg-rose-500/20 text-rose-200 text-[10px] border-t border-rose-500/30 flex items-center justify-between">
+            <div className="px-3 py-1.5 bg-rose-50 text-rose-700 text-[10px] border-t border-rose-200 flex items-center justify-between">
               <span>{sttError}</span>
               <button onClick={() => setSttError(null)} className="underline cursor-pointer">
                 Dismiss
@@ -693,12 +710,12 @@ Click any quick-action chip below or ask your own question in English or Japanes
           )}
 
           {/* Input Bar & Voice Controls */}
-          <div className="p-3 bg-slate-900 border-t border-white/10 shrink-0">
+          <div className="p-3 bg-white border-t border-[#e7e2d7] shrink-0">
             {isListening && (
-              <div className="mb-2 px-2.5 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/40 text-xs text-rose-200 flex items-center justify-between animate-pulse">
+              <div className="mb-2 px-2.5 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center justify-between animate-pulse">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-                  <span className="text-[11px] font-semibold text-white">
+                  <span className="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
+                  <span className="text-[11px] font-semibold text-rose-900">
                     Listening ({speechLang === "ja-JP" ? "Japanese" : speechLang === "en-US" ? "English" : "Auto"})...
                   </span>
                 </div>
@@ -728,18 +745,18 @@ Click any quick-action chip below or ask your own question in English or Japanes
                     className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
                       isListening
                         ? "bg-rose-600 border-rose-400 text-white shadow-lg shadow-rose-600/30 animate-pulse"
-                        : "bg-slate-950 hover:bg-slate-800 border-white/15 text-[#93c5fd]"
+                        : "bg-[#f8f6f0] hover:bg-slate-100 border-[#e7e2d7] text-blue-600"
                     }`}
                     title={isListening ? "Stop listening" : `Voice Input (${speechLang})`}
                   >
-                    {isListening ? <MicOff className="w-4 h-4 text-white" /> : <Mic className="w-4 h-4 text-[#93c5fd]" />}
+                    {isListening ? <MicOff className="w-4 h-4 text-white" /> : <Mic className="w-4 h-4 text-blue-600" />}
                   </button>
 
                   {/* Recognition Language Selector */}
                   <select
                     value={speechLang}
                     onChange={(e) => setSpeechLang(e.target.value as any)}
-                    className="ml-1 bg-slate-950 text-[10px] text-slate-300 border border-white/15 rounded-lg px-1.5 py-2 outline-none cursor-pointer"
+                    className="ml-1 bg-[#f8f6f0] text-[10px] text-slate-700 border border-[#e7e2d7] rounded-lg px-1.5 py-2 outline-none cursor-pointer"
                     title="Choose speech recognition language"
                   >
                     <option value="ja-JP">🇯🇵 JA</option>
@@ -759,21 +776,21 @@ Click any quick-action chip below or ask your own question in English or Japanes
                     : "Ask about Japanese grammar, kanji, or check sentences..."
                 }
                 disabled={isStreaming}
-                className="flex-1 bg-slate-950 border border-white/15 focus:border-[#f06449] rounded-xl px-3 py-2 text-xs text-white placeholder:text-slate-500 outline-none transition-colors"
+                className="flex-1 bg-[#f8f6f0] border border-[#e7e2d7] focus:border-[#d9381e] rounded-xl px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-colors"
               />
 
               <button
                 type="submit"
                 disabled={isStreaming || !inputValue.trim()}
                 aria-label="Send message"
-                className="px-3.5 py-2.5 rounded-xl bg-[#f06449] hover:bg-[#d9533a] disabled:opacity-40 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-[#f06449]/20 cursor-pointer shrink-0"
+                className="px-3.5 py-2.5 rounded-xl bg-[#d9381e] hover:bg-[#b92c15] disabled:opacity-40 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-[#d9381e]/20 cursor-pointer shrink-0"
               >
                 <Send className="w-3.5 h-3.5" />
               </button>
             </form>
 
             {/* Privacy Note */}
-            <div className="mt-2 text-[9px] text-slate-500 flex items-center justify-between">
+            <div className="mt-2 text-[9px] text-slate-400 flex items-center justify-between">
               <span className="flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3 text-slate-400" />
                 Session only • No personal data collected

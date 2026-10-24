@@ -79,7 +79,7 @@ export default async function StudentAttendancePage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 pb-16">
+    <div className="min-h-screen bg-japanese-canvas pb-16">
       <Navbar user={session} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
@@ -87,17 +87,17 @@ export default async function StudentAttendancePage() {
         <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-semibold border border-blue-500/30">
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#7A8B6B] font-semibold border border-[#7A8B6B]/30">
                 Anti-Cheat Attendance
               </span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-mono border border-emerald-500/20">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-[#C5A059] font-mono border border-[#C5A059]/30 font-bold">
                 GPS & Device Locked
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
               Student Attendance Ledger
             </h1>
-            <p className="text-sm text-slate-400 mt-1">
+            <p className="text-sm text-slate-600 mt-1">
               Real-time cryptographic verification ledger for JLPT{" "}
               {session.courseLevel} ({session.section}).
             </p>
@@ -106,27 +106,27 @@ export default async function StudentAttendancePage() {
           {/* Quick Action Button to Mobile Scanner */}
           <Link
             href="/student/scan"
-            className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold shadow-lg shadow-blue-500/25 border border-blue-400/30 transition-all hover:scale-[1.02] active:scale-[0.98] group"
+            className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#2E3033] via-[#7A8B6B] to-[#C5A059] hover:opacity-95 text-white font-bold shadow-md border border-[#E2DDD5] transition-all hover:scale-[1.02] active:scale-[0.98] group cursor-pointer"
           >
-            <QrCode className="w-5 h-5 text-blue-200 group-hover:rotate-12 transition-transform" />
+            <QrCode className="w-5 h-5 text-white/90 group-hover:rotate-12 transition-transform" />
             <span>Open QR Scanner</span>
-            <ArrowRight className="w-4 h-4 text-blue-200 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 text-white/90 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
         {/* Live Scanner Banner */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-950/70 via-slate-900 to-slate-900 border border-blue-500/30 p-6 sm:p-8 mb-8 shadow-2xl">
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-50/60 via-white to-amber-50/40 border border-[#E2DDD5] p-6 sm:p-8 mb-8 shadow-sm">
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-[#7A8B6B]/10 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
-              <div className="flex items-center gap-2 text-blue-400 text-xs font-bold uppercase tracking-wider">
-                <Sparkles className="w-4 h-4" />
+              <div className="flex items-center gap-2 text-[#7A8B6B] text-xs font-bold uppercase tracking-wider">
+                <Sparkles className="w-4 h-4 text-[#C5A059]" />
                 In-Class Verification Active
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                 Ready to mark attendance for today's lecture?
               </h2>
-              <p className="text-sm text-slate-300 leading-relaxed">
+              <p className="text-sm text-slate-600 leading-relaxed">
                 Scan the dynamic 5-second rotating QR code projected on the classroom screen.
                 Our anti-cheat engine verifies your live GPS geofence (within 50 meters) and
                 physical device hardware signature to ensure instant attendance confirmation.
@@ -135,7 +135,7 @@ export default async function StudentAttendancePage() {
 
             <Link
               href="/student/scan"
-              className="w-full md:w-auto shrink-0 flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-blue-500 hover:bg-blue-400 text-slate-950 font-black text-sm uppercase tracking-wider transition-all shadow-md shadow-blue-500/40"
+              className="w-full md:w-auto shrink-0 flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[#2E3033] hover:bg-slate-800 text-white font-black text-sm uppercase tracking-wider transition-all shadow-md cursor-pointer"
             >
               <QrCode className="w-5 h-5" />
               Launch Camera Scanner
@@ -145,17 +145,17 @@ export default async function StudentAttendancePage() {
 
         {/* Metrics Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg">
-            <span className="text-xs text-slate-400 uppercase font-semibold">
+          <div className="bg-white border border-[#E2DDD5] rounded-2xl p-5 shadow-sm">
+            <span className="text-xs text-slate-500 uppercase font-semibold">
               Attendance Rate
             </span>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-white">{rate}%</span>
+              <span className="text-3xl font-black text-slate-900">{rate}%</span>
               <span
                 className={`text-xs px-2 py-0.5 rounded-full font-bold ${
                   rate >= 75
-                    ? "bg-emerald-950 text-emerald-300 border border-emerald-800"
-                    : "bg-rose-950 text-rose-300 border border-rose-800"
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    : "bg-rose-50 text-rose-800 border border-rose-200"
                 }`}
               >
                 {rate >= 75 ? "Exam Eligible" : "Low Attendance"}
@@ -168,45 +168,45 @@ export default async function StudentAttendancePage() {
             </p>
           </div>
 
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg">
-            <span className="text-xs text-slate-400 uppercase font-semibold">
+          <div className="bg-white border border-[#E2DDD5] rounded-2xl p-5 shadow-sm">
+            <span className="text-xs text-slate-500 uppercase font-semibold">
               Sessions Attended
             </span>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-emerald-400">
+              <span className="text-3xl font-black text-[#7A8B6B]">
                 {attendedCount}
               </span>
-              <span className="text-xs text-slate-400">/ {totalSessions} total</span>
+              <span className="text-xs text-slate-500">/ {totalSessions} total</span>
             </div>
             <p className="text-[11px] text-slate-500 mt-2">
               Cryptographically verified check-ins
             </p>
           </div>
 
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg">
-            <span className="text-xs text-slate-400 uppercase font-semibold">
+          <div className="bg-white border border-[#E2DDD5] rounded-2xl p-5 shadow-sm">
+            <span className="text-xs text-slate-500 uppercase font-semibold">
               Missed Sessions
             </span>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-rose-400">
+              <span className="text-3xl font-black text-rose-600">
                 {missedCount}
               </span>
-              <span className="text-xs text-slate-400">unattended</span>
+              <span className="text-xs text-slate-500">unattended</span>
             </div>
             <p className="text-[11px] text-slate-500 mt-2">
               Absences recorded by class closure
             </p>
           </div>
 
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg">
-            <span className="text-xs text-slate-400 uppercase font-semibold">
+          <div className="bg-white border border-[#E2DDD5] rounded-2xl p-5 shadow-sm">
+            <span className="text-xs text-slate-500 uppercase font-semibold">
               Classroom Proximity
             </span>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-indigo-400">
+              <span className="text-3xl font-black text-[#C5A059]">
                 {avgDistance}m
               </span>
-              <span className="text-xs text-slate-400 font-mono">avg radius</span>
+              <span className="text-xs text-slate-500 font-mono">avg radius</span>
             </div>
             <p className="text-[11px] text-slate-500 mt-2">
               Geofence limit: 50.0m from projector
@@ -216,9 +216,9 @@ export default async function StudentAttendancePage() {
 
         {/* Subject / Course Breakdown */}
         {Object.keys(courseMap).length > 0 && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 mb-8 shadow-xl">
-            <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-blue-500" />
+          <div className="bg-white border border-[#E2DDD5] rounded-2xl p-6 mb-8 shadow-sm">
+            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-[#7A8B6B]" />
               Course Module Attendance
             </h2>
 
@@ -231,36 +231,36 @@ export default async function StudentAttendancePage() {
                 return (
                   <div
                     key={code}
-                    className="p-4 bg-slate-950/60 border border-slate-800 rounded-xl space-y-2"
+                    className="p-4 bg-[#FAF8F5] border border-[#E2DDD5] rounded-xl space-y-2"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-xs font-mono font-bold text-blue-400">
+                        <span className="text-xs font-mono font-bold text-[#7A8B6B]">
                           {code}
                         </span>
-                        <h4 className="text-sm font-semibold text-slate-200">
+                        <h4 className="text-sm font-semibold text-slate-900">
                           {stats.name}
                         </h4>
                       </div>
                       <span
                         className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${
                           courseRate >= 75
-                            ? "bg-emerald-950 text-emerald-400 border border-emerald-800"
-                            : "bg-rose-950 text-rose-400 border border-rose-800"
+                            ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                            : "bg-rose-50 text-rose-800 border border-rose-200"
                         }`}
                       >
                         {courseRate}%
                       </span>
                     </div>
-                    <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${
-                          courseRate >= 75 ? "bg-emerald-500" : "bg-rose-500"
+                          courseRate >= 75 ? "bg-[#7A8B6B]" : "bg-rose-500"
                         }`}
                         style={{ width: `${courseRate}%` }}
                       />
                     </div>
-                    <div className="flex justify-between text-[11px] text-slate-400">
+                    <div className="flex justify-between text-[11px] text-slate-500">
                       <span>Attended: {stats.present}</span>
                       <span>Total: {stats.total} sessions</span>
                     </div>
@@ -272,18 +272,18 @@ export default async function StudentAttendancePage() {
         )}
 
         {/* Detailed Verified Attendance Logs */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl overflow-hidden">
+        <div className="bg-white border border-[#E2DDD5] rounded-2xl p-6 shadow-sm overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-blue-500" />
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-[#7A8B6B]" />
                 Verified Attendance History
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-600 mt-0.5">
                 Each check-in includes GPS distance audit and hardware device signature.
               </p>
             </div>
-            <span className="text-xs font-mono text-slate-400 bg-slate-950 px-3 py-1 rounded-full border border-slate-800 self-start sm:self-auto">
+            <span className="text-xs font-mono text-slate-600 bg-[#FAF8F5] px-3 py-1 rounded-full border border-[#E2DDD5] self-start sm:self-auto">
               Total Recorded: {attendances.length}
             </span>
           </div>
@@ -291,7 +291,7 @@ export default async function StudentAttendancePage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                <tr className="bg-[#FAF8F5] text-slate-700 uppercase font-semibold border-b border-[#E2DDD5]">
                   <th className="py-3 px-4">Session Date & Time</th>
                   <th className="py-3 px-4">Course</th>
                   <th className="py-3 px-4">Proximity Distance</th>
@@ -299,14 +299,14 @@ export default async function StudentAttendancePage() {
                   <th className="py-3 px-4">Hardware Signature</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 text-slate-300">
+              <tbody className="divide-y divide-[#E2DDD5] text-slate-700">
                 {attendances.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-8 text-center text-slate-500">
                       <div className="flex flex-col items-center justify-center gap-2">
-                        <Info className="w-6 h-6 text-slate-600" />
+                        <Info className="w-6 h-6 text-slate-400" />
                         <p>No verified attendance sessions recorded yet.</p>
-                        <p className="text-[11px] text-slate-600">
+                        <p className="text-[11px] text-slate-400">
                           Use the QR scanner during live classroom sessions to register your attendance.
                         </p>
                       </div>
@@ -316,10 +316,10 @@ export default async function StudentAttendancePage() {
                   attendances.map((item) => (
                     <tr
                       key={item.id}
-                      className="hover:bg-slate-800/40 transition-colors"
+                      className="hover:bg-[#FAF8F5]/80 transition-colors"
                     >
                       <td className="py-3 px-4">
-                        <div className="font-medium text-slate-200">
+                        <div className="font-semibold text-slate-900">
                           {new Date(item.timestamp).toLocaleDateString("en-US", {
                             weekday: "short",
                             month: "short",
@@ -327,7 +327,7 @@ export default async function StudentAttendancePage() {
                             year: "numeric",
                           })}
                         </div>
-                        <div className="text-[11px] font-mono text-slate-400">
+                        <div className="text-[11px] font-mono text-slate-500">
                           {new Date(item.timestamp).toLocaleTimeString("en-US", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -337,18 +337,18 @@ export default async function StudentAttendancePage() {
                       </td>
 
                       <td className="py-3 px-4">
-                        <span className="font-mono font-bold text-blue-400">
+                        <span className="font-mono font-bold text-[#7A8B6B]">
                           {item.session?.courseCode || "JLPT"}
                         </span>
-                        <div className="text-[11px] text-slate-300">
+                        <div className="text-[11px] text-slate-600">
                           {item.session?.courseName || "Japanese Lecture"}
                         </div>
                       </td>
 
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-1.5 font-mono">
-                          <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-                          <span className="font-bold text-white">
+                          <MapPin className="w-3.5 h-3.5 text-[#7A8B6B]" />
+                          <span className="font-bold text-slate-900">
                             {item.distanceMeters.toFixed(1)}m
                           </span>
                         </div>
@@ -358,18 +358,18 @@ export default async function StudentAttendancePage() {
                       </td>
 
                       <td className="py-3 px-4">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#7A8B6B]" />
                           GPS & Device Verified
                         </span>
                       </td>
 
                       <td className="py-3 px-4">
-                        <div className="flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
-                          <Smartphone className="w-3.5 h-3.5 text-slate-500" />
+                        <div className="flex items-center gap-1.5 font-mono text-[11px] text-slate-600">
+                          <Smartphone className="w-3.5 h-3.5 text-slate-400" />
                           <span>{item.deviceHash.slice(0, 10)}...</span>
                         </div>
-                        <span className="text-[10px] text-slate-500 font-mono">
+                        <span className="text-[10px] text-slate-400 font-mono">
                           IP: {item.ipAddress}
                         </span>
                       </td>

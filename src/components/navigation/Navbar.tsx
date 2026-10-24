@@ -202,7 +202,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
   return (
     <>
       {/* Clean Top Header Bar */}
-      <header className="sticky top-0 z-40 w-full border-b border-white/[0.08] bg-[#081220]/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 w-full border-b border-[#e7e2d7] bg-white/95 washi-header-strip backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
           {/* Left: Sole Navigation Control & Main Brand Title */}
           <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
@@ -210,12 +210,12 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-              className="btn-spring flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 rounded-xl bg-slate-900/90 border border-white/10 hover:border-[#f06449]/50 hover:bg-slate-800 text-slate-100 transition-all cursor-pointer shadow-sm group shrink-0"
+              className="btn-spring flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 rounded-xl bg-white border border-[#e7e2d7] hover:border-[#d9381e]/50 hover:bg-slate-50 text-slate-800 transition-all cursor-pointer shadow-sm group shrink-0"
             >
               {isMenuOpen ? (
-                <X className="w-4 h-4 text-[#ff7c62] group-hover:rotate-90 transition-transform duration-200" />
+                <X className="w-4 h-4 text-[#d9381e] group-hover:rotate-90 transition-transform duration-200" />
               ) : (
-                <Menu className="w-4 h-4 text-[#ff7c62] group-hover:scale-110 transition-transform duration-200" />
+                <Menu className="w-4 h-4 text-[#d9381e] group-hover:scale-110 transition-transform duration-200" />
               )}
               <span className="text-xs font-bold tracking-wide">
                 {isMenuOpen ? "Close" : "Menu"}
@@ -227,7 +227,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
               href={isAdmin ? "/admin/dashboard" : "/student/dashboard"}
               className="flex items-center gap-2 sm:gap-2.5 group min-w-0"
             >
-              <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border border-[#f06449]/40 shadow-md shadow-[#081220]/60 group-hover:scale-105 transition-transform shrink-0 bg-[#081220]">
+              <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border border-[#d9381e]/40 shadow-sm group-hover:scale-105 transition-transform shrink-0 bg-white">
                 <img
                   src="/logo.png"
                   alt="RIT Japanese Portal Logo"
@@ -236,14 +236,14 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-extrabold text-xs sm:text-base tracking-tight text-white truncate">
-                    RIT <span className="text-[#ff7c62]">JAPANESE COURSE</span>
+                  <span className="font-extrabold text-xs sm:text-base tracking-tight text-slate-900 truncate">
+                    RIT <span className="text-[#d9381e]">JAPANESE COURSE</span>
                   </span>
-                  <span className="hidden sm:inline-flex text-[9px] px-1.5 py-0.5 rounded bg-[#296ec2]/20 text-[#93c5fd] font-medium border border-[#296ec2]/35 shrink-0">
+                  <span className="hidden sm:inline-flex text-[9px] px-1.5 py-0.5 rounded bg-[#1d4ed8]/10 text-[#1d4ed8] font-medium border border-[#1d4ed8]/25 shrink-0">
                     JLPT Academy
                   </span>
                 </div>
-                <p className="text-[9px] sm:text-[11px] text-[#ff7c62] font-bold tracking-wider uppercase truncate">
+                <p className="text-[9px] sm:text-[11px] text-[#d9381e] font-bold tracking-wider uppercase truncate">
                   BELIEVE IN THE POSSIBILITIES
                 </p>
               </div>
@@ -253,18 +253,18 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
           {/* Right: User Identity & Logout */}
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex flex-col text-right">
-              <span className="text-xs font-bold text-slate-200">{user.name}</span>
+              <span className="text-xs font-bold text-slate-800">{user.name}</span>
               <div className="flex items-center gap-1 justify-end">
                 <span
                   className={`text-[10px] px-1.5 rounded font-mono font-bold ${
                     isAdmin
-                      ? "bg-[#2a1714] text-[#ff7c62] border border-[#f06449]/40"
-                      : "bg-[#0f294d] text-[#93c5fd] border border-[#1b4987]"
+                      ? "bg-[#d9381e]/10 text-[#c53018] border border-[#d9381e]/30"
+                      : "bg-[#1d4ed8]/10 text-[#1d4ed8] border border-[#1d4ed8]/20"
                   }`}
                 >
                   {user.role}
                 </span>
-                <span className="text-[10px] px-1.5 rounded bg-slate-900 text-slate-300 border border-white/10 font-mono">
+                <span className="text-[10px] px-1.5 rounded bg-slate-100 text-slate-700 border border-slate-200 font-mono">
                   JLPT {user.courseLevel} ({user.section})
                 </span>
               </div>
@@ -273,7 +273,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
             <button
               onClick={handleLogout}
               title="Log Out"
-              className="btn-spring p-2 rounded-xl bg-slate-900/90 border border-white/10 text-slate-400 hover:text-[#ff7c62] hover:border-[#f06449]/40 hover:bg-slate-800 transition-all cursor-pointer"
+              className="btn-spring p-2 rounded-xl bg-white border border-[#e7e2d7] text-slate-600 hover:text-[#d9381e] hover:border-[#d9381e]/40 hover:bg-slate-50 transition-all cursor-pointer shadow-sm"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -287,29 +287,29 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
       {/* Backdrop Overlay */}
       <div
         onClick={() => setIsMenuOpen(false)}
-        className={`fixed inset-0 z-50 bg-black/80 backdrop-blur-md transition-opacity duration-350 ${
+        className={`fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-350 ${
           isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       />
 
       {/* Slide-over Drawer (Clean, Smooth & Scrollable with Spring Physics) */}
       <aside
-        className={`fixed top-0 left-0 bottom-0 z-50 w-[85vw] max-w-sm sm:w-96 bg-[#081220]/95 backdrop-blur-2xl border-r border-[#296ec2]/20 shadow-2xl flex flex-col justify-between transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
+        className={`fixed top-0 left-0 bottom-0 z-50 w-[85vw] max-w-sm sm:w-96 bg-[#fbfaf6] border-r border-[#e7e2d7] shadow-2xl flex flex-col justify-between transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Drawer Header (Fixed at top of drawer) */}
-        <div className="p-5 border-b border-white/10 shrink-0 space-y-3 bg-[#081220]/90">
+        <div className="p-5 border-b border-[#e7e2d7] shrink-0 space-y-3 bg-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full overflow-hidden border border-[#f06449]/30 bg-[#081220]">
+              <div className="w-8 h-8 rounded-full overflow-hidden border border-[#d9381e]/30 bg-white">
                 <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
               </div>
               <div>
-                <span className="font-extrabold text-sm text-white tracking-tight">
-                  RIT <span className="text-[#ff7c62]">JAPANESE COURSE</span>
+                <span className="font-extrabold text-sm text-slate-900 tracking-tight">
+                  RIT <span className="text-[#d9381e]">JAPANESE COURSE</span>
                 </span>
-                <p className="text-[10px] text-[#ff7c62] font-bold uppercase tracking-wider">
+                <p className="text-[10px] text-[#d9381e] font-bold uppercase tracking-wider">
                   BELIEVE IN THE POSSIBILITIES
                 </p>
               </div>
@@ -317,7 +317,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
 
             <button
               onClick={() => setIsMenuOpen(false)}
-              className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
               title="Close Menu (Esc)"
             >
               <X className="w-4 h-4" />
@@ -325,23 +325,23 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
           </div>
 
           {/* User Profile Card */}
-          <div className="p-3 bg-[#0b1a2d]/90 border border-[#296ec2]/20 rounded-2xl flex items-center justify-between">
+          <div className="p-3 bg-[#f8f6f0] border border-[#e7e2d7] rounded-2xl flex items-center justify-between">
             <div>
-              <div className="font-bold text-xs text-white">{user.name}</div>
-              <div className="text-[11px] text-slate-400 font-mono">{user.email}</div>
+              <div className="font-bold text-xs text-slate-900">{user.name}</div>
+              <div className="text-[11px] text-slate-500 font-mono">{user.email}</div>
             </div>
 
             <div className="flex flex-col items-end gap-1">
               <span
                 className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold ${
                   isAdmin
-                    ? "bg-[#2a1714] text-[#ff7c62] border border-[#f06449]/40"
-                    : "bg-[#0f294d] text-[#93c5fd] border border-[#1b4987]"
+                    ? "bg-[#d9381e]/10 text-[#c53018] border border-[#d9381e]/30"
+                    : "bg-[#1d4ed8]/10 text-[#1d4ed8] border border-[#1d4ed8]/20"
                 }`}
               >
                 {user.role}
               </span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-900 text-slate-300 border border-slate-800 font-mono">
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-white text-slate-700 border border-[#e7e2d7] font-mono">
                 JLPT {user.courseLevel} ({user.section})
               </span>
             </div>
@@ -365,15 +365,15 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
                 onClick={() => setIsMenuOpen(false)}
                 className={`btn-spring group flex items-start gap-3 p-3 rounded-2xl border transition-all cursor-pointer ${
                   isActive
-                    ? "bg-[#296ec2]/20 border-[#296ec2]/50 text-white shadow-lg shadow-[#081220]/50"
-                    : "bg-slate-900/60 border-white/5 text-slate-300 hover:bg-slate-800/80 hover:border-white/10"
+                    ? "bg-[#1d4ed8]/10 border-[#1d4ed8]/40 text-[#1d4ed8] shadow-sm"
+                    : "bg-white border-[#e7e2d7] text-slate-700 hover:bg-slate-50 hover:border-slate-300"
                 }`}
               >
                 <div
                   className={`p-2.5 rounded-xl transition-colors shrink-0 ${
                     isActive
-                      ? "bg-gradient-to-br from-[#296ec2] to-[#1b4987] text-white shadow-md shadow-[#081220]/60"
-                      : "bg-slate-900 text-slate-400 group-hover:text-[#5c9ee6]"
+                      ? "bg-gradient-to-br from-[#1d4ed8] to-[#2563eb] text-white shadow-sm"
+                      : "bg-[#f8f6f0] text-slate-600 group-hover:text-[#1d4ed8]"
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -387,8 +387,8 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
                         <span
                           className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold border ${
                             link.badgeColor === "emerald"
-                              ? "bg-emerald-950/80 text-emerald-300 border-emerald-800/80"
-                              : "bg-[#2a1714] text-[#ff7c62] border-[#f06449]/40"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : "bg-[#d9381e]/10 text-[#c53018] border-[#d9381e]/30"
                           }`}
                         >
                           {link.badge}
@@ -396,12 +396,12 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
                       )}
                       <ChevronRight
                         className={`w-3.5 h-3.5 transition-transform ${
-                          isActive ? "text-[#ff7c62] translate-x-0.5" : "text-slate-600"
+                          isActive ? "text-[#d9381e] translate-x-0.5" : "text-slate-400"
                         }`}
                       />
                     </div>
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-0.5 leading-snug line-clamp-1">
+                  <p className="text-[11px] text-slate-500 mt-0.5 leading-snug line-clamp-1">
                     {link.description}
                   </p>
                 </div>
@@ -411,18 +411,18 @@ export const Navbar: React.FC<NavbarProps> = ({ user }) => {
         </div>
 
         {/* Drawer Bottom Footer (Fixed at bottom of drawer) */}
-        <div className="p-4 pb-safe border-t border-white/10 bg-[#060d17] shrink-0 space-y-2.5">
-          <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+        <div className="p-4 pb-safe border-t border-[#e7e2d7] bg-[#f8f6f0] shrink-0 space-y-2.5">
+          <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               RIT Course Network Online
             </span>
-            <span className="font-mono text-[10px] text-slate-500">JLPT Certified</span>
+            <span className="font-mono text-[10px] text-slate-400">JLPT Certified</span>
           </div>
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-[#ff7c62] hover:text-[#ffa694] transition-all cursor-pointer min-h-[44px]"
+            className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white hover:bg-slate-50 border border-[#e7e2d7] text-xs font-bold text-[#d9381e] hover:text-[#b82e18] shadow-sm transition-all cursor-pointer min-h-[44px]"
           >
             <LogOut className="w-4 h-4" />
             Sign Out of Portal

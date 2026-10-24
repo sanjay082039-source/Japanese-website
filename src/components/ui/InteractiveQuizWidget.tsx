@@ -92,25 +92,25 @@ export default function InteractiveQuizWidget() {
   };
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto rounded-3xl glass-panel p-6 sm:p-8 border border-white/10 shadow-2xl overflow-hidden bg-gradient-to-b from-[#0b1a2d]/90 to-[#081220]/95">
+    <div className="relative w-full max-w-2xl mx-auto rounded-3xl p-6 sm:p-8 border border-[#E2DDD5] shadow-sm overflow-hidden bg-white/95">
       {/* Background Pattern */}
-      <div className="absolute inset-0 bg-circuit-mesh opacity-30 pointer-events-none" />
+      <div className="absolute inset-0 bg-circuit-mesh opacity-10 pointer-events-none" />
 
       {/* Floating Feedback Toast */}
       {toastMessage && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 px-5 py-2 rounded-2xl bg-[#081220]/95 border border-[#f06449]/40 text-[#ff7c62] text-xs font-bold shadow-2xl shadow-blue-950/80 flex items-center gap-2 animate-[slideDown_300ms_cubic-bezier(0.16,1,0.3,1)]">
-          <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 px-5 py-2 rounded-2xl bg-white border border-[#7A8B6B] text-[#7A8B6B] text-xs font-bold shadow-lg flex items-center gap-2 animate-[slideDown_300ms_cubic-bezier(0.16,1,0.3,1)]">
+          <Sparkles className="w-4 h-4 text-[#C5A059] animate-spin" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Header Bar */}
-      <div className="relative z-10 flex items-center justify-between pb-4 border-b border-white/10">
+      <div className="relative z-10 flex items-center justify-between pb-4 border-b border-[#E2DDD5]">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#f06449]/15 text-[#ff7c62] border border-[#f06449]/35">
-            Interactive Kanji Check
+          <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#7A8B6B]/15 text-[#7A8B6B] border border-[#7A8B6B]/30 font-mono">
+            Interactive Kanji Check • 確認テスト
           </span>
-          <span className="text-xs text-slate-300 font-mono">
+          <span className="text-xs text-slate-500 font-mono">
             Question {currentIndex + 1} of {SAMPLE_QUIZ.length}
           </span>
         </div>
@@ -119,7 +119,7 @@ export default function InteractiveQuizWidget() {
           type="button"
           onClick={handleReset}
           title="Reset Quiz"
-          className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors"
+          className="text-slate-500 hover:text-slate-900 p-1 rounded-lg hover:bg-slate-100 transition-colors"
         >
           <RotateCcw className="w-3.5 h-3.5" />
         </button>
@@ -128,15 +128,15 @@ export default function InteractiveQuizWidget() {
       {/* Question Prompt */}
       <div className="relative z-10 my-6 text-center">
         <div className="flex items-center justify-center gap-3">
-          <span className="font-japanese text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-[#93c5fd]">
+          <span className="font-japanese text-3xl sm:text-4xl font-extrabold text-[#2E3033]">
             {currentQ.promptKanji}
           </span>
           <JapaneseAudioPlayer text={currentQ.promptKanji} size="sm" />
         </div>
-        <span className="text-xs font-mono text-[#ff7c62] font-medium block mt-1 tracking-widest uppercase">
+        <span className="text-xs font-mono text-[#C5A059] font-medium block mt-1 tracking-widest uppercase">
           {currentQ.romaji}
         </span>
-        <h4 className="text-sm sm:text-base font-bold text-slate-100 mt-4 max-w-lg mx-auto leading-snug">
+        <h4 className="text-sm sm:text-base font-bold text-slate-800 mt-4 max-w-lg mx-auto leading-snug">
           {currentQ.question}
         </h4>
       </div>
@@ -145,15 +145,15 @@ export default function InteractiveQuizWidget() {
       <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
         {currentQ.options.map((opt, idx) => {
           const isSelected = selectedOption === idx;
-          let stateStyle = "bg-[#0b1a2d]/60 border-white/10 hover:border-[#5c9ee6]/50 hover:bg-[#0f243e]/80";
+          let stateStyle = "bg-[#FAF8F5] border-[#E2DDD5] text-slate-800 hover:border-[#7A8B6B] hover:bg-white";
 
           if (isAnswered) {
             if (opt.correct) {
-              stateStyle = "quiz-correct-glow text-emerald-200";
+              stateStyle = "bg-emerald-50 border-emerald-400 text-emerald-900 shadow-xs";
             } else if (isSelected && !opt.correct) {
-              stateStyle = "quiz-incorrect-shake text-[#ff7c62]";
+              stateStyle = "bg-rose-50 border-rose-300 text-rose-900 shadow-xs";
             } else {
-              stateStyle = "opacity-40 bg-[#081220]/40 border-white/5";
+              stateStyle = "opacity-45 bg-[#FAF8F5] border-[#E2DDD5]";
             }
           }
 
@@ -167,16 +167,16 @@ export default function InteractiveQuizWidget() {
                 !isAnswered ? "cursor-pointer" : "cursor-default"
               }`}
             >
-              <span className="w-6 h-6 rounded-lg bg-white/5 border border-white/10 font-mono text-xs font-bold flex items-center justify-center shrink-0 text-slate-300">
+              <span className="w-6 h-6 rounded-lg bg-white border border-[#E2DDD5] font-mono text-xs font-bold flex items-center justify-center shrink-0 text-slate-700">
                 {opt.label}
               </span>
               <span className="text-xs font-semibold leading-snug flex-1">{opt.text}</span>
 
               {isAnswered && opt.correct && (
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               )}
               {isAnswered && isSelected && !opt.correct && (
-                <XCircle className="w-4 h-4 text-[#f06449] shrink-0 mt-0.5" />
+                <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               )}
             </button>
           );
@@ -185,16 +185,16 @@ export default function InteractiveQuizWidget() {
 
       {/* Answer Explanation & Next Trigger */}
       {isAnswered && (
-        <div className="relative z-10 mt-6 pt-5 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 animate-[fadeIn_300ms_ease-in-out]">
-          <p className="text-xs text-slate-300 leading-relaxed max-w-md">
-            <strong className="text-[#ff7c62] font-semibold">Insight: </strong>
+        <div className="relative z-10 mt-6 pt-5 border-t border-[#E2DDD5] flex flex-col sm:flex-row items-center justify-between gap-4 animate-[fadeIn_300ms_ease-in-out]">
+          <p className="text-xs text-slate-600 leading-relaxed max-w-md">
+            <strong className="text-[#C5A059] font-semibold">Insight: </strong>
             {currentQ.explanation}
           </p>
 
           <button
             type="button"
             onClick={handleNext}
-            className="btn-spring px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#296ec2] to-[#f06449] hover:from-[#1b4987] hover:to-[#ea583c] text-white font-bold text-xs shadow-lg shadow-blue-950/60 flex items-center gap-2 shrink-0 cursor-pointer"
+            className="btn-spring px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#2E3033] via-[#7A8B6B] to-[#C5A059] hover:opacity-95 text-white font-bold text-xs shadow-sm flex items-center gap-2 shrink-0 cursor-pointer"
           >
             <span>Next Question</span>
             <ArrowRight className="w-3.5 h-3.5" />
